@@ -1,0 +1,291 @@
+body {
+	background-image: url("public/home_slider.jpg");
+	background-size: cover;
+	font-family: 'Fredoka', sans-serif;
+	font-size: 24px;
+}
+
+
+h1 { 
+	font-family: 'Nunito', sans-serif;
+	font-weight: bold;
+	font-size: 42px;
+}
+
+h2 {
+	font-size: 48px;
+}
+
+h5 {
+	font-size: 28px;
+}
+
+img {
+	max-height: 100%;
+	max-width: 100%;
+}
+
+th {
+	padding-right: 24px;
+}
+
+.h1-gradient {
+	background-image: linear-gradient(90deg, #eb0506, #ed005a, #cf2694, #9953b7, #5769be, #1673ad);
+
+	/* Set the background size and repeat properties. */
+	background-size: 100%;
+	background-repeat: repeat;
+
+	/* Use the text as a mask for the background. */
+	/* This will show the gradient as a text color rather than element bg. */
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent; 
+	-moz-background-clip: text;
+	-moz-text-fill-color: transparent;
+}
+
+.main-container {
+	background: #ffffff52;
+	backdrop-filter: blur( 4px );
+	-webkit-backdrop-filter: blur( 4px );
+}
+
+.sub-container {
+	min-height: calc(100vh - 38px);
+	padding-top: 10vh;
+}
+
+.footer {
+	height: 38px;
+	margin-left: auto;
+	margin-right: auto;
+	font-size: 24px;
+	display: inline-block;
+}
+.footer-svg {
+	height: 28px;
+}
+
+.hero-container {
+	margin-bottom: 80px;
+	height: 46vh;
+}
+
+.hero-heading {
+	padding-top: 24px;
+}
+
+.hero-logo {
+	height: auto;
+	width: 350px;
+	margin-bottom: 28px;
+}
+
+.hero-heading-button-container {
+	width: 350px;
+	margin-top: 48px;
+}
+
+.hero-heading-button {
+	max-width: 100%;
+	padding: 20px 48px;
+	border-radius: 54px;
+	font-size: 20px;
+	background: linear-gradient(15deg, #f01d1d, #ea1a1a, #e51717, #df1413, #da1010, #d40d0c, #ce0808, #c90405);
+	color: #ffffff;
+	border: none;
+}
+
+.hero-heading-button:hover {
+	background: linear-gradient(180deg, #ff1f1f, #fb1c1c, #f61919, #f21615, #ed1212, #e90e0e, #e40a0a, #e00506);
+	color: #ffffff;
+	border: none;
+}
+
+.hero-heading-button:active {
+	background: linear-gradient(0deg, #a81414, #ab1212, #ad1011, #b00e0f, #b20c0d, #b5090a, #b70708, #ba0405);
+	color: #ffffff;
+	border: none;
+}
+
+
+.hero-dish-topl {
+	height: 100%;
+	margin-top: 86px;
+    margin-left: -61px;
+    margin-right: -20px;
+}
+
+.hero-dish-topr {
+	height: 100%;
+    margin-top: 10px;
+    margin-left: 2px;
+    margin-right: -28px;
+}
+
+.hero-dish-bot {
+	height: 100%;
+	margin-left: 68px;
+}
+
+.hero-dish-topl > img {
+	border-radius: 16px;
+	box-shadow: 0 10px 10px rgb(0 0 0 / 20%);
+}
+
+.hero-dish-topr > img {
+	border-radius: 16px;
+	box-shadow: 0 10px 10px rgb(0 0 0 / 20%);
+
+}
+
+.hero-dish-bot >img {
+	border-radius: 16px;
+	box-shadow: 0 10px 10px rgb(0 0 0 / 20%);
+}
+
+.hero-card {
+	box-shadow: 0 10px 10px rgb(0 0 0 / 20%);
+    border-radius: 16px;
+    padding: 40px;
+    background-color: #ffffff52;
+    margin-bottom: 64px;
+    backdrop-filter: blur(64px);
+}
+
+.hero-card-phone {
+	font-weight: bold;
+}
+
+.hero-card-table {
+
+}
+
+/* ##########################################   @MEDIA QUERIES   ######################################## */
+
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) and (max-width: 1199.98px) { 
+
+	.hero-container {
+		height: auto;
+	}
+	.hero-dish-topl {
+	    height: 100%;
+	    margin-top: 16px;
+	    margin-left: -81px;
+	    margin-right: -29px;
+	    margin-bottom: -4px;
+	}
+	.hero-dish-topr {
+	    height: 100%;
+	    margin-top: -14px;
+	    margin-left: -14px;
+	    margin-right: -49px;
+	}
+	.hero-dish-bot {
+	    margin-left: 0px;
+    	margin-top: -12px;
+	}
+
+}
+
+
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) and (max-width: 991.98px) {
+
+	body {
+		font-size: 18px;
+	}
+
+
+	h1 { 
+		font-size: 42px;
+	}
+
+	h2 {
+		font-weight: bold;
+		font-size: 28px;
+	}
+
+	h5 {
+		font-size: 20px;
+	}
+	.footer {
+		font-size: 18px;
+	}
+	.hero-container {
+		height: auto;
+	}	
+	.hero-card { 
+		padding: 24px;
+	}
+	.hero-dish-topl {
+		height: 100%;
+		margin-top: 128px;
+	    margin-left: -13px;
+	    margin-right: -108px;
+	}
+
+	.hero-dish-topr {
+		height: 100%;
+	    margin-top: -2px;
+	    margin-left: -30px;
+	    margin-right: -62px;
+	}
+
+	.hero-dish-bot {
+		height: 100%;
+		margin-left: 24px;
+	}
+
+}
+
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) and (max-width: 767.98px) {
+
+	.hero-container {
+		height: auto;
+	}	
+
+}
+
+/* Extra small devices (portrait phones, less than 576px) */
+@media (max-width: 575.98px) {
+
+	body {
+		font-size: 22px;
+	}
+	th {
+		text-align: right;
+	}
+	.footer {
+		font-size: 18px;
+	}
+	.hero-container {
+		height: auto;
+		text-align: center;
+	}
+	.hero-logo {
+		margin-left: auto !important;
+		margin-right: auto !important;
+	}
+	.hero-heading-button-container {
+		margin-left: auto !important;
+		margin-right: auto !important;
+	}
+	.hero-card { 
+		padding: 48px 8px;
+		margin-left: 1px;
+		margin-right: 1px;
+		text-align: center;
+	}
+	.hero-card-phone {
+		padding-bottom: 8px;
+	}
+	.hero-card-table {
+		margin-top: 10px;
+	}
+
+}
