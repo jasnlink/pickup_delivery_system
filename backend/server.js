@@ -7,7 +7,10 @@ import path from 'path';
 import otpService from 'otp-generator';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
 
+//read .env file
+dotenv.config();
 // disable TLS for testing mail SMTP
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 
@@ -26,10 +29,10 @@ const PORT = process.env.PORT || 3500;
 //database connection info
 var connection;
 const connectionInfo = {
-    host: '127.0.0.1', 
-    user:'admin', 
-    password: '29sGp%jYbk!GhxY',
-    database: 'order_system_db'
+    host: process.env.DB_HOST, 
+    user: process.env.DB_USER, 
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
 };
 
 //secret keys declaration, to be fetched from DB
@@ -211,12 +214,12 @@ async function main() {
 
   // create reusable transporter object using the default SMTP transport
   let transporter = nodemailer.createTransport({
-    host: "shadow.mxrouting.net",
+    host: process.env.SMTP_HOST,
     port: 25,
     secure: false, // true for 465, false for other ports
     auth: {
-      user: "admin@2kfusion.com", // generated ethereal user
-      pass: "s0F5pefOHF", // generated ethereal password
+      user: process.env.SMTP_USER, // generated ethereal user
+      pass: process.env.SMTP_PASSWORD, // generated ethereal password
     },
   });
 
