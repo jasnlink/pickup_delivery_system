@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Axios from 'axios';
-
+import AddressSearchInput from './AddressSearchInput';
 
 import { 	
 	Typography,
@@ -25,23 +25,12 @@ import {
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
-import Autocomplete, { usePlacesWidget } from "react-google-autocomplete";
 
 function Delivery({ setStep, userToken }) {
 
 	//do you have an account prompt
 	const [prompt, setPrompt] = useState(1);
 
-
-
-	const { ref: autoCompleteRef } = usePlacesWidget({
-	    apiKey: "AIzaSyA4I5APOf8GJC9hSLyx270OL5hOwj2iajU",
-	    onPlaceSelected: (place) => console.log(place),
-	    inputAutocompleteValue: "country",
-	    options: {
-	      componentRestrictions: "ca",
-	    },
-	  });
 	//to contain google maps autocomplete suggestion
 	const [suggestion, setSuggestion] = useState(1);
 
@@ -65,48 +54,17 @@ function Delivery({ setStep, userToken }) {
 	    </Box>
 		<Container maxWidth='sm'>
 			<List sx={{ mt: '24px' }}>
-			{prompt && (<> 
-				<ListItem style={{display:'flex', justifyContent:'center'}}>
-					<ListItemText primary={<Typography variant="h4">Avez-vous un compte?</Typography>} style={{display:'flex', justifyContent:'center'}} />
-				</ListItem>
-				<Divider />
-				<ListItem disablePadding>
-					<ListItemButton onClick={() => setStep(100)}>
-						<ListItemText primary={<Typography variant="h4">Oui</Typography>} style={{display:'flex', justifyContent:'center'}} />
-					</ListItemButton>
-				</ListItem>
-				<ListItem disablePadding>
-					<ListItemButton onClick={() => setPrompt(null)}>
-						<ListItemText primary={<Typography variant="h4">Non</Typography>} style={{display:'flex', justifyContent:'center'}} />
-					</ListItemButton>
-				</ListItem>
-			</>)}
-			{!prompt && (<>
 				<ListItem style={{display:'flex', justifyContent:'center'}}>
 					<ListItemText primary={<Typography variant="h2">Quel endroit?</Typography>} style={{display:'flex', justifyContent:'center'}} />
 				</ListItem>
-				<ListItem style={{marginTop: 36, display:'flex', justifyContent:'center'}}>
+				<ListItem style={{marginTop: 24, display:'flex', justifyContent:'center'}}>
 					<FormControl variant="standard" fullWidth>
-						<Input
-							inputComponent={({ inputRef, onFocus, onBlur, ...props }) => (
-								              <Autocomplete
-								                apiKey="AIzaSyA4I5APOf8GJC9hSLyx270OL5hOwj2iajU"
-								                {...props}
-								                onPlaceSelected={(selected) => console.log(selected)}
-								                options={{
-											      componentRestrictions: { country: ["ca"] },
-											      fields: ["address_components", "geometry"],
-											      types: ["address"],
-								                }}
-								              />
-								            )}
-						/>
+						<AddressSearchInput />
 					</FormControl>
 				</ListItem>
 				<ListItem style={{marginTop: 48, display:'flex', justifyContent:'center'}}>
 					<Button variant="contained" size="large" fullWidth>Continuer</Button>
 				</ListItem>
-			</>)}
 			</List>
 		</Container>
 

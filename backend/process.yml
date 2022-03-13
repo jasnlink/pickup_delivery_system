@@ -1,5 +1,5 @@
 apps:
-  - script: './index.js'
+  - script: './server.js'
     exec_mode: 'fork'
     name: 'worker-0'
     env:

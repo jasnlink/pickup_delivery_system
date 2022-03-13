@@ -53,7 +53,7 @@ function Welcome({ setStep }) {
 					</ListItemButton>
 				</ListItem>
 				<ListItem disablePadding>
-					<ListItemButton onClick={() => setStep(21)}>
+					<ListItemButton onClick={() => setStep(100)}>
 						<ListItemText primary={<Typography variant="h3">Livraison</Typography>} style={{display:'flex', justifyContent:'center'}} />
 					</ListItemButton>
 				</ListItem>

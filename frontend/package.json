@@ -2,6 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://staging.2kfusion.ca/app",
   "dependencies": {
     "@emotion/css": "^11.7.1",
     "@emotion/react": "^11.8.2",
@@ -15,6 +16,7 @@
     "@testing-library/react": "^12.1.4",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^0.26.1",
+    "dotenv": "^16.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-google-autocomplete": "^2.6.1",
