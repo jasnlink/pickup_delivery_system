@@ -25,10 +25,30 @@ import {
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
+import Autocomplete, { usePlacesWidget } from "react-google-autocomplete";
+
 function Delivery({ setStep, userToken }) {
 
-	//Application step var
+	//do you have an account prompt
 	const [prompt, setPrompt] = useState(1);
+
+
+
+	const { ref: autoCompleteRef } = usePlacesWidget({
+	    apiKey: "AIzaSyA4I5APOf8GJC9hSLyx270OL5hOwj2iajU",
+	    onPlaceSelected: (place) => console.log(place),
+	    inputAutocompleteValue: "country",
+	    options: {
+	      componentRestrictions: "ca",
+	    },
+	  });
+	//to contain google maps autocomplete suggestion
+	const [suggestion, setSuggestion] = useState(1);
+
+	function handleSuggestionSelected(res) {
+		setSuggestion(res)
+		console.log(suggestion)
+	}
 
 	return (<>
 		<Box sx={{ flexGrow: 1 }}>
@@ -67,7 +87,20 @@ function Delivery({ setStep, userToken }) {
 				</ListItem>
 				<ListItem style={{marginTop: 36, display:'flex', justifyContent:'center'}}>
 					<FormControl variant="standard" fullWidth>
-						<Input />
+						<Input
+							inputComponent={({ inputRef, onFocus, onBlur, ...props }) => (
+								              <Autocomplete
+								                apiKey="AIzaSyA4I5APOf8GJC9hSLyx270OL5hOwj2iajU"
+								                {...props}
+								                onPlaceSelected={(selected) => console.log(selected)}
+								                options={{
+											      componentRestrictions: { country: ["ca"] },
+											      fields: ["address_components", "geometry"],
+											      types: ["address"],
+								                }}
+								              />
+								            )}
+						/>
 					</FormControl>
 				</ListItem>
 				<ListItem style={{marginTop: 48, display:'flex', justifyContent:'center'}}>
