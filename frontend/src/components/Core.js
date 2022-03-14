@@ -13,6 +13,8 @@ function Core() {
 	const [step, setStep] = useState(1);
 	//auth token for user login
 	const [userToken, setUserToken] = React.useState(null);
+	//user email
+	const [userEmail, setUserEmail] = React.useState(null);
 
 
 	switch(step) {
@@ -41,6 +43,7 @@ function Core() {
 	      	setStep={step => setStep(step)}
 	      	userToken={userToken}
 	      	setUserToken={token => setUserToken(token)}
+	      	setUserEmail={email => setUserEmail(email)}
 	      	 />	
 	      	
 	      )

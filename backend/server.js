@@ -42,11 +42,22 @@ var AWS_SECRET_ACCESS_KEY = null;
 const AWS_REGION='ca-central-1';
 
 
+// create reusable transporter object using the default SMTP transport
+let transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: 25,
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: process.env.SMTP_USER, // generated ethereal user
+      pass: process.env.SMTP_PASSWORD, // generated ethereal password
+    },
+});
+
 //express json cors setup
 var app = express();
 app.use(cors());
-app.use(bodyParser.json({extended: true}));
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json({extended: true}));
 
 
 //file upload
@@ -151,11 +162,40 @@ function verifyHashOTP(user,hash,otp){
 
 
 
+
+// async..await is not allowed in global scope, must use a wrapper
+async function sendOtpMail(otp, user) {
+
+  // send mail with defined transport object
+  let info = await transporter.sendMail({
+    from: '"Restaurant 2K Fusion" <noreply@2kfusion.com>', // sender address
+    to: user, // list of receivers
+    subject: "Votre code de vérification", // Subject line
+    text: "Votre code de vérification est: "+otp, // plain text body
+    html: "Votre code de vérification est: <b>"+otp+"</b><br /><br />", // html body
+  });
+
+  console.log("sending otp mail... %s", info.messageId);
+  // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+
+}
+
+
 //check if email is in DB so user can login
-app.get('/api/login/submit', (req, res) => {
+app.post('/api/login/submit', (req, res) => {
 
-        const email = "chem9310@gmail.com";
+        const email = req.body.email;
 
+        // generate a 6 digit numeric OTP
+        const otp = otpService.generate(6, {lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false});
+        // generate unique hash to verify email
+        const hash = newHashOTP(email, otp);
+        console.log('generating new OTP...');
+        sendOtpMail(otp, email)
+        .then((e) => {res.json({hash:hash})})
+        .catch(console.error);
+        
+/*
         //search for email in DB
         const query = "SELECT * FROM osd_users WHERE user_email=?;";
         connection.query(query, [email], (err, result) => {
@@ -168,11 +208,13 @@ app.get('/api/login/submit', (req, res) => {
 
             //if email is found
             if(result.length > 0) {
+                console.log('user found...');
                 // Generate a 6 digit numeric OTP
                 const otp = otpService.generate(6, {alphabets: false, upperCase: false, specialChars: false});
-                const hash = newHashOTP(email, otp)
-                console.log(hash);
+                console.log('user found...');
+                const hash = newHashOTP(email, otp);
                 res.json({message:hash,otp:otp});
+
                 return;
             }
 
@@ -184,23 +226,25 @@ app.get('/api/login/submit', (req, res) => {
             }
 
     });
-   
+   */
 });
 
 
 //check if email is in DB so user can login
-app.get('/api/login/verify', (req, res) => {
+app.post('/api/login/verify', (req, res) => {
 
-        const email = "chem9310@gmail.com";
-        const hash = "e64523cdca32e7d988de4354e5a253c7ab7eff22ca0c362490fe715a56fbf1e7.1647166435123";
-        const otp = "x7Mgup";
+        const email = req.body.email;
+        const hash = req.body.hash;
+        const otp = req.body.otp;
 
+        console.log(hash)
+        console.log('verify otp...');
         const verify = verifyHashOTP(email,hash,otp);
         if(verify) {
-            console.log('verified!')
+            console.log('otp verified...')
             res.json({message:verify});
         } else {
-            console.log('wrong otp!')
+            console.log('otp wrong...')
             res.json({message:verify});
         }
 });
@@ -212,20 +256,9 @@ async function main() {
   // Generate test SMTP service account from ethereal.email
   // Only needed if you don't have a real mail account for testing
 
-  // create reusable transporter object using the default SMTP transport
-  let transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: 25,
-    secure: false, // true for 465, false for other ports
-    auth: {
-      user: process.env.SMTP_USER, // generated ethereal user
-      pass: process.env.SMTP_PASSWORD, // generated ethereal password
-    },
-  });
-
   // send mail with defined transport object
   let info = await transporter.sendMail({
-    from: '"Fred Foo 👻" <admin@2kfusion.com>', // sender address
+    from: '"Restaurant 2K Fusion" <noreply@2kfusion.com>', // sender address
     to: "chem9310@gmail.com", // list of receivers
     subject: "Hello ✔", // Subject line
     text: "Hello world?", // plain text body

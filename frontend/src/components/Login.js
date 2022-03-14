@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Axios from 'axios';
+import * as Yup from "yup";
 
 
 import { 	
@@ -18,14 +19,25 @@ import {
 	FormControl,
 	InputLabel,
 	Button,
-	Input
+	Input,
+	TextField,
  } from '@mui/material';
 
-
+import { LoadingButton } from '@mui/lab';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
-function Login({ setStep, userToken, setUserToken }) {
+import LoginSubmitForm from './LoginSubmitForm';
+import LoginVerifyForm from './LoginVerifyForm';
 
+function Login({ setStep, userToken, setUserToken, setUserEmail }) {
+
+	//form email
+	let [email, setEmail] = useState('');
+  	//hash for verification
+	let [hash, setHash] = useState(null);
+	//is verified
+	let [verified, setVerified] = useState(false);
+	
 
 	return (<>
 		<Box sx={{ flexGrow: 1 }}>
@@ -42,17 +54,12 @@ function Login({ setStep, userToken, setUserToken }) {
 	    </Box>
 		<Container maxWidth='sm'>
 			<List sx={{ mt: '24px' }}>
-				<ListItem style={{display:'flex', justifyContent:'center'}}>
-					<ListItemText primary={<Typography variant="h4" align="center">Entrez votre <span style={{fontWeight: '600'}}>téléphone</span> ou votre <span style={{fontWeight: '600'}}>courriel</span></Typography>} style={{display:'flex', justifyContent:'center'}} />
-				</ListItem>
-				<ListItem style={{display:'flex', justifyContent:'center'}}>
-					<FormControl variant="standard" fullWidth>
-						<Input />
-					</FormControl>
-				</ListItem>
-				<ListItem style={{marginTop: 36, display:'flex', justifyContent:'center'}}>
-					<Button variant="contained" size="large" fullWidth>Continuer</Button>
-				</ListItem>
+			{!hash && (
+				<LoginSubmitForm email={email} setEmail={(email) => setEmail(email)} setHash={(hash) => setHash(hash)} />
+			)}
+			{hash && (
+				<LoginVerifyForm email={email} hash={hash} setVerified={(verify) => setVerified(verify)} />
+			)}
 			</List>
 		</Container>
 
