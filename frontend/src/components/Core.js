@@ -11,7 +11,7 @@ import AddressSearch from './AddressSearch'
 function Core() {
 
 	//Application step var
-	const [step, setStep] = useState(1);
+	const [step, setStep] = useState(13);
 
 	//auth token for user login
 	const [userToken, setUserToken] = React.useState(null);
@@ -38,11 +38,70 @@ function Core() {
 	const [userDistrict, setUserDistrict] = React.useState('');
 	//user postal code
 	const [userPostalCode, setUserPostalCode] = React.useState('');
-	//user geocode
-	const [userGeocode, setUserGeocode] = React.useState('');
+	//user latitude
+	const [userLat, setUserLat] = React.useState('');
+	//user longitude
+	const [userLng, setUserLng] = React.useState('');
 
 	//order type
 	const [orderType, setOrderType] = React.useState(null);
+
+
+	//store name
+	const [storeName, setStoreName] = React.useState('');
+	//store address
+	const [storeAddress, setStoreAddress] = React.useState('');
+	//store address2
+	const [storeAddress2, setStoreAddress2] = React.useState('');
+	//store city
+	const [storeCity, setStoreCity] = React.useState('');
+	//store district
+	const [storeDistrict, setStoreDistrict] = React.useState('');
+	//store postal code
+	const [storePostalCode, setStorePostalCode] = React.useState('');
+	//store latitude
+	const [storeLat, setStoreLat] = React.useState('');
+	//store longitude
+	const [storeLng, setStoreLng] = React.useState('');
+
+
+	//store delivery zones
+	const [deliveryZones, setDeliveryZones] = React.useState();
+
+
+	//get store details and populate into state
+	useEffect(() => {
+
+		Axios.post("http://localhost:3500/api/store/detail")
+		.then((response) => {
+
+			response = response.data[0];
+
+			setStoreName(response.store_name);
+			setStoreAddress(response.store_address);
+			setStoreAddress2(response.store_address2);
+			setStoreCity(response.store_city);
+			setStoreDistrict(response.store_district);
+			setStorePostalCode(response.store_postal_code);
+			setStoreLat(response.store_lat);
+			setStoreLng(response.store_lng);
+
+		})
+		.catch((err) => {
+	       	console.log("error ", err)});
+
+
+		Axios.post("http://localhost:3500/api/store/zones")
+		.then((response) => {
+			setDeliveryZones(response.data);
+		})
+		.catch((err) => {
+	       	console.log("error ", err)});
+
+
+	}, [])
+
+
 
 
 	switch(step) {
@@ -76,6 +135,9 @@ function Core() {
 	    return (
 				<AddressSearch
 					setStep={step => setStep(step)}
+					storeLat={storeLat}
+					storeLng={storeLng}
+					deliveryZones={deliveryZones}
 				 />
 	      )
 	    case 14:

@@ -116,7 +116,6 @@ function LoginVerifyForm({ email, hash, setUserData, setUserVerified, setError }
 				fullWidth 
 				disabled={!isOtp} 
 				loading={verifyLoading} 
-				loadingPosition="end"
 				onClick={() => handleVerify()}
 			>
 				Confirmer

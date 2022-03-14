@@ -194,39 +194,6 @@ app.post('/api/login/submit', (req, res) => {
         sendOtpMail(otp, email)
         .then((e) => {res.json({hash:hash})})
         .catch(console.error);
-        
-/*
-        //search for email in DB
-        const query = "SELECT * FROM osd_users WHERE user_email=?;";
-        connection.query(query, [email], (err, result) => {
-            if(err) {
-                res.status(400).send(err);
-                return;
-            }
-            console.log('logging in with email...');
-
-
-            //if email is found
-            if(result.length > 0) {
-                console.log('user found...');
-                // Generate a 6 digit numeric OTP
-                const otp = otpService.generate(6, {alphabets: false, upperCase: false, specialChars: false});
-                console.log('user found...');
-                const hash = newHashOTP(email, otp);
-                res.json({message:hash,otp:otp});
-
-                return;
-            }
-
-            //if no email is found 
-            if(result.length === 0) {
-                console.log('no user found...');
-                res.json({status:3,message:'Username doesn\'t exist.'});
-                return;
-            }
-
-    });
-   */
 });
 
 
@@ -272,6 +239,39 @@ app.post('/api/login/verify', (req, res) => {
 });
 
 
+//search for store detail in DB
+app.post('/api/store/detail', (req, res) => {
+
+    
+    const query = "SELECT * FROM osd_stores;";
+    connection.query(query, (err, result) => {
+        if(err) {
+            res.status(400).send(err);
+            return;
+        }
+        res.send(result);
+        console.log('fetching store details...');
+    })
+
+});
+
+
+
+//get delivery zones
+app.post('/api/store/zones', (req, res) => {
+
+    
+    const query = "SELECT * FROM osd_delivery_zones;";
+    connection.query(query, (err, result) => {
+        if(err) {
+            res.status(400).send(err);
+            return;
+        }
+        res.send(result);
+        console.log('fetching store delivery zones...');
+    })
+
+});
 
 // async..await is not allowed in global scope, must use a wrapper
 async function main() {
