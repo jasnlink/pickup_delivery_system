@@ -14,7 +14,7 @@ import { LoadingButton } from '@mui/lab';
 
 
 
-function LoginVerifyForm({ email, hash, setVerified }) {
+function LoginVerifyForm({ email, hash, setUserData, setUserVerified, setError }) {
 
 
 	//form OTP
@@ -55,18 +55,38 @@ function LoginVerifyForm({ email, hash, setVerified }) {
 		formData.append('hash', hash);
 		formData.append('otp', otp);
 
-		//send otp verify to backend
-		Axios.post("http://localhost:3500/api/login/verify", formData, {
-				headers: {
-					'Content-Type': 'application/json'
+		//data coming back too fast, wait 1 second
+		setTimeout(() => {
+			//send otp verify to backend
+			Axios.post("http://localhost:3500/api/login/verify", formData, {
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				})
+			.then((response) => {
+				console.log(response.data)
+				if(response.data.status === 0 && response.data.verify === 0) {
+					//user could not verify otp
+					setOtp('')
+					setError(true);
+
+				} else if(response.data.status === 0 && response.data.verify === 1) {
+					//user verified otp but not registered
+					setUserVerified(true);
+
+				} else {
+					//user verified and is registered
+					setUserData(response.data);
+					setUserVerified(true);
 				}
+				
+	              setVerifyLoading(false);
+	         
+				
 			})
-		.then((response) => {
-			setVerifyLoading(false);
-			setVerified(true);
-		})
-		.catch((err) => {
-	       	console.log("error ", err)});
+			.catch((err) => {
+		       	console.log("error ", err)});
+		}, 1000)
 	}
 
 
@@ -79,12 +99,13 @@ function LoginVerifyForm({ email, hash, setVerified }) {
 		<ListItem style={{display:'flex', justifyContent:'center'}}>
 			<FormControl variant="standard" fullWidth>
 				<TextField
-					inputProps={{ style: { textAlign:'center' } }}
+					inputProps={{ style: { textAlign:'center' }, maxLength: 6 }}
 					placeholder=""							
 					autoFocus
 					value={otp}
 					onChange={(e) => setOtp(e.target.value)}
 					required
+					disabled={verifyLoading}
 				 />
 			</FormControl>
 		</ListItem>

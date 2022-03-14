@@ -1,50 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import Axios from 'axios';
 
-import './styles/Pickup.css';
-
 import { 	
 	Typography,
-	Container,
-	List,
 	ListItem,
-	ListItemButton,
-	ListItemIcon,
 	ListItemText,
-	Divider,
-	AppBar,
-	Box,
-	Toolbar,
-	IconButton,
-	TextField,
 	Select,
 	MenuItem,
 	FormControl,
-	InputLabel,
-	Link,
-	Button 
+	InputLabel
  } from '@mui/material';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
-function Pickup({ setStep }) {
+function TimeSelectForm() {
 
 
 	return (<>
-		<Box sx={{ flexGrow: 1 }}>
-	      <AppBar position="static">
-	        <Toolbar variant="regular">
-	          <IconButton edge="start" color="inherit" sx={{ mr: 2 }} onClick={() => setStep(1)}>
-	            <ArrowBackIcon />
-	          </IconButton>
-	          <Typography variant="h6" color="inherit" component="div">
-	            Emporter
-	          </Typography>
-	        </Toolbar>
-	      </AppBar>
-	    </Box>
-		<Container maxWidth='sm'>
-			<List sx={{ mt: '24px' }}>
+
 				<ListItem style={{display:'flex', justifyContent:'center'}}>
 					<ListItemText primary={<Typography variant="h2">Pour quand?</Typography>} style={{display:'flex', justifyContent:'center'}} />
 				</ListItem>
@@ -81,15 +54,10 @@ function Pickup({ setStep }) {
 						</Select>
 					</FormControl>
 				</ListItem>
-				<ListItem style={{marginTop: 48, display:'flex', justifyContent:'center'}}>
-					<Button variant="contained" size="large" fullWidth>Continuer</Button>
-				</ListItem>
-			</List>
-		</Container>
 
 		</>)
 
 
 }
 
-export default Pickup;
+export default TimeSelectForm;

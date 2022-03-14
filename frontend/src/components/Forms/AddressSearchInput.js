@@ -6,7 +6,7 @@ function AddressSearchInput() {
 
 	const { ref: autoCompleteRef } = usePlacesWidget({
 	    apiKey: process.env.REACT_APP_GOOGLE_API_KEY,
-	    onPlaceSelected: (place, inputRef, autocomplete) => console.log(place),
+	    onPlaceSelected: (place, inputRef, autocomplete) => {console.log(place);},
 	    options: {
 	      componentRestrictions: { country: ["ca"] },
 	      fields: ["formatted_address","address_components", "geometry.location"],
@@ -18,6 +18,7 @@ function AddressSearchInput() {
 	return (
 			<Input
 				inputRef={autoCompleteRef}
+				inputProps={{ style: { textAlign:'center' } }}
 			/>
 		)
 }

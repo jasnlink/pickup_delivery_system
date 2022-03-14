@@ -24,11 +24,7 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 
-
-import AddressSearchInput from './Forms/AddressSearchInput';
-
-
-function Delivery({ setStep, userToken }) {
+function Account({ setStep }) {
 
 	//do you have an account prompt
 	const [prompt, setPrompt] = useState(1);
@@ -49,21 +45,13 @@ function Delivery({ setStep, userToken }) {
 	            <ArrowBackIcon />
 	          </IconButton>
 	          <Typography variant="h6" color="inherit" component="div">
-	            Livraison
+	            Account
 	          </Typography>
 	        </Toolbar>
 	      </AppBar>
 	    </Box>
 		<Container maxWidth='sm'>
 			<List sx={{ mt: '24px' }}>
-				<ListItem style={{display:'flex', justifyContent:'center'}}>
-					<ListItemText primary={<Typography variant="h2">Quel endroit?</Typography>} style={{display:'flex', justifyContent:'center'}} />
-				</ListItem>
-				<ListItem style={{marginTop: 24, display:'flex', justifyContent:'center'}}>
-					<FormControl variant="standard" fullWidth>
-						<AddressSearchInput />
-					</FormControl>
-				</ListItem>
 				<ListItem style={{marginTop: 48, display:'flex', justifyContent:'center'}}>
 					<Button variant="contained" size="large" fullWidth>Continuer</Button>
 				</ListItem>
@@ -75,4 +63,4 @@ function Delivery({ setStep, userToken }) {
 
 }
 
-export default Delivery;
+export default Account;

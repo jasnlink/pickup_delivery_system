@@ -237,15 +237,37 @@ app.post('/api/login/verify', (req, res) => {
         const hash = req.body.hash;
         const otp = req.body.otp;
 
-        console.log(hash)
-        console.log('verify otp...');
+        console.log('verify otp... '+hash);
         const verify = verifyHashOTP(email,hash,otp);
+
         if(verify) {
+            //otp is verified
             console.log('otp verified...')
-            res.json({message:verify});
+
+            //search for email in DB
+            const query = "SELECT * FROM osd_users WHERE user_email=?;";
+            connection.query(query, [email], (err, result) => {
+                if(err) {
+                    res.status(400).send(err);
+                    return;
+                }
+                console.log('logging in with email...');
+                //if email is found
+                if(result.length > 0) {
+                    console.log('found user...')
+                    res.send(result);
+                }
+                //if no email is found 
+                if(result.length === 0) {
+                    console.log('no user found...');
+                    res.json({status:0,verify:1});
+                    return;
+                }
+            });
         } else {
+            //otp wrong, so try again
             console.log('otp wrong...')
-            res.json({message:verify});
+            res.json({status:0,verify:0});
         }
 });
 

@@ -22,7 +22,7 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 
 
-function Welcome({ setStep }) {
+function Welcome({ setStep, setOrderType }) {
 
 
 	return (<>
@@ -48,12 +48,12 @@ function Welcome({ setStep }) {
 				</ListItem>
 				<Divider />
 				<ListItem disablePadding>
-					<ListItemButton onClick={() => setStep(11)}>
+					<ListItemButton onClick={() => {setStep(14); setOrderType('Emporter')}}>
 						<ListItemText primary={<Typography variant="h3">Emporter</Typography>} style={{display:'flex', justifyContent:'center'}} />
 					</ListItemButton>
 				</ListItem>
 				<ListItem disablePadding>
-					<ListItemButton onClick={() => setStep(100)}>
+					<ListItemButton onClick={() => {setStep(11); setOrderType('Livraison')}}>
 						<ListItemText primary={<Typography variant="h3">Livraison</Typography>} style={{display:'flex', justifyContent:'center'}} />
 					</ListItemButton>
 				</ListItem>
