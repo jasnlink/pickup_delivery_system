@@ -31,7 +31,7 @@ import ErrorIcon from '@mui/icons-material/Error';
 
 import { usePlacesWidget } from "react-google-autocomplete";
 
-function AddressSearch({ setStep, storeLat, storeLng, deliveryZones }) {
+function AddressSearch({ setStep, storeLat, storeLng, deliveryZones, setUserAddress, setUserCity, setUserDistrict, setUserPostalCode, setUserLat, setUserLng }) {
 
 	//google places autocomplete ref used by search input
 	const { ref: autoCompleteRef } = usePlacesWidget({
@@ -82,10 +82,37 @@ function AddressSearch({ setStep, storeLat, storeLng, deliveryZones }) {
         return dist
 	}
 
+	//Helper function to extract Google Address components
+	function getAddressComponent(place, name, type) {
+	  var result;
+	  for (let fieldIndex in place) {
+	    let field = place[fieldIndex];
+	    for (let propertyIndex in field) {
+	      let property = field[propertyIndex];
+	      if (propertyIndex === name) {
+	        result = property;
+	      }
+	      if(Array.isArray(property)) {
+	        for (let componentIndex in property) {
+	          let component = property[componentIndex];
+	          if (component === type) {
+	            return result;
+	          }
+	        }
+	      }
+	      
+	    }
+	  }
+	  return false;
+	}
+
+
 	//currently selected lat
 	const [selectLat, setSelectLat] = useState(0);
 	//currently selected long
 	const [selectLng, setSelectLng] = useState(0);
+	//currently selected place
+	const [selectPlace, setSelectPlace] = useState();
 
 	//submit button toggle if address is validated
 	const [isAddress, setIsAddress] = useState(false);
@@ -99,26 +126,53 @@ function AddressSearch({ setStep, storeLat, storeLng, deliveryZones }) {
 		setSearchValue(place.formatted_address);
 		setSelectLat(place.geometry.location.lat());
 		setSelectLng(place.geometry.location.lng());
+		setSelectPlace(place.address_components)
 		setIsAddress(true);
 	}
 	//handle submit button
 	function handleSubmit() {
 		
+		//set to button loading
 		setSubmitLoading(true);
-
+		//calculate distance between user and store with helper function
 		const distanceFromStore = distance(storeLat, storeLng, selectLat, selectLng, 'K');
-
-		if(distanceFromStore <= maxRange) {
-			console.log('in range!')
-			setStep(14)
-		} else {
-			setError(true);
-			setIsAddress(false);
-		}
-		console.log(distanceFromStore)
-
 		//data coming back too fast, wait 1 second
-		setTimeout(() => {setSubmitLoading(false);}, 1000)
+		setTimeout(() => {
+			if(distanceFromStore <= maxRange) {
+			//address is in range
+
+				//extract address components with helper function
+				var address = getAddressComponent(selectPlace, 'long_name', 'street_number');
+				address += ' ';
+				address += getAddressComponent(selectPlace, 'short_name', 'route');
+				var city = getAddressComponent(selectPlace, 'long_name', 'locality')
+				var district = getAddressComponent(selectPlace, 'short_name', 'administrative_area_level_1')
+				var postalCode = getAddressComponent(selectPlace, 'long_name', 'postal_code')
+
+				//helper function to populate state with address components
+				function initUser() {
+						setUserAddress(address);
+						setUserCity(city);
+						setUserDistrict(district);
+						setUserPostalCode(postalCode);
+						setUserLat(selectLat);
+						setUserLng(selectLng);
+						
+				}
+				//wait for state to finish populating before unmounting and moving to next step
+				const promise = new Promise((resolve, reject) => {initUser(); resolve();});
+				promise
+				.then((resolve) => {setStep(14)})
+				.catch((err) => {console.log("error ", err)});
+			
+			} else {
+			//address is not in range
+				setError(true);
+				setIsAddress(false);
+			}
+			
+			setSubmitLoading(false);
+		}, 1000)
 	}
 
 	

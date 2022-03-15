@@ -13,13 +13,15 @@ function Core() {
 	//Application step var
 	const [step, setStep] = useState(13);
 
+	//user handling vars
 	//auth token for user login
 	const [userToken, setUserToken] = React.useState(null);
 	//user verified otp
 	const [userVerified, setUserVerified] = React.useState(false)
-	//user data aggregate
+	//registered user data aggregate from DB
 	const [userData, setUserData] = React.useState(null);
 
+	//user data for new users
 	//user first name
 	const [userFirstName, setUserFirstName] = React.useState('');
 	//user last name
@@ -46,7 +48,7 @@ function Core() {
 	//order type
 	const [orderType, setOrderType] = React.useState(null);
 
-
+	//store data from DB
 	//store name
 	const [storeName, setStoreName] = React.useState('');
 	//store address
@@ -102,15 +104,13 @@ function Core() {
 	}, [])
 
 
-
-
 	switch(step) {
 	  case 1:
 	    return (
-		      <Welcome
-		      	setStep={step => setStep(step)}
-		      	setOrderType={type => setOrderType(type)}
-	      	 />
+				<Welcome
+					setStep={step => setStep(step)}
+					setOrderType={type => setOrderType(type)}
+				/>
 	      )
 	   case 11:
 	    return (
@@ -138,6 +138,12 @@ function Core() {
 					storeLat={storeLat}
 					storeLng={storeLng}
 					deliveryZones={deliveryZones}
+					setUserAddress={address => setUserAddress(address)}
+					setUserCity={city => setUserCity(city)}
+					setUserDistrict={district => setUserDistrict(district)}
+					setUserPostalCode={postalcode => setUserPostalCode(postalcode)}
+					setUserLat={lat => setUserLat(lat)}
+					setUserLng={lng => setUserLng(lng)}
 				 />
 	      )
 	    case 14:
