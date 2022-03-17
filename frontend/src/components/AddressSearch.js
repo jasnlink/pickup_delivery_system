@@ -112,7 +112,10 @@ function AddressSearch({ setStep, storeLat, storeLng, deliveryZones, setUserAddr
 	//currently selected long
 	const [selectLng, setSelectLng] = useState(0);
 	//currently selected place
-	const [selectPlace, setSelectPlace] = useState();
+	const [selectPlace, setSelectPlace] = useState('');
+	//input value
+	const [searchValue, setSearchValue] = useState('');
+
 
 	//submit button toggle if address is validated
 	const [isAddress, setIsAddress] = useState(false);
@@ -150,7 +153,7 @@ function AddressSearch({ setStep, storeLat, storeLng, deliveryZones, setUserAddr
 				var postalCode = getAddressComponent(selectPlace, 'long_name', 'postal_code')
 
 				//helper function to populate state with address components
-				function initUser() {
+				async function initUser() {
 						setUserAddress(address);
 						setUserCity(city);
 						setUserDistrict(district);
@@ -162,7 +165,7 @@ function AddressSearch({ setStep, storeLat, storeLng, deliveryZones, setUserAddr
 				//wait for state to finish populating before unmounting and moving to next step
 				const promise = new Promise((resolve, reject) => {initUser(); resolve();});
 				promise
-				.then((resolve) => {setStep(14)})
+				.then((resolve) => {setStep(13)})
 				.catch((err) => {console.log("error ", err)});
 			
 			} else {
@@ -174,10 +177,6 @@ function AddressSearch({ setStep, storeLat, storeLng, deliveryZones, setUserAddr
 			setSubmitLoading(false);
 		}, 1000)
 	}
-
-	
-	//submit button toggle
-	const [searchValue, setSearchValue] = useState('');
 
 	return (<>
 		<Box sx={{ flexGrow: 1 }}>

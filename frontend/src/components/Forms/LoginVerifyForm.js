@@ -64,7 +64,6 @@ function LoginVerifyForm({ email, hash, setUserData, setUserVerified, setError }
 					}
 				})
 			.then((response) => {
-				console.log(response.data)
 				if(response.data.status === 0 && response.data.verify === 0) {
 					//user could not verify otp
 					setOtp('')
@@ -76,7 +75,7 @@ function LoginVerifyForm({ email, hash, setUserData, setUserVerified, setError }
 
 				} else {
 					//user verified and is registered
-					setUserData(response.data);
+					setUserData(response.data[0]);
 					setUserVerified(true);
 				}
 				

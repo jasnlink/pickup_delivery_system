@@ -31,22 +31,63 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LoginSubmitForm from './Forms/LoginSubmitForm';
 import LoginVerifyForm from './Forms/LoginVerifyForm';
 
-function Login({ setStep, userToken, setUserToken, setUserEmail, userVerified, setUserVerified, userData, setUserData }) {
+function Login({ 
+	setStep, 
+	userToken, 
+	setUserToken,  
+	userVerified, 
+	setUserVerified, 
+	setUserId,
+	setUserFirstName, 
+	setUserLastName, 
+	setUserEmail, 
+	setUserPhone, 
+	setUserAddress, 
+	setUserAddress2, 
+	setUserCity, 
+	setUserDistrict, 
+	setUserPostalCode, 
+	setUserLat, 
+	setUserLng 
+}) {
 
 	//form email
-	let [email, setEmail] = useState('');
+	const [email, setEmail] = useState('');
   	//hash for verification
-	let [hash, setHash] = useState(null);
+	const [hash, setHash] = useState(null);
+	//registered user data aggregate from DB
+	const [userData, setUserData] = useState(null);
+
+	async function setUser() {
+		try {
+			setUserId(userData.user_id)
+			setUserFirstName(userData.user_first_name)
+			setUserLastName(userData.user_last_name)
+			setUserEmail(userData.user_email)
+			setUserPhone(userData.user_phone)
+			setUserAddress(userData.user_address)
+			setUserAddress2(userData.user_address2)
+			setUserCity(userData.user_city)
+			setUserDistrict(userData.user_district)
+			setUserPostalCode(userData.user_postal_code)
+			setUserLat(userData.user_lat)
+			setUserLng(userData.user_lng)
+		} finally {
+			setStep(21)
+		}
+		
+	}
 
 	//check if verified
   	useEffect(() => {
 		if(userVerified) {
 			if(userData) {
 			//verified and registered
-				setStep(12) // go to account page
+				setUser();
+				//setStep(21) // go to account page
 			} else {
 			//verified but not registered
-				setStep(13) // go to address search
+				setStep(12) // go to address search
 			}
 		}
 	}, [userVerified])
@@ -54,12 +95,7 @@ function Login({ setStep, userToken, setUserToken, setUserEmail, userVerified, s
 
 
 	//otp error
-	let [error, setError] = useState(false);
-	//otp error notification close
-  	function closeError(event, reason) {
-
-	    setError(false)
-  	}
+	const [error, setError] = useState(false);
 
 
 	return (<>
@@ -76,7 +112,7 @@ function Login({ setStep, userToken, setUserToken, setUserEmail, userVerified, s
 	      </AppBar>
 	    </Box>
 		<Container maxWidth='sm'>
-			<Snackbar open={error} anchorOrigin={{vertical: 'top', horizontal: 'center'}} autoHideDuration={1000} onClose={closeError}>
+			<Snackbar open={error} anchorOrigin={{vertical: 'top', horizontal: 'center'}} autoHideDuration={1250} onClose={() => setError(false)}>
 				<Alert
 					sx={{ mt: '24px' }}
 					variant="filled"

@@ -24,18 +24,7 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 
-function Account({ setStep }) {
-
-	//do you have an account prompt
-	const [prompt, setPrompt] = useState(1);
-
-	//to contain google maps autocomplete suggestion
-	const [suggestion, setSuggestion] = useState(1);
-
-	function handleSuggestionSelected(res) {
-		setSuggestion(res)
-		console.log(suggestion)
-	}
+function Account({ setStep, userFirstName, userLastName, userEmail, userPhone, userAddress, userAddress2, userCity, userDistrict, userPostalCode }) {
 
 	return (<>
 		<Box sx={{ flexGrow: 1 }}>
@@ -45,15 +34,37 @@ function Account({ setStep }) {
 	            <ArrowBackIcon />
 	          </IconButton>
 	          <Typography variant="h6" color="inherit" component="div">
-	            Account
+	            Votre adresse
 	          </Typography>
 	        </Toolbar>
 	      </AppBar>
 	    </Box>
 		<Container maxWidth='sm'>
 			<List sx={{ mt: '24px' }}>
-				<ListItem style={{marginTop: 48, display:'flex', justifyContent:'center'}}>
-					<Button variant="contained" size="large" fullWidth>Continuer</Button>
+				<ListItem>
+					<ListItemText primary={<Typography variant="h3">{userFirstName} {userLastName}</Typography>} style={{display:'flex', justifyContent:'center'}} />
+				</ListItem>
+				<Divider />
+			</List>
+			<List sx={{ mt: '8px' }}>
+				<ListItem disablePadding>
+					<ListItemText primary={<Typography variant="h5">{userAddress}</Typography>} style={{display:'flex', justifyContent:'center'}} />
+				</ListItem>
+				<ListItem disablePadding>
+					<ListItemText primary={<Typography variant="h5">{userCity}, {userDistrict} {userPostalCode}</Typography>} style={{display:'flex', justifyContent:'center'}} />
+				</ListItem>
+			</List>
+			<List sx={{ mt: '8px' }}>
+				<Divider />
+				<ListItem disablePadding>
+					<ListItemButton onClick={() => setStep(13)}>
+						<ListItemText primary={<Typography variant="h4">Utiliser cette adresse</Typography>} style={{display:'flex', justifyContent:'center'}} />
+					</ListItemButton>
+				</ListItem>
+				<ListItem disablePadding>
+					<ListItemButton onClick={() => setStep(12)}>
+						<ListItemText primary={<Typography variant="h4">Livrer ailleurs</Typography>} style={{display:'flex', justifyContent:'center'}} />
+					</ListItemButton>
 				</ListItem>
 			</List>
 		</Container>

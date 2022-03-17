@@ -8,12 +8,18 @@ import otpService from 'otp-generator';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import util from 'util';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+require('util.promisify').shim();
+
 
 //read .env file
 dotenv.config();
 // disable TLS for testing mail SMTP
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
-
+//set time zone
+process.env.TZ = 'America/Toronto';
 
 // set current working directory
 const __dirname = path.resolve();
@@ -272,6 +278,31 @@ app.post('/api/store/zones', (req, res) => {
     })
 
 });
+
+//fetch open and closing times from timegroups
+app.post('/api/timegroup/hours/operation', async (req, res) => {
+
+    const day = req.body.day;
+
+
+
+    const request =   "SELECT osd_timegroups.timegroup_from, osd_timegroups.timegroup_to FROM osd_timegroups INNER JOIN osd_timegroup_days ON osd_timegroups.timegroup_id = osd_timegroup_days.timegroup_id WHERE osd_timegroup_days.timegroup_day=?;";
+    connection.query(request, [day], (err, result) => {
+
+        if(err) {
+            res.status(400).send(err);
+            return;
+        }
+
+        
+        res.send(result)
+        console.log('fetching hours of operation...');
+
+    })
+
+});
+
+
 
 // async..await is not allowed in global scope, must use a wrapper
 async function main() {

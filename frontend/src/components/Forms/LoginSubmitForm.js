@@ -51,8 +51,7 @@ function LoginSubmitForm({ email, setEmail, setHash }) {
 				}
 			})
 		.then((response) => {
-			setHash(response.data.hash)
-			setSubmitLoading(false);
+			setHash(response.data.hash);
 		})
 		.catch((err) => {
 	       	console.log("error ", err)});
@@ -84,7 +83,6 @@ function LoginSubmitForm({ email, setEmail, setHash }) {
 				fullWidth 
 				disabled={!isEmail} 
 				loading={submitLoading} 
-				loadingPosition="end"
 				onClick={() => handleSubmit()}
 			>
 				Continuer

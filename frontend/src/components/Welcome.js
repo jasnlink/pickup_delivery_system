@@ -24,7 +24,6 @@ import MenuIcon from '@mui/icons-material/Menu';
 
 function Welcome({ setStep, setOrderType }) {
 
-
 	return (<>
 		<Box sx={{ flexGrow: 1 }}>
 	      <AppBar position="static">
@@ -48,7 +47,7 @@ function Welcome({ setStep, setOrderType }) {
 				</ListItem>
 				<Divider />
 				<ListItem disablePadding>
-					<ListItemButton onClick={() => {setStep(14); setOrderType('Emporter')}}>
+					<ListItemButton onClick={() => {setStep(13); setOrderType('Emporter')}}>
 						<ListItemText primary={<Typography variant="h3">Emporter</Typography>} style={{display:'flex', justifyContent:'center'}} />
 					</ListItemButton>
 				</ListItem>

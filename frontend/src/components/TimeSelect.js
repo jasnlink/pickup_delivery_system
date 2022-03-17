@@ -28,7 +28,9 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 import TimeSelectForm from './Forms/TimeSelectForm'
 
-function TimeSelect({ orderType, setStep }) {
+function TimeSelect({ orderType, setStep, storeTimeHours, setOrderDate, setOrderTime }) {
+
+
 
 
 	return (<>
@@ -46,10 +48,7 @@ function TimeSelect({ orderType, setStep }) {
 	    </Box>
 		<Container maxWidth='sm'>
 			<List sx={{ mt: '24px' }}>
-				<TimeSelectForm />
-				<ListItem style={{marginTop: 48, display:'flex', justifyContent:'center'}}>
-					<Button variant="contained" size="large" fullWidth>Continuer</Button>
-				</ListItem>
+				<TimeSelectForm setStep={step => setStep(step)} storeTimeHours={storeTimeHours} setOrderDate={setOrderDate} setOrderTime={setOrderTime} />
 			</List>
 		</Container>
 

@@ -1,74 +1,84 @@
 import React, { useState, useEffect } from 'react';
 import Axios from 'axios';
 import { BrowserRouter as Router, Route, Switch, useParams } from "react-router-dom";
+import { DateTime } from "luxon";
 
 import Welcome from './Welcome';
 import TimeSelect from './TimeSelect';
 import Account from './Account';
 import Login from './Login';
 import AddressSearch from './AddressSearch'
+import Menu from './Menu'
 
 function Core() {
 
 	//Application step var
-	const [step, setStep] = useState(13);
+	const [step, setStep] = useState(1);
 
 	//user handling vars
 	//auth token for user login
-	const [userToken, setUserToken] = React.useState(null);
+	const [userToken, setUserToken] = useState(null);
 	//user verified otp
-	const [userVerified, setUserVerified] = React.useState(false)
-	//registered user data aggregate from DB
-	const [userData, setUserData] = React.useState(null);
+	const [userVerified, setUserVerified] = useState(false)
 
-	//user data for new users
+
+	//user data
+	//user id
+	const [userId, setUserId] = useState('');
 	//user first name
-	const [userFirstName, setUserFirstName] = React.useState('');
+	const [userFirstName, setUserFirstName] = useState('');
 	//user last name
-	const [userLastName, setUserLastName] = React.useState('');
+	const [userLastName, setUserLastName] = useState('');
 	//user email
-	const [userEmail, setUserEmail] = React.useState('');
+	const [userEmail, setUserEmail] = useState('');
 	//user phone
-	const [userPhone, setUserPhone] = React.useState('');
+	const [userPhone, setUserPhone] = useState('');
 	//user address
-	const [userAddress, setUserAddress] = React.useState('');
+	const [userAddress, setUserAddress] = useState('');
 	//user address2
-	const [userAddress2, setUserAddress2] = React.useState('');
+	const [userAddress2, setUserAddress2] = useState('');
 	//user city
-	const [userCity, setUserCity] = React.useState('');
+	const [userCity, setUserCity] = useState('');
 	//user district
-	const [userDistrict, setUserDistrict] = React.useState('');
+	const [userDistrict, setUserDistrict] = useState('');
 	//user postal code
-	const [userPostalCode, setUserPostalCode] = React.useState('');
+	const [userPostalCode, setUserPostalCode] = useState('');
 	//user latitude
-	const [userLat, setUserLat] = React.useState('');
+	const [userLat, setUserLat] = useState('');
 	//user longitude
-	const [userLng, setUserLng] = React.useState('');
+	const [userLng, setUserLng] = useState('');
 
-	//order type
-	const [orderType, setOrderType] = React.useState(null);
+	//order type, delivery or takeout
+	const [orderType, setOrderType] = useState(null);
+	//order date to be delivered or collected 
+	const [orderDate, setOrderDate] = useState(null);
+	//order time to be delivered or collected 
+	const [orderTime, setOrderTime] = useState(null);
 
 	//store data from DB
 	//store name
-	const [storeName, setStoreName] = React.useState('');
+	const [storeName, setStoreName] = useState('');
 	//store address
-	const [storeAddress, setStoreAddress] = React.useState('');
+	const [storeAddress, setStoreAddress] = useState('');
 	//store address2
-	const [storeAddress2, setStoreAddress2] = React.useState('');
+	const [storeAddress2, setStoreAddress2] = useState('');
 	//store city
-	const [storeCity, setStoreCity] = React.useState('');
+	const [storeCity, setStoreCity] = useState('');
 	//store district
-	const [storeDistrict, setStoreDistrict] = React.useState('');
+	const [storeDistrict, setStoreDistrict] = useState('');
 	//store postal code
-	const [storePostalCode, setStorePostalCode] = React.useState('');
+	const [storePostalCode, setStorePostalCode] = useState('');
 	//store latitude
-	const [storeLat, setStoreLat] = React.useState('');
+	const [storeLat, setStoreLat] = useState('');
 	//store longitude
-	const [storeLng, setStoreLng] = React.useState('');
+	const [storeLng, setStoreLng] = useState('');
 
+
+	//store hours from time groups
+	const [storeTimeHours, setStoreTimeHours] = useState();
 
 	//store delivery zones
-	const [deliveryZones, setDeliveryZones] = React.useState();
+	const [deliveryZones, setDeliveryZones] = useState();
 
 
 	//get store details and populate into state
@@ -92,7 +102,7 @@ function Core() {
 		.catch((err) => {
 	       	console.log("error ", err)});
 
-
+		//get store delivery zones
 		Axios.post("http://localhost:3500/api/store/zones")
 		.then((response) => {
 			setDeliveryZones(response.data);
@@ -101,6 +111,19 @@ function Core() {
 	       	console.log("error ", err)});
 
 
+		//get store hours
+		const currentWeekday = DateTime.now().setZone("America/Toronto").get('weekday');
+
+		Axios.post("http://localhost:3500/api/timegroup/hours/operation", {
+			day: currentWeekday,
+		})
+		.then((response) => {
+			setStoreTimeHours(response.data)
+		})
+		.catch((err) => {
+	       	console.log("error ", err)});
+
+		
 	}, [])
 
 
@@ -118,20 +141,24 @@ function Core() {
 					setStep={step => setStep(step)}
 					userToken={userToken}
 					setUserToken={token => setUserToken(token)}
-					setUserEmail={email => setUserEmail(email)}
 					userVerified={userVerified}
 					setUserVerified={verify => setUserVerified(verify)}
-					userData={userData}
-					setUserData={data => setUserData(data)}
+
+					setUserId={id => setUserId(id)}
+					setUserFirstName={first => setUserFirstName(first)}
+					setUserLastName={last => setUserLastName(last)}
+					setUserEmail={email => setUserEmail(email)}
+					setUserPhone={phone => setUserPhone(phone)}
+					setUserAddress={address => setUserAddress(address)}
+					setUserAddress2={address2 => setUserAddress2(address2)}
+					setUserCity={city => setUserCity(city)}
+					setUserDistrict={district => setUserDistrict(district)}
+					setUserPostalCode={postalcode => setUserPostalCode(postalcode)}
+					setUserLat={lat => setUserLat(lat)}
+					setUserLng={lng => setUserLng(lng)}
 				 />	
 	      )
 	    case 12:
-	    return (
-				<Account
-					setStep={step => setStep(step)}
-				/>
-	      )
-	    case 13:
 	    return (
 				<AddressSearch
 					setStep={step => setStep(step)}
@@ -146,11 +173,37 @@ function Core() {
 					setUserLng={lng => setUserLng(lng)}
 				 />
 	      )
-	    case 14:
+	    case 13:
 	    return (
 				<TimeSelect
 					orderType={orderType}
 					setStep={step => setStep(step)}
+					storeTimeHours={storeTimeHours}
+					setOrderDate={setOrderDate}
+					setOrderTime={setOrderTime}
+				/>
+	      )
+	    case 14:
+	    return (
+				<Menu
+					setStep={step => setStep(step)}
+					orderType={orderType}
+					orderTime={orderTime}
+				/>
+	      )
+	    case 21:
+	    return (
+				<Account
+					setStep={step => setStep(step)}
+					userFirstName={userFirstName}
+					userLastName={userLastName}
+					userEmail={userEmail}
+					userPhone={userPhone}
+					userAddress={userAddress}
+					userAddress2={userAddress2}
+					userCity={userCity}
+					userDistrict={userDistrict}
+					userPostalCode={userPostalCode}
 				/>
 	      )
 
