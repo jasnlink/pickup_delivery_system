@@ -283,10 +283,10 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 	                    <Grid container alignItems="center" direction="row" justifyContent="space-between">
 	                        <Grid item xs={9}>
 	                            <Grid container direction="row" alignItems="center" justifyContent="flex-start" spacing={1}>
-	                                <Grid item xs={2}>
+	                                <Grid item xs={3}>
 	                                    <Chip label={item.productQty} />
 	                                </Grid>
-	                                <Grid item xs={10}>
+	                                <Grid item xs={9}>
 	                                    <Typography variant="subtitle2" color="textPrimary">
 	                                    	{item.productName}
 	                                    </Typography>
