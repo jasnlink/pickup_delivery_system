@@ -9,11 +9,14 @@ import Account from './Account';
 import Login from './Login';
 import AddressSearch from './AddressSearch'
 import Menu from './Menu'
+import Checkout from './Checkout'
 
 function Core() {
 
 	//Application step var
 	const [step, setStep] = useState(1);
+	//order cart
+	const [cart, setCart] = useState([]);
 
 	//user handling vars
 	//auth token for user login
@@ -54,6 +57,16 @@ function Core() {
 	const [orderDate, setOrderDate] = useState(null);
 	//order time to be delivered or collected 
 	const [orderTime, setOrderTime] = useState(null);
+	//order tip amount 
+	const [orderTip, setOrderTip] = useState(0);
+	//order GST amount 
+	const [orderGst, setOrderGst] = useState(0);
+	//order QST amount 
+	const [orderQst, setOrderQst] = useState(0);
+	//order amount subtotal 
+	const [orderSubtotal, setOrderSubtotal] = useState(0);
+	//order amount total 
+	const [orderTotal, setOrderTotal] = useState(0);
 
 	//store data from DB
 	//store name
@@ -187,8 +200,23 @@ function Core() {
 	    return (
 				<Menu
 					setStep={step => setStep(step)}
+					cart={cart}
+					setCart={cart => setCart(cart)}
 					orderType={orderType}
+					orderDate={orderDate}
 					orderTime={orderTime}
+				/>
+	      )
+	    case 15:
+	    return (
+				<Checkout
+					setStep={step => setStep(step)}
+					cart={cart}
+					setCart={cart => setCart(cart)}
+					orderType={orderType}
+					orderDate={orderDate}
+					orderTime={orderTime}
+					setOrderSubtotal={subtotal => setOrderSubtotal(subtotal)}
 				/>
 	      )
 	    case 21:

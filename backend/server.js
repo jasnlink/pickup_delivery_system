@@ -303,6 +303,81 @@ app.post('/api/timegroup/hours/operation', async (req, res) => {
 });
 
 
+//fetch categories given a weekday and a time
+//used to list all categories that belong in open and close times
+app.post('/api/category/list/operation', async (req, res) => {
+
+    const day = req.body.day;
+    const time = req.body.time;
+
+    console.log('day-'+day+' time-'+time)
+
+    const request =   "SELECT osd_product_categories.category_id, category_name FROM osd_timegroups INNER JOIN osd_timegroup_days ON osd_timegroups.timegroup_id = osd_timegroup_days.timegroup_id INNER JOIN osd_timegroup_categories ON osd_timegroups.timegroup_id = osd_timegroup_categories.timegroup_id INNER JOIN osd_product_categories ON osd_timegroup_categories.category_id = osd_product_categories.category_id WHERE osd_timegroup_days.timegroup_day=? AND osd_product_categories.enabled=1 AND STR_TO_DATE(?, '%H:%i') BETWEEN osd_timegroups.timegroup_from AND osd_timegroups.timegroup_to;";
+    connection.query(request, [day, time], (err, result) => {
+
+        if(err) {
+            res.status(400).send(err);
+            return;
+        }
+
+        
+        res.send(result)
+        console.log('fetching categories in hours of operation...');
+
+    })
+
+});
+
+
+
+
+
+
+//fetch products given a lsit of category ids
+//used to list all products from given categories
+app.post('/api/product/list/category', async (req, res) => {
+
+    const categories = req.body.categories;
+
+    console.log(categories)
+
+    buildRequest()
+    .then((result) => {
+        const request = result
+        connection.query(request, (err, result) => {
+
+            if(err) {
+                res.status(400).send(err);
+                return;
+            }
+
+            res.send(result)
+            console.log('fetching products in categories...');
+
+        })
+    })
+
+
+
+    async function buildRequest() {
+        let result = "SELECT category_id, product_id, product_name, product_desc, product_image, product_price FROM osd_products WHERE category_id IN ("
+        for(let i=0;i<categories.length;i++) {
+
+            if(i+1 === categories.length) {
+                result += categories[i]+");"
+                break;
+            }
+
+            result += categories[i]+","
+            
+        }
+    return result;
+}
+});
+
+
+
+
 
 // async..await is not allowed in global scope, must use a wrapper
 async function main() {
