@@ -97,6 +97,9 @@ function Checkout({ setStep, cart, setCart, orderType, orderDate, orderTime, set
 	}, [selectTipValue]);
 
 	useEffect(()=> {
+		if (cart.length === 0) {
+			return;
+		}
 
 		let tempCartGst = cartSubtotal*0.05;
 		let tempCartQst = cartSubtotal*0.0975;
@@ -120,7 +123,11 @@ function Checkout({ setStep, cart, setCart, orderType, orderDate, orderTime, set
 
 		if (cart.length === 0) {
 			setCartCount(0);
-			setCartSubtotal(0);
+			setCartSubtotal((0).toFixed(2));
+			setCartGst((0).toFixed(2));
+			setCartQst((0).toFixed(2));
+			setCartTip((0).toFixed(2));
+			setCartTotal((0).toFixed(2))
 			return;
 		}
 		//inital value so no errors are thrown
@@ -146,7 +153,6 @@ function Checkout({ setStep, cart, setCart, orderType, orderDate, orderTime, set
 	function handleSelectTip(e) {
 		if(e.target.value === "other") {
 			setInputTip(true)
-			setCartTip((0).toFixed(2))
 		} else {
 			setInputTip(false)
 			setInputTipValue("")
@@ -157,6 +163,8 @@ function Checkout({ setStep, cart, setCart, orderType, orderDate, orderTime, set
 	function handleInputTipSubmit() {
 
 		let tempCartTotal = cartTotal-cartTip;
+		console.log('temp tip', cartTip)
+		console.log('temp total',tempCartTotal)
 		let tempCartTip = Number.parseFloat(inputTipValue);
 		tempCartTip = (Math.round((tempCartTip + Number.EPSILON) * 100) / 100);
 		tempCartTotal += tempCartTip;
@@ -193,7 +201,7 @@ function Checkout({ setStep, cart, setCart, orderType, orderDate, orderTime, set
 			<Container maxWidth="sm" disableGutters>
 				<List sx={{ mt: '24px' }}>
 					
-	                <ListItem style={{display:'flex', justifyContent:'center', paddingBottom: '12px'}}>
+	                <ListItem style={{display:'flex', justifyContent:'center', paddingBottom: '12px'}} onClick={() => console.log(cartTip)}>
 	                    <Typography variant="h3">
 	                        {displayDate} {orderTime}
 	                    </Typography>
