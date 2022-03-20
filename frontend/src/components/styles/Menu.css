@@ -77,9 +77,10 @@ body {
 
 .product-drawer-close-btn {
 	position: fixed !important;
-	background-color: #f5f5f591 !important;
+	background-color: #f5f5f590 !important;
 	margin-top: 16px !important;
 	margin-left: 16px !important;
+	z-index: 100000;
 }
 
 .cart-btn-container {

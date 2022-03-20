@@ -26,7 +26,11 @@ import {
 	CircularProgress,
 	Drawer,
 	Paper,
-	Chip
+	Chip,
+	Checkbox,
+	FormGroup,
+	Radio,
+	RadioGroup
  } from '@mui/material';
 
 import { LoadingButton } from '@mui/lab';
@@ -36,6 +40,9 @@ import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import CloseIcon from '@mui/icons-material/Close';
 
 import './styles/Menu.css';
+
+import CheckBoxGroupForm from './Forms/CheckBoxGroupForm';
+
 
 function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 	
@@ -52,6 +59,10 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 	const [categories, setCategories] = useState('');
 	//list of products
 	const [products, setProducts] = useState('');
+	//list of product option groups
+	const [productOptgroups, setProductOptgroups] = useState('');
+	//list of product options belonging in option groups
+	const [productOptions, setProductOptions] = useState('');
 
 	//product selection
 	const [selectProductId, setSelectProductId] = useState('');
@@ -60,6 +71,9 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 	const [selectProductDesc, setSelectProductDesc] = useState('');
 	const [selectProductImg, setSelectProductImg] = useState('');
 	const [selectProductQty, setSelectProductQty] = useState('');
+
+	//product options of selection
+	const [selectProductOptions, setSelectProductOptions] = React.useState([]);
 	//subtotal of current selection
 	const [selectSubtotal, setSelectSubtotal] = React.useState(0);
 
@@ -78,7 +92,7 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 		})
 		.then((response) => {
 			setCategories(response.data)
-			getCategoryIds(response.data)
+			getIdArray(response.data, 'category_id')
 			.then((result) => {
 				Axios.post("http://localhost:3500/api/product/list/category", {
 					categories: result,
@@ -97,16 +111,17 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 
 	}, [])
 
-	async function getCategoryIds(data) {
+	//helper function to generate an array of a specific property of an object
+	async function getIdArray(data, id_field) {
 		let result = []
 		for(let d of data) {
-			result.push(d.category_id)
+			result.push(d[id_field])
 		}
 		return result;
 	}
 
 
-
+	//handle product selection
 	async function handleProductSelect(id, name, price, desc, img) {
 		try {
 			setProductLoading(true)
@@ -116,14 +131,49 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 			setSelectProductPrice(price);
 			setSelectProductDesc(desc);
 			setSelectProductImg(img);
-			setSelectProductQty(1)
+			setSelectProductQty(1);
+			await getProductOptiongroups(id);
+			
 		} finally {
 			setTimeout(() => {
 				setProductLoading(false)
 			}, 450)
 		}
 	}
+	//helper function to fetch product option groups given a product id
+	async function getProductOptiongroups(id) {
+		//get option groups
+		Axios.post("http://localhost:3500/api/product/list/optiongroups", {
+			id: id,
+		})
+		.then((response) => {
+			if(response.data.length) {
+				setProductOptgroups(response.data)
+				getProductOptions(response.data)
+			}
+		})
+		.catch((err) => {
+	       	console.log("error ", err)});
+	}
+	//helper function to fetch product options given product option groups data
+	async function getProductOptions(data) {
+		console.log(data)
+		getIdArray(data, 'optgroup_id')
+			.then((result) => {
+				Axios.post("http://localhost:3500/api/product/list/options", {
+					optiongroups: result,
+				})
+				.then((response) => {
+					setProductOptions(response.data)
+					console.log(response.data)
+				})
+				.catch((err) => {
+	       			console.log("error ", err)});
+			})
 
+	}
+
+	//handle closing product drawer
 	function closeProductDrawer() {
 
 			setProductDrawer(false)
@@ -133,6 +183,8 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 			setSelectProductDesc('');
 			setSelectProductImg('');
 			setSelectProductQty('')
+			setProductOptgroups('')
+			setProductOptions('')
 	}
 
 	//Increment and decrement chosen item quantity
@@ -142,10 +194,12 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 	function handleDecQty() {
 		setSelectProductQty(selectProductQty-1);
 	}
+	//calculate subtotal amount to be added to cart
 	useEffect(()=> {
 		setSelectSubtotal(selectProductQty*selectProductPrice)
 	}, [selectProductQty]);
 
+	//handles adding a product to cart
 	function handleAddToCart() {
 		let product = {
 			productId: selectProductId,
@@ -157,6 +211,7 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 		closeProductDrawer();
 	}
 
+	//handles removing a product from cart
 	function handleRemoveFromCart(event, id) {
 
 		let tempCart = [...cart];
@@ -168,6 +223,7 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 		setCart(cleanCart);
 	}
 
+	//go to checkout
 	function handleCheckout() {
 		setStep(15)
 	}
@@ -361,6 +417,11 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 								</Typography>
 							</ListItem>
 							<Divider style={{ marginLeft: '-4%', marginRight: '-4%' }} />
+							{productOptgroups && (
+								<>
+									<CheckBoxGroupForm productOptgroups={productOptgroups} productOptions={productOptions} />
+								</>
+							)}
 							<ListItem sx={{ mt: '4px', mb: '4px' }}>
 								<Grid container spacing={2} justifyContent="center" alignItems="center">
 			                        <Grid item>

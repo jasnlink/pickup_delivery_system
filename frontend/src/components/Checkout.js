@@ -43,8 +43,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import CheckIcon from '@mui/icons-material/Check';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import KeyboardReturnIcon from '@mui/icons-material/KeyboardReturn';
 
 
 
@@ -96,28 +95,6 @@ function Checkout({ setStep, cart, setCart, orderType, orderDate, orderTime, set
 		}
 	}, [selectTipValue]);
 
-	useEffect(()=> {
-		if (cart.length === 0) {
-			return;
-		}
-
-		let tempCartGst = cartSubtotal*0.05;
-		let tempCartQst = cartSubtotal*0.0975;
-		let tempCartTip = cartSubtotal*(selectTipValue/100);
-		var tempCartTotal;
-
-		tempCartGst = (Math.round((tempCartGst + Number.EPSILON) * 100) / 100);
-		tempCartQst = (Math.round((tempCartQst + Number.EPSILON) * 100) / 100);
-		tempCartTip = (Math.round((tempCartTip + Number.EPSILON) * 100) / 100);
-		tempCartTotal = (Math.round((tempCartQst + tempCartGst + tempCartTip + (cartSubtotal*1) + Number.EPSILON) * 100) / 100);
-
-		setCartGst((tempCartGst).toFixed(2));
-		setCartQst((tempCartQst).toFixed(2));
-		setCartTip((tempCartTip).toFixed(2));
-		setCartTotal((tempCartTotal).toFixed(2))
-
-	}, [cartSubtotal]);
-
 	//Update cart count and subtotal
 	useEffect(()=> {
 
@@ -142,9 +119,30 @@ function Checkout({ setStep, cart, setCart, orderType, orderDate, orderTime, set
 			return previousValue + currentTotal;
 		}, initialValue)
 
-		tempCartSubtotal = (Math.round((tempCartSubtotal + Number.EPSILON) * 100) / 100).toFixed(2);
+		tempCartSubtotal = (Math.round((tempCartSubtotal + Number.EPSILON) * 100) / 100);
+
+		let tempCartGst = tempCartSubtotal*0.05;
+		let tempCartQst = tempCartSubtotal*0.0975;
+		var tempCartTip
+		if(selectTipValue === "other") {
+			tempCartTip = cartTip*1;
+		} else {
+			tempCartTip = tempCartSubtotal*(selectTipValue/100);
+			tempCartTip = (Math.round((tempCartTip + Number.EPSILON) * 100) / 100);
+		}
+		var tempCartTotal;
+
+		tempCartGst = (Math.round((tempCartGst + Number.EPSILON) * 100) / 100);
+		tempCartQst = (Math.round((tempCartQst + Number.EPSILON) * 100) / 100);
+		tempCartTotal = (Math.round((tempCartQst + tempCartGst + tempCartTip + tempCartSubtotal + Number.EPSILON) * 100) / 100);
+
 		setCartCount(tempCartCount);
-		setCartSubtotal(tempCartSubtotal);
+		setCartSubtotal((tempCartSubtotal).toFixed(2));
+
+		setCartGst((tempCartGst).toFixed(2));
+		setCartQst((tempCartQst).toFixed(2));
+		setCartTip((tempCartTip).toFixed(2));
+		setCartTotal((tempCartTotal).toFixed(2))
 
 		
 	}, [cart]);
@@ -246,7 +244,7 @@ function Checkout({ setStep, cart, setCart, orderType, orderDate, orderTime, set
 						              <InputAdornment position="end">
 						              	<Divider sx={{ height: 38, m: 0 }} orientation="vertical" />
 						              	<ButtonBase disabled={!inputTipValue.length} onClick={handleInputTipSubmit} sx={{ height: 38, padding: '12px 0', width: '48px', backgroundColor: '#1976d2', color: '#ffffff', outline: '1px solid #1976d2 !important', borderTopRightRadius: '4px', borderBottomRightRadius: '4px' }}>
-						              		<CheckIcon color="inherit" fontSize="medium" />
+						              		<KeyboardReturnIcon color="inherit" fontSize="medium" />
 						              	</ButtonBase>
 						                
 						              </InputAdornment>
@@ -366,7 +364,7 @@ function Checkout({ setStep, cart, setCart, orderType, orderDate, orderTime, set
 	                </ListItem>
 	                <Divider />
 	                <ListItem>
-	                    <Button variant="contained" color="primary" size="large" fullWidth>
+	                    <Button disabled={!cart.length} variant="contained" color="primary" size="large" fullWidth>
 	                        Placer la commande
 	                    </Button>
 	                </ListItem>

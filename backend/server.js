@@ -280,7 +280,7 @@ app.post('/api/store/zones', (req, res) => {
 });
 
 //fetch open and closing times from timegroups
-app.post('/api/timegroup/hours/operation', async (req, res) => {
+app.post('/api/timegroup/hours/operation', (req, res) => {
 
     const day = req.body.day;
 
@@ -305,12 +305,11 @@ app.post('/api/timegroup/hours/operation', async (req, res) => {
 
 //fetch categories given a weekday and a time
 //used to list all categories that belong in open and close times
-app.post('/api/category/list/operation', async (req, res) => {
+app.post('/api/category/list/operation', (req, res) => {
 
     const day = req.body.day;
     const time = req.body.time;
 
-    console.log('day-'+day+' time-'+time)
 
     const request =   "SELECT osd_product_categories.category_id, category_name FROM osd_timegroups INNER JOIN osd_timegroup_days ON osd_timegroups.timegroup_id = osd_timegroup_days.timegroup_id INNER JOIN osd_timegroup_categories ON osd_timegroups.timegroup_id = osd_timegroup_categories.timegroup_id INNER JOIN osd_product_categories ON osd_timegroup_categories.category_id = osd_product_categories.category_id WHERE osd_timegroup_days.timegroup_day=? AND osd_product_categories.enabled=1 AND STR_TO_DATE(?, '%H:%i') BETWEEN osd_timegroups.timegroup_from AND osd_timegroups.timegroup_to;";
     connection.query(request, [day, time], (err, result) => {
@@ -333,13 +332,15 @@ app.post('/api/category/list/operation', async (req, res) => {
 
 
 
-//fetch products given a lsit of category ids
+//fetch products given a list of category ids
 //used to list all products from given categories
 app.post('/api/product/list/category', async (req, res) => {
 
     const categories = req.body.categories;
 
-    console.log(categories)
+    if(categories.length === 0) {
+        res.json([])
+    }
 
     buildRequest()
     .then((result) => {
@@ -358,7 +359,7 @@ app.post('/api/product/list/category', async (req, res) => {
     })
 
 
-
+    //helper function to build sql requests with multiple recursive values
     async function buildRequest() {
         let result = "SELECT category_id, product_id, product_name, product_desc, product_image, product_price FROM osd_products WHERE category_id IN ("
         for(let i=0;i<categories.length;i++) {
@@ -371,10 +372,82 @@ app.post('/api/product/list/category', async (req, res) => {
             result += categories[i]+","
             
         }
-    return result;
-}
+        return result;
+    }
 });
 
+
+
+
+//fetch product option groups given a product id
+//used to list all product option groups from given product
+app.post('/api/product/list/optiongroups', (req, res) => {
+
+    const id = req.body.id;
+
+
+    const request =   "SELECT osd_optgroups.optgroup_id, optgroup_name, required, must_select_all, max_choices FROM osd_optgroups INNER JOIN osd_optgroup_products ON osd_optgroups.optgroup_id = osd_optgroup_products.optgroup_id WHERE product_id=?;";
+    connection.query(request, [id], (err, result) => {
+
+        if(err) {
+            res.status(400).send(err);
+            return;
+        }
+
+        
+        res.send(result)
+        console.log('fetching product option groups...');
+
+    })
+
+});
+
+
+
+
+//fetch product options given a list of optiongroup ids
+//used to list all product options from given optiongroups
+app.post('/api/product/list/options', async (req, res) => {
+
+    const optiongroups = req.body.optiongroups;
+
+    if(optiongroups.length === 0) {
+        res.json([])
+    }
+
+    buildRequest()
+    .then((result) => {
+        const request = result
+        connection.query(request, (err, result) => {
+
+            if(err) {
+                res.status(400).send(err);
+                return;
+            }
+
+            res.send(result)
+            console.log('fetching options in option groups...');
+
+        })
+    })
+
+
+    //helper function to build sql requests with multiple recursive values
+    async function buildRequest() {
+        let result = "SELECT option_id, optgroup_id, option_name, option_price FROM osd_options WHERE optgroup_id IN ("
+        for(let i=0;i<optiongroups.length;i++) {
+
+            if(i+1 === optiongroups.length) {
+                result += optiongroups[i]+");"
+                break;
+            }
+
+            result += optiongroups[i]+","
+            
+        }
+        return result;
+    }
+});
 
 
 
