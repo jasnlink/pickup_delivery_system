@@ -50,7 +50,9 @@ import KeyboardReturnIcon from '@mui/icons-material/KeyboardReturn';
 function Checkout({ setStep, cart, setCart, orderType, orderDate, orderTime, setOrderSubtotal }) {
 	
 	//page loading
-	let [loading, setLoading] = useState(false);
+	let [loading, setLoading] = useState(true);
+	//order display date and time
+	let [displayDate, setDisplayDate] = useState("")
 	//tip input visible
 	let [inputTip, setInputTip] = useState(false);
 	//tip select value
@@ -62,6 +64,7 @@ function Checkout({ setStep, cart, setCart, orderType, orderDate, orderTime, set
 	//cart price subtotal and item count
 	const [cartSubtotal, setCartSubtotal] = React.useState(0);
 	const [cartCount, setCartCount] = React.useState(0);
+	const [cartOptgroups, setCartOptgroups] = React.useState({});
 
 	const [cartGst, setCartGst] = React.useState(0);
 	const [cartQst, setCartQst] = React.useState(0);
@@ -69,7 +72,38 @@ function Checkout({ setStep, cart, setCart, orderType, orderDate, orderTime, set
 	const [cartTotal, setCartTotal] = React.useState(0);
 
 
-	let displayDate = DateTime.fromFormat(orderDate, 'yyyy-MM-dd').setLocale('fr').toFormat('dd MMMM');
+	useEffect(()=> {
+
+		let date = DateTime.fromFormat(orderDate, 'yyyy-MM-dd').setLocale('fr').toFormat('dd MMMM');
+		setDisplayDate(date);
+		buildCartProductOptions()
+		.then((result) => {
+			setCartOptgroups(result)
+			setTimeout(() => {
+				setLoading(false)
+			}, 500)
+		})
+
+	}, []);
+
+
+	//helper function to generate product option groups that are in the cart
+	async function buildCartProductOptions() {
+
+		let cartMap = {};
+		for(let c of cart) {
+			if(c['productOptions'].length) {
+				for(let o of c['productOptions']) {
+					if(!cartMap[o.groupId]) {
+						cartMap[o.groupId] = o.groupName;
+					}
+				}
+			}			
+		}
+
+		return cartMap;
+	}
+
 
 	function handleRemoveFromCart(event, id) {
 
@@ -115,8 +149,21 @@ function Checkout({ setStep, cart, setCart, orderType, orderDate, orderTime, set
 		}, initialValue)
 
 		let tempCartSubtotal = cart.reduce(function (previousValue, currentValue) {
-			let currentTotal = currentValue.productQty*currentValue.productPrice;
+
+			let currentTotal = 0;
+
+			if(currentValue['productOptions'].length) {
+				let optionSum = 0;
+				for(let o of currentValue['productOptions']) {
+					optionSum += o.optionPrice;
+				}
+				currentTotal = (optionSum+currentValue.productPrice)*currentValue.productQty
+			} else {
+				currentTotal = currentValue.productQty*currentValue.productPrice;
+			}
+
 			return previousValue + currentTotal;
+
 		}, initialValue)
 
 		tempCartSubtotal = (Math.round((tempCartSubtotal + Number.EPSILON) * 100) / 100);
@@ -144,7 +191,6 @@ function Checkout({ setStep, cart, setCart, orderType, orderDate, orderTime, set
 		setCartTip((tempCartTip).toFixed(2));
 		setCartTotal((tempCartTotal).toFixed(2))
 
-		
 	}, [cart]);
 
 
@@ -256,40 +302,74 @@ function Checkout({ setStep, cart, setCart, orderType, orderDate, orderTime, set
 	                )}
 	                <Divider />
 	            {cart.map((item, index) => (
-	                <ListItem key={index}>
-	                    <Grid container alignItems="center" direction="row" justifyContent="space-between">
-	                        <Grid item xs={9}>
-	                            <Grid container direction="row" alignItems="center" justifyContent="flex-start" spacing={1}>
-	                                <Grid item xs={3}>
-	                                    <Chip label={item.productQty} />
-	                                </Grid>
-	                                <Grid item xs={9}>
-	                                    <Typography variant="subtitle2" color="textPrimary">
-	                                    	{item.productName}
-	                                    </Typography>
-	                                </Grid>
-	                            </Grid>
+            	<>
+                <ListItem key={index}>
+                    <Grid container alignItems="center" direction="row" justifyContent="space-between">
+                        <Grid item xs={9}>
+                            <Grid container direction="row" alignItems="center" justifyContent="flex-start" spacing={1}>
+                                <Grid item xs={3}>
+                                    <Chip label={item.productQty} />
+                                </Grid>
+                                <Grid item xs={9}>
+                                    <Typography variant="subtitle2" color="textPrimary">
+                                    	{item.productName}
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                        <Grid item xs={3}>
+                            <Grid container justifyContent="flex-end">
+                                <Typography variant="subtitle1" color="textPrimary">
+                                    {item.productSubtotal}$
+                                </Typography>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                    <ListItemSecondaryAction>
+                        <IconButton 
+                        color="default"
+                        size="small"
+                        edge="end"
+                        onClick={(event) => handleRemoveFromCart(event, index)} 
+                        >
+                            <CloseIcon />
+                        </IconButton>
+                    </ListItemSecondaryAction>
+                </ListItem>
+                {!!item['productOptions'].length && (
+                	<>
+                	<List sx={{ mt: '-16px', pt: 0, pl: 1 }}>
+                	{Object.keys(cartOptgroups).map((keyId, i) => (
+                		<>
+                		<ListItem sx={{ pb: '2px', pt: '2px' }}>
+                		<Grid container>
+	                		<Grid item xs ={2}>
+	                        	<div></div>
 	                        </Grid>
-	                        <Grid item xs={3}>
-	                            <Grid container justifyContent="flex-end">
-	                                <Typography variant="subtitle1" color="textPrimary">
-	                                    {(item.productPrice*item.productQty).toFixed(2)}$
-	                                </Typography>
-	                            </Grid>
+	                        <Grid item xs={8}>
+		                		<Typography sx={{ pr: '8px' }} variant="body2">{cartOptgroups[keyId]+':'}</Typography> 
+			                	{item['productOptions'].map((option, index) => (
+			                		<>
+				                	{option.groupId == keyId && (
+					                	<>
+					                		<Chip sx={{ mb:'4px' ,mr: '4px' }} variant="filled" size="small" color="default" label={option.optionName} />
+					                	</>
+					                )}
+				                	</>
+			                	))}
+		                	</Grid>
+		                	<Grid item xs ={2}>
+	                        	<div></div>
 	                        </Grid>
-	                    </Grid>
-	                    <ListItemSecondaryAction>
-	                        <IconButton 
-	                        color="default"
-	                        size="small"
-	                        edge="end"
-	                        onClick={(event) => handleRemoveFromCart(event, index)} 
-	                        >
-	                            <CloseIcon />
-	                        </IconButton>
-	                    </ListItemSecondaryAction>
-	                </ListItem>
-	            ))}
+		                </Grid>
+	                	</ListItem>
+	                	</>
+                	))}
+                	</List>
+                	</>
+                )}
+                </>
+            ))}
 	            
 	                <Divider />
 	                <ListItem>

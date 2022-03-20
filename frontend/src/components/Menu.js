@@ -42,6 +42,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import './styles/Menu.css';
 
 import CheckBoxGroupForm from './Forms/CheckBoxGroupForm';
+import RadioGroupForm from './Forms/RadioGroupForm';
+import CartDrawer from './Forms/CartDrawer';
 
 
 function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
@@ -52,8 +54,7 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 	let [productLoading, setProductLoading] = useState(true);
 	//product drawer open state
 	let [productDrawer, setProductDrawer] = useState(false);
-	//cart drawer open state
-	let [cartDrawer, setCartDrawer] = useState(false);
+	
 
 	//list of categories
 	const [categories, setCategories] = useState('');
@@ -77,9 +78,7 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 	//subtotal of current selection
 	const [selectSubtotal, setSelectSubtotal] = React.useState(0);
 
-	//cart price subtotal and item count
-	const [cartSubtotal, setCartSubtotal] = React.useState(0);
-	const [cartCount, setCartCount] = React.useState(0);
+
 
 	useEffect(() => {
 
@@ -157,7 +156,6 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 	}
 	//helper function to fetch product options given product option groups data
 	async function getProductOptions(data) {
-		console.log(data)
 		getIdArray(data, 'optgroup_id')
 			.then((result) => {
 				Axios.post("http://localhost:3500/api/product/list/options", {
@@ -165,12 +163,32 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 				})
 				.then((response) => {
 					setProductOptions(response.data)
-					console.log(response.data)
 				})
 				.catch((err) => {
 	       			console.log("error ", err)});
 			})
 
+	}
+
+	//handle add product option
+	function handleAddProductOption(option) {
+		let tempOptions = [...selectProductOptions]
+		tempOptions.push(option);
+		setSelectProductOptions(tempOptions)
+	}
+	//handle removing product option
+	function handleRemoveProductOption(option) {
+		let tempOptions = [...selectProductOptions]
+		var toBeRemoved;
+		//loop through and find matching product option
+		for(let i = 0; i < tempOptions.length; i++) {
+			if(tempOptions[i].groupId === option.groupId && tempOptions[i].optionId === option.optionId) {
+				toBeRemoved = i;
+			}
+		}
+		//filter out found option
+		let cleanOptions = tempOptions.filter((item, index) => index !== toBeRemoved)
+		setSelectProductOptions(cleanOptions);
 	}
 
 	//handle closing product drawer
@@ -185,8 +203,8 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 			setSelectProductQty('')
 			setProductOptgroups('')
 			setProductOptions('')
+			setSelectProductOptions([])
 	}
-
 	//Increment and decrement chosen item quantity
 	function handleIncQty() {
 		setSelectProductQty(selectProductQty+1);
@@ -196,8 +214,23 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 	}
 	//calculate subtotal amount to be added to cart
 	useEffect(()=> {
-		setSelectSubtotal(selectProductQty*selectProductPrice)
-	}, [selectProductQty]);
+		let subtotal = 0
+
+		if(selectProductOptions.length) {
+			let sum = 0;
+			for(let o of selectProductOptions) {
+				sum += o.optionPrice
+			}
+			subtotal = (selectProductPrice+sum)*selectProductQty;
+			subtotal = (Math.round((subtotal + Number.EPSILON) * 100) / 100).toFixed(2);
+			setSelectSubtotal(subtotal)
+		} else {
+			subtotal = selectProductQty*selectProductPrice;
+			subtotal = (Math.round((subtotal + Number.EPSILON) * 100) / 100).toFixed(2);
+			setSelectSubtotal(subtotal);
+		}
+
+	}, [selectProductQty, selectProductOptions]);
 
 	//handles adding a product to cart
 	function handleAddToCart() {
@@ -206,53 +239,20 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 			productName: selectProductName,
 			productPrice: selectProductPrice,
 			productQty: selectProductQty,
+			productSubtotal: selectSubtotal,
+			productOptions: selectProductOptions,
 		};
 		setCart(cart => [...cart, product])
 		closeProductDrawer();
 	}
 
-	//handles removing a product from cart
-	function handleRemoveFromCart(event, id) {
 
-		let tempCart = [...cart];
-		let toBeRemoved = {...tempCart[id]};
-
-		//Search array for the item and filter it out from array
-		//Replace current copy of cart with new filtered array
-		let cleanCart = tempCart.filter((item, index) => index !== id);
-		setCart(cleanCart);
-	}
 
 	//go to checkout
 	function handleCheckout() {
 		setStep(15)
 	}
 
-	//Update cart count and subtotal
-	useEffect(()=> {
-
-		if (cart.length === 0) {
-			setCartCount(0);
-			setCartSubtotal(0);
-			return;
-		}
-		//inital value so no errors are thrown
-		let initialValue = 0;
-		//sum up all cart quantities
-		let tempCartCount = cart.reduce(function (previousValue, currentValue) {
-		    return previousValue + currentValue.productQty
-		}, initialValue)
-
-		let tempCartSubtotal = cart.reduce(function (previousValue, currentValue) {
-			let currentTotal = currentValue.productQty*currentValue.productPrice;
-			return previousValue + currentTotal;
-		}, initialValue)
-
-		tempCartSubtotal = (Math.round((tempCartSubtotal + Number.EPSILON) * 100) / 100).toFixed(2);
-		setCartCount(tempCartCount);
-		setCartSubtotal(tempCartSubtotal);
-
-	}, [cart]);
 
 	return (<>
 
@@ -316,83 +316,9 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 					</>
 				))}
 				</List>
-				{!!cart.length && (
-					<AppBar position="fixed" className="cart-btn-container">
-						<Toolbar>
-							<Button onClick={() => setCartDrawer(true)} variant="contained" color="primary" size="large" className="cart-btn" fullWidth>
-								Votre commande ᛫ ({cartCount})
-							</Button>
-						</Toolbar>
-					</AppBar>
-				)}
+				<CartDrawer cart={cart} setCart={cart => setCart(cart)} handleCheckout={handleCheckout} />
 			</Container>
-			<Drawer classes={{ paper: "cart-drawer", }} anchor="bottom" open={cartDrawer} onClose={() => setCartDrawer(false)}>
-            	<List>
-	                <ListItem>
-                        <Typography variant="h6">
-                            Votre commande
-                        </Typography>
-	                </ListItem>
-	                <Divider />
-	            {cart.map((item, index) => (
-	                <ListItem key={index}>
-	                    <Grid container alignItems="center" direction="row" justifyContent="space-between">
-	                        <Grid item xs={9}>
-	                            <Grid container direction="row" alignItems="center" justifyContent="flex-start" spacing={1}>
-	                                <Grid item xs={3}>
-	                                    <Chip label={item.productQty} />
-	                                </Grid>
-	                                <Grid item xs={9}>
-	                                    <Typography variant="subtitle2" color="textPrimary">
-	                                    	{item.productName}
-	                                    </Typography>
-	                                </Grid>
-	                            </Grid>
-	                        </Grid>
-	                        <Grid item xs={3}>
-	                            <Grid container justifyContent="flex-end">
-	                                <Typography variant="subtitle1" color="textPrimary">
-	                                    {(item.productPrice*item.productQty).toFixed(2)}$
-	                                </Typography>
-	                            </Grid>
-	                        </Grid>
-	                    </Grid>
-	                    <ListItemSecondaryAction>
-	                        <IconButton 
-	                        color="default"
-	                        size="small"
-	                        edge="end"
-	                        onClick={(event) => handleRemoveFromCart(event, index)} 
-	                        >
-	                            <CloseIcon />
-	                        </IconButton>
-	                    </ListItemSecondaryAction>
-	                </ListItem>
-	            ))}
-	                <Divider />
-	                <ListItem>
-	                    <Grid container alignItems="center" justifyContent="space-between">
-	                        <Grid item>
-	                            <Typography style={{ fontWeight: "bold" }} variant="subtitle1" color="textPrimary">
-	                                Sous-total
-	                            </Typography>
-	                        </Grid>
-	                        <Grid item>
-	                            <Typography style={{ fontWeight: "bold" }} variant="subtitle1" color="textPrimary">
-	                                {cartSubtotal}$
-	                            </Typography>
-	                        </Grid>
-	                    </Grid>
-	                    
-	                </ListItem>
-	                <ListItem>
-	                    <Button onClick={() => handleCheckout()} variant="contained" color="primary" size="large" fullWidth disabled={cart.length===0}>
-	                        Passer au paiement
-	                    </Button>
-	                </ListItem>
-	                </List>
-	            
-	        </Drawer>
+			
 
 			<Drawer open={productDrawer} onClose={closeProductDrawer} classes={{paper: "product-drawer"}} anchor="bottom" style={{ paddingBottom: 32 }}>
 				{productLoading && (
@@ -419,7 +345,8 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 							<Divider style={{ marginLeft: '-4%', marginRight: '-4%' }} />
 							{productOptgroups && (
 								<>
-									<CheckBoxGroupForm productOptgroups={productOptgroups} productOptions={productOptions} />
+									<RadioGroupForm productOptgroups={productOptgroups} productOptions={productOptions} handleAddProductOption={option => handleAddProductOption(option)} handleRemoveProductOption={option => handleRemoveProductOption(option)} />
+									<CheckBoxGroupForm productOptgroups={productOptgroups} productOptions={productOptions} handleAddProductOption={option => handleAddProductOption(option)} handleRemoveProductOption={option => handleRemoveProductOption(option)} />
 								</>
 							)}
 							<ListItem sx={{ mt: '4px', mb: '4px' }}>
@@ -451,7 +378,7 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 				<AppBar position="fixed" className="product-drawer-add-cart-container">
 					<Toolbar>
 						<LoadingButton onClick={handleAddToCart} variant="contained" color="primary" size="large" className="product-drawer-add-cart-btn" fullWidth>
-							Ajouter à la commande ᛫ {selectSubtotal.toFixed(2)}$
+							Ajouter à la commande ᛫ {selectSubtotal}$
 						</LoadingButton>
 					</Toolbar>
 				</AppBar>

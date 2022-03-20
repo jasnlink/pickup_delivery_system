@@ -61,10 +61,11 @@ function TimeSelectForm({ setStep, storeTimeHours, setOrderDate, setOrderTime })
 
 			setCurrentWeekday(weekday)
 			currentWeekdayRef.current = weekday
-
-			//check if store is closed by compared current time to closing time
+			console.log(weekday)
+			//check if store is closed by comparing current time to closing time
 			//if it is closed then we offset by 1 day
 			let offset = 0
+
 			if(currentRoundedTime > result) {
 				offset = 1
 				weekday = DateTime.now().setZone("America/Toronto").plus({days:1}).get('weekday')
@@ -74,6 +75,7 @@ function TimeSelectForm({ setStep, storeTimeHours, setOrderDate, setOrderTime })
 				setSelectWeekday(weekday)
 				selectWeekdayRef.current = weekday
 			}
+
 
 			Axios.post("http://localhost:3500/api/timegroup/hours/operation", {
 				day: weekday,

@@ -38,34 +38,36 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import CloseIcon from '@mui/icons-material/Close';
 
-function CheckBoxGroupForm({ productOptgroups, productOptions }) {
+function CheckBoxGroupForm({ productOptgroups, productOptions, handleAddProductOption, handleRemoveProductOption }) {
 	
 	const [checkLoading, setCheckLoading] = useState(true)
 	//checkbox group checked state
 	const [isChecked, setIsChecked] = useState({})
+	//checkbox group disabled state
 
 	useEffect(() => {
 
 		buildCheckBoxState()
 		.then((result) => {
-			console.log(result)
 			setIsChecked(result)
 			setCheckLoading(false)
 		})
 
 	}, [])
 
-
+	//helper function to build initial checkbox group state
 	async function buildCheckBoxState() {
 
 		let tempChecked = {}
 		let checkMap = {}
 
+		//find all product group options that have more than 1 max choice
+		//set all checkboxes to unchecked and not disabled
 		for(let group of productOptgroups) {
 			if(group.max_choices > 1) {
 				for(let option of productOptions) {
 					if(option.optgroup_id === group.optgroup_id) {
-						checkMap[option.option_id] = false
+						checkMap[option.option_id] = {checked: false, disabled: false}
 					}
 
 				}
@@ -76,10 +78,57 @@ function CheckBoxGroupForm({ productOptgroups, productOptions }) {
 
 	}
 
-	function handleChecked(group, id) {
+	//handle checking and unchecking boxes
+	function handleChecked(groupId, groupName, groupMax, optionId, optionName, optionPrice) {
 
+		//temp variable to hold current checkbox group state
+		//need to use spread operator to create a copy of the old object state
+		//because just updating a property inside an object state will not make react rerender checkboxes
 		let tempChecked = {...isChecked};
-		tempChecked[group][id] = !tempChecked[group][id]
+
+		//current option object to be added to cart
+		let option = {
+						groupId: groupId,
+						groupName: groupName,
+						optionId: optionId,
+						optionName: optionName,
+						optionPrice: optionPrice,
+					}
+
+		//reverse check state
+		if(tempChecked[groupId][optionId]['checked'] === false) {
+
+			tempChecked[groupId][optionId]['checked'] = true
+			handleAddProductOption(option);
+
+		} else if (tempChecked[groupId][optionId]['checked'] === true) {
+
+			tempChecked[groupId][optionId]['checked'] = false
+			handleRemoveProductOption(option);
+
+		}
+
+		//count number of boxes checked
+		let count = 0
+		for(let c in tempChecked[groupId]) {
+			if(tempChecked[groupId][c]['checked'] === true) {
+				count++;
+			}
+		}
+		//if we reached max boxes checked, disable the rest
+		if(count === groupMax) {
+			for(let c in tempChecked[groupId]) {
+				if(tempChecked[groupId][c]['checked'] === false) {
+					tempChecked[groupId][c]['disabled'] = true
+				}
+			}
+		}
+		//enable everything back if we are back to below max boxes checked
+		else if (count < groupMax) {
+			for(let c in tempChecked[groupId]) {
+				tempChecked[groupId][c]['disabled'] = false
+			}
+		}
 		setIsChecked(tempChecked)
 	}
 
@@ -114,7 +163,12 @@ function CheckBoxGroupForm({ productOptgroups, productOptions }) {
 								<ListItem key={index} disablePadding sx={{ mt: '8px', mb: '8px' }}>
 									<Grid container alignItems="center" direction="row">
 										<Grid item xs={1}>
-											<Checkbox sx={{ m: 0, p: 0 }} checked={isChecked[option.optgroup_id][option.option_id]} onChange={() => handleChecked(option.optgroup_id, option.option_id)} />
+											<Checkbox 
+												sx={{ m: 0, p: 0 }} 
+												checked={isChecked[option.optgroup_id][option.option_id]['checked']} 
+												onChange={() => handleChecked(option.optgroup_id, group.optgroup_name, group.max_choices, option.option_id, option.option_name, option.option_price)} 
+												disabled={isChecked[option.optgroup_id][option.option_id]['disabled']}
+											/>
 										</Grid>
 										<Grid item xs={9}>
 											<Typography variant="subtitle2" sx={{ pl: '12px' }} className="">
