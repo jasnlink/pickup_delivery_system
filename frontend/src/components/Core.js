@@ -57,6 +57,8 @@ function Core() {
 	const [orderDate, setOrderDate] = useState(null);
 	//order time to be delivered or collected 
 	const [orderTime, setOrderTime] = useState(null);
+	//order note
+	const [orderNote, setOrderNote] = useState('');
 	//order tip amount 
 	const [orderTip, setOrderTip] = useState(0);
 	//order GST amount 
@@ -217,6 +219,28 @@ function Core() {
 					orderDate={orderDate}
 					orderTime={orderTime}
 					setOrderSubtotal={subtotal => setOrderSubtotal(subtotal)}
+					setOrderNote={note => setOrderNote(note)}
+
+					userFirstName={userFirstName}
+					userLastName={userLastName}
+					userEmail={userEmail}
+					userPhone={userPhone}
+
+					userAddress={userAddress}
+					userCity={userCity}
+					userDistrict={userDistrict}
+					userPostalCode={userPostalCode}
+
+					setUserFirstName={first => setUserFirstName(first)}
+					setUserLastName={last => setUserLastName(last)}
+					setUserEmail={email => setUserEmail(email)}
+					setUserPhone={phone => setUserPhone(phone)}
+
+					storeName={storeName}
+					storeAddress={storeAddress}
+					storeCity={storeCity}
+					storeDistrict={storeDistrict}
+					storePostalCode={storePostalCode}
 				/>
 	      )
 	    case 21:

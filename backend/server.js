@@ -319,7 +319,6 @@ app.post('/api/category/list/operation', (req, res) => {
             return;
         }
 
-        
         res.send(result)
         console.log('fetching categories in hours of operation...');
 
@@ -386,7 +385,7 @@ app.post('/api/product/list/optiongroups', (req, res) => {
     const id = req.body.id;
 
 
-    const request =   "SELECT osd_optgroups.optgroup_id, optgroup_name, required, must_select_all, max_choices FROM osd_optgroups INNER JOIN osd_optgroup_products ON osd_optgroups.optgroup_id = osd_optgroup_products.optgroup_id WHERE product_id=?;";
+    const request =   "SELECT osd_optgroups.optgroup_id, optgroup_name, required, max_choices FROM osd_optgroups INNER JOIN osd_optgroup_products ON osd_optgroups.optgroup_id = osd_optgroup_products.optgroup_id WHERE product_id=?;";
     connection.query(request, [id], (err, result) => {
 
         if(err) {

@@ -54,7 +54,10 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 	let [productLoading, setProductLoading] = useState(true);
 	//product drawer open state
 	let [productDrawer, setProductDrawer] = useState(false);
-	
+	//radio buttons filled
+	const [radioFilled, setRadioFilled] = useState(true);
+	//checkboxes checked
+	const [checkFilled, setCheckFilled] = useState(true);
 
 	//list of categories
 	const [categories, setCategories] = useState('');
@@ -204,6 +207,8 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 			setProductOptgroups('')
 			setProductOptions('')
 			setSelectProductOptions([])
+			setRadioFilled(true)
+			setCheckFilled(true)
 	}
 	//Increment and decrement chosen item quantity
 	function handleIncQty() {
@@ -277,7 +282,7 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 				{categories.map((category, cIndex) => (
 					<>
 					<ListItem disablePadding key={cIndex} sx={{ mt: '24px' }}>
-						<ListItemText primary={<Typography variant="h4" className=".category-title">{category.category_name}</Typography>} />
+						<ListItemText primary={<Typography variant="h4" className="category-title">{category.category_name}</Typography>} />
 					</ListItem>
 					{products.map((product, pIndex) => (
 						<>
@@ -316,7 +321,9 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 					</>
 				))}
 				</List>
+
 				<CartDrawer cart={cart} setCart={cart => setCart(cart)} handleCheckout={handleCheckout} />
+
 			</Container>
 			
 
@@ -345,8 +352,20 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 							<Divider style={{ marginLeft: '-4%', marginRight: '-4%' }} />
 							{productOptgroups && (
 								<>
-									<RadioGroupForm productOptgroups={productOptgroups} productOptions={productOptions} handleAddProductOption={option => handleAddProductOption(option)} handleRemoveProductOption={option => handleRemoveProductOption(option)} />
-									<CheckBoxGroupForm productOptgroups={productOptgroups} productOptions={productOptions} handleAddProductOption={option => handleAddProductOption(option)} handleRemoveProductOption={option => handleRemoveProductOption(option)} />
+									<RadioGroupForm 
+										productOptgroups={productOptgroups} 
+										productOptions={productOptions} 
+										handleAddProductOption={option => handleAddProductOption(option)} 
+										handleRemoveProductOption={option => handleRemoveProductOption(option)} 
+										setRadioFilled={fill => setRadioFilled(fill)} />
+
+									<CheckBoxGroupForm 
+										productOptgroups={productOptgroups} 
+										productOptions={productOptions} 
+										handleAddProductOption={option => handleAddProductOption(option)} 
+										handleRemoveProductOption={option => handleRemoveProductOption(option)}
+										setCheckFilled={fill => setCheckFilled(fill)} />
+
 								</>
 							)}
 							<ListItem sx={{ mt: '4px', mb: '4px' }}>
@@ -361,7 +380,7 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 			                                <RemoveCircleIcon fontSize="inherit" />
 			                            </IconButton>
 			                        </Grid>
-			                        <Grid item>
+			                        <Grid item onClick={() => console.log(checkFilled)}>
 			                            <Typography variant="h5">{selectProductQty}</Typography>						
 			                        </Grid>
 			                        <Grid item>
@@ -373,15 +392,17 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 							</ListItem>
 						</List>
 					</Container>
+					<AppBar position="fixed" className="product-drawer-add-cart-container">
+						<Toolbar>
+							<LoadingButton onClick={handleAddToCart} variant="contained" color="primary" size="large" className="product-drawer-add-cart-btn" disabled={!radioFilled || !checkFilled} fullWidth>
+								Ajouter à la commande ᛫ {selectSubtotal}$
+							</LoadingButton>
+						</Toolbar>
+					</AppBar>
 					</>
+
 				)}
-				<AppBar position="fixed" className="product-drawer-add-cart-container">
-					<Toolbar>
-						<LoadingButton onClick={handleAddToCart} variant="contained" color="primary" size="large" className="product-drawer-add-cart-btn" fullWidth>
-							Ajouter à la commande ᛫ {selectSubtotal}$
-						</LoadingButton>
-					</Toolbar>
-				</AppBar>
+				
 			</Drawer>
 			</>
 		)}

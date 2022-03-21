@@ -39,17 +39,20 @@ import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import CloseIcon from '@mui/icons-material/Close';
 
 
-function RadioGroupForm({ productOptgroups, productOptions, handleAddProductOption, handleRemoveProductOption }) {
+function RadioGroupForm({ productOptgroups, productOptions, handleAddProductOption, handleRemoveProductOption, setRadioFilled }) {
 	
 	const [radioLoading, setRadioLoading] = useState(true)
 	//radio group checked state
 	const [radioState, setRadioState] = useState({})
+	//radio fill count to enable add to cart
+	const [radioFillCount, setRadioFillCount] = useState(0)
 	//previous radio option,
 	//so we can remove it from cart when we change to another radio
 	const [prevRadioOption, setPrevRadioOption] = useState({})
 
 
 	useEffect(() => {
+		setRadioFilled(true)
 		buildRadioState()
 		.then((result) => {
 			setRadioState(result)
@@ -61,13 +64,25 @@ function RadioGroupForm({ productOptgroups, productOptions, handleAddProductOpti
 	//helper function to build initial radio group state
 	async function buildRadioState() {
 
+		//map to contain all radio buttons
 		let radioMap = {}
+		//count number of groups to be filled
+		let count = 0
 
 		for(let group of productOptgroups) {
 			if(group.max_choices === 1) {
 				radioMap[group.optgroup_id] = '';
+				count++;
 			}
 		}
+
+		//if there are groups to be filled, this is a fail safe
+		if(count > 0) {
+			//have radios to be filled, set number of groups to be filled
+			setRadioFilled(false)
+			setRadioFillCount(count)
+		}
+		
 		return radioMap
 
 	}
@@ -104,6 +119,14 @@ function RadioGroupForm({ productOptgroups, productOptions, handleAddProductOpti
 		tempChecked[groupId] = optionId
 		setRadioState(tempChecked)
 
+		//check number of radios filled by counting how many are selected
+		let size = Object.keys(tempChecked).length;
+		//if the number of selected radios are the same as the number we need to be filled,
+		//then all radios are filled and we can add to cart
+		if(size === radioFillCount) {
+			setRadioFilled(true);
+		}
+
 	}
 
 	return (<>
@@ -126,7 +149,7 @@ function RadioGroupForm({ productOptgroups, productOptions, handleAddProductOpti
 					</ListItem>
 					<ListItem key={index} disablePadding sx={{ mb: '12px' }}>
 						<Typography variant="subtitle2" className="">
-							Faites 1 choix {group.required ? 'obligatoire' : ''}
+							Faites 1 choix {group.required ? '*obligatoire' : ''}
 						</Typography>
 					</ListItem>
 					
