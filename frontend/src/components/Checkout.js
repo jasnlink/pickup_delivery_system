@@ -34,7 +34,8 @@ import {
 	Chip,
 	ToggleButton,
 	ToggleButtonGroup,
-	ButtonBase
+	ButtonBase,
+	Alert
  } from '@mui/material';
 
 import { LoadingButton } from '@mui/lab';
@@ -49,6 +50,7 @@ import CartDisplay from './Forms/CartDisplay';
 import TipInputForm from './Forms/TipInputForm';
 import PersonalInformationForm from './Forms/PersonalInformationForm';
 import CheckoutAddressDisplay from './Forms/CheckoutAddressDisplay';
+import PaymentDrawer from './Forms/PaymentDrawer';
 
 
 function Checkout({ 
@@ -67,7 +69,9 @@ function Checkout({
 	userAddress, 
 	userCity, 
 	userDistrict, 
-	userPostalCode, 
+	userPostalCode,
+	userLat,
+	userLng,
 	setUserFirstName, 
 	setUserLastName, 
 	setUserEmail, 
@@ -76,19 +80,29 @@ function Checkout({
 	storeAddress, 
 	storeCity, 
 	storeDistrict, 
-	storePostalCode
+	storePostalCode,
+	storeLat,
+	storeLng,
+	deliveryZones
 }) {
 	
 	//page loading
 	let [loading, setLoading] = useState(true);
-	
+	//payment drawer open state
+	let [paymentDrawer, setPaymentDrawer] = useState(false);
 	//order display date and time
 	let [displayDate, setDisplayDate] = useState("")
+
+
+	const [inputNote, setInputNote] = useState("")
 
 	//cart price subtotal and item count
 	const [cartSubtotal, setCartSubtotal] = React.useState(0);
 	const [cartCount, setCartCount] = React.useState(0);
 	const [cartOptgroups, setCartOptgroups] = React.useState({});
+
+	const [cartDelivery, setCartDelivery] = React.useState(0);
+	const [cartMinimum, setCartMinimum] = React.useState(0);
 
 	const [cartGst, setCartGst] = React.useState(0);
 	const [cartQst, setCartQst] = React.useState(0);
@@ -98,18 +112,49 @@ function Checkout({
 
 	useEffect(()=> {
 
-		let date = DateTime.fromFormat(orderDate, 'yyyy-MM-dd').setLocale('fr').toFormat('dd MMMM');
-		setDisplayDate(date);
-		setTimeout(() => {
-			setLoading(false)
-		}, 500)
+		if(orderType === "Livraison") {
 
+			getCurrentZone()
+			.then((result) => {
+				setCartDelivery((result.delivery_zone_price).toFixed(2))
+				setCartMinimum((result.delivery_zone_order_min).toFixed(2))
+				let date = DateTime.fromFormat(orderDate, 'yyyy-MM-dd').setLocale('fr').toFormat('dd MMMM');
+				setDisplayDate(date);
+				addCartTotal();
+				setTimeout(() => {
+					setLoading(false)
+				}, 500)
+
+			})
+		} else {
+
+			let date = DateTime.fromFormat(orderDate, 'yyyy-MM-dd').setLocale('fr').toFormat('dd MMMM');
+			setDisplayDate(date);
+			setTimeout(() => {
+				setLoading(false)
+			}, 500)
+		}
+		
 	}, []);
 
+	async function getCurrentZone() {
+		//calculate distance between user and store with helper function
+		const distanceFromStore = distance(storeLat, storeLng, userLat, userLng, 'K');
+		var currentZone;
 
-	//Update cart count and subtotal
-	useEffect(()=> {
+		let cursor = 0
+		let i = 0;
 
+		while(cursor < distanceFromStore) {
+			cursor = deliveryZones[i]['delivery_zone_range']
+			currentZone = deliveryZones[i]
+			i++
+		}
+
+		return currentZone;
+	}
+
+	function addCartTotal() {
 		if (cart.length === 0) {
 			setCartCount(0);
 			setCartSubtotal((0).toFixed(2));
@@ -119,6 +164,8 @@ function Checkout({
 			setCartTotal((0).toFixed(2))
 			return;
 		}
+
+
 		//inital value so no errors are thrown
 		let initialValue = 0;
 		//sum up all cart quantities
@@ -132,8 +179,10 @@ function Checkout({
 
 			if(currentValue['productOptions'].length) {
 				let optionSum = 0;
-				for(let o of currentValue['productOptions']) {
-					optionSum += o.optionPrice;
+				for(let g of currentValue['productOptions']) {
+					for(let o of g['groupOptions']) {
+						optionSum += o.optionPrice;
+					}
 				}
 				currentTotal = (optionSum+currentValue.productPrice)*currentValue.productQty
 			} else {
@@ -146,37 +195,60 @@ function Checkout({
 
 		tempCartSubtotal = (Math.round((tempCartSubtotal + Number.EPSILON) * 100) / 100);
 
-		let tempCartGst = tempCartSubtotal*0.05;
-		let tempCartQst = tempCartSubtotal*0.0975;
+		var tempCartGst;
+		var tempCartQst;
 
-		/*
-		var tempCartTip
-		if(selectTipValue === "other") {
-			tempCartTip = cartTip*1;
+		if(orderType === "Livraison") {
+			tempCartGst = ((cartDelivery*1)+tempCartSubtotal)*0.05;
+			tempCartQst = ((cartDelivery*1)+tempCartSubtotal)*0.09975;
 		} else {
-			tempCartTip = tempCartSubtotal*(selectTipValue/100);
-			tempCartTip = (Math.round((tempCartTip + Number.EPSILON) * 100) / 100);
+			tempCartGst = tempCartSubtotal*0.05;
+			tempCartQst = tempCartSubtotal*0.09975;
 		}
-		*/
+		
 
 		var tempCartTotal;
 
 		tempCartGst = (Math.round((tempCartGst + Number.EPSILON) * 100) / 100);
 		tempCartQst = (Math.round((tempCartQst + Number.EPSILON) * 100) / 100);
-		//tempCartTotal = (Math.round((tempCartQst + tempCartGst + tempCartTip + tempCartSubtotal + Number.EPSILON) * 100) / 100);
-		tempCartTotal = (Math.round((tempCartQst + tempCartGst + tempCartSubtotal + Number.EPSILON) * 100) / 100);
+
+		if(orderType === "Livraison") {
+			tempCartTotal = (Math.round(((cartDelivery*1) + (cartTip*1) + tempCartQst + tempCartGst + tempCartSubtotal + Number.EPSILON) * 100) / 100);
+		} else {
+			tempCartTotal = (Math.round(((cartTip*1) + tempCartQst + tempCartGst + tempCartSubtotal + Number.EPSILON) * 100) / 100);
+		}
 
 		setCartCount(tempCartCount);
 		setCartSubtotal((tempCartSubtotal).toFixed(2));
 
 		setCartGst((tempCartGst).toFixed(2));
 		setCartQst((tempCartQst).toFixed(2));
-		//setCartTip((tempCartTip).toFixed(2));
 		setCartTotal((tempCartTotal).toFixed(2))
+	}
 
-	}, [cart]);
 
+	useEffect(()=> {
 
+		addCartTotal();
+
+	}, [cart, cartTip, cartDelivery]);
+
+	//Harversine formula to calculate distance between two points on earth
+	function distance(lat1, lon1, lat2, lon2, unit) {
+        var radlat1 = Math.PI * lat1/180
+        var radlat2 = Math.PI * lat2/180
+        var radlon1 = Math.PI * lon1/180
+        var radlon2 = Math.PI * lon2/180
+        var theta = lon1-lon2
+        var radtheta = Math.PI * theta/180
+        var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+        dist = Math.acos(dist)
+        dist = dist * 180/Math.PI
+        dist = dist * 60 * 1.1515
+        if (unit=="K") { dist = dist * 1.609344 }
+        if (unit=="N") { dist = dist * 0.8684 }
+        return dist
+	}
 
 
 	return (
@@ -203,10 +275,10 @@ function Checkout({
 		{!loading && (
 			
 			<Container maxWidth="sm" disableGutters>
+				<PaymentDrawer paymentDrawer={paymentDrawer} setPaymentDrawer={paymentDrawer => setPaymentDrawer(paymentDrawer)} />
 				<List sx={{ mt: '24px' }}>
 
 					<PersonalInformationForm
-						setOrderNote={note => setOrderNote(note)}
 						userFirstName={userFirstName}
 						userLastName={userLastName}
 						userEmail={userEmail}
@@ -245,8 +317,30 @@ function Checkout({
 	                <Divider />
 
 	                <CartDisplay cart={cart} setCart={cart => setCart(cart)} />
-	            
+	            	<ListItem sx={{ pt: '48px', pb: '24px' }}>
+						<TextField 
+							label="Ajouter une note à la commande" 
+							multiline 
+							minRows={4} 
+							value={inputNote}
+							onChange={(e) => setInputNote(e.target.value)}
+							fullWidth />
+					</ListItem>
+
+					{parseFloat(cartMinimum) > parseFloat(cartSubtotal) && (
+						<ListItem style={{display:'flex', justifyContent:'center', paddingBottom: '12px'}}>
+							<Alert variant="filled" severity="error" icon={false}>
+					        	<Typography  variant="subtitle1" sx={{ pl: '8px', pr: '8px' }}>
+					        		Minimum de {cartMinimum}$ avant frais et taxes pour cette livraison.
+					        	</Typography>
+					        </Alert>
+				        </ListItem>
+	                )}
+	                {parseFloat(cartMinimum) < parseFloat(cartSubtotal) && (
+						<TipInputForm cartSubtotal={cartSubtotal} cartTip={cartTip} setCartTip={tip => setCartTip(tip)} cartTotal={cartTotal} setCartTotal={total => setCartTotal(total)} />
+	                )}
 	                <Divider />
+		            
 	                <ListItem>
 	                    <Grid container alignItems="center" justifyContent="space-between">
 	                        <Grid item>
@@ -261,6 +355,38 @@ function Checkout({
 	                        </Grid>
 	                    </Grid>
 	                </ListItem>
+	                	<ListItem>
+		                    <Grid container alignItems="center" justifyContent="space-between">
+		                        <Grid item>
+		                            <Typography variant="subtitle1" color="textPrimary">
+		                                Pourboire
+		                            </Typography>
+		                        </Grid>
+		                        <Grid item>
+		                            <Typography variant="subtitle1" color="textPrimary">
+		                                {cartTip}$
+		                            </Typography>
+		                        </Grid>
+		                    </Grid>
+		                </ListItem>
+		            {orderType === "Livraison" && (
+		            <>
+		                <ListItem>
+		                    <Grid container alignItems="center" justifyContent="space-between">
+		                        <Grid item>
+		                            <Typography variant="subtitle1" color="textPrimary">
+		                                Frais de Livraison
+		                            </Typography>
+		                        </Grid>
+		                        <Grid item>
+		                            <Typography variant="subtitle1" color="textPrimary">
+		                                {cartDelivery === 0 ? 'Gratuit' : cartDelivery}$
+		                            </Typography>
+		                        </Grid>
+		                    </Grid>
+		                </ListItem>
+		            </>
+	            	)}
 	                <ListItem>
 	                    <Grid container alignItems="center" justifyContent="space-between">
 	                        <Grid item>
@@ -305,8 +431,13 @@ function Checkout({
 	                </ListItem>
 	                <Divider />
 	                <ListItem>
-	                    <Button disabled={!cart.length} variant="contained" color="primary" size="large" fullWidth>
-	                        Placer la commande
+	                    <Button onClick={() => setPaymentDrawer(true)} disabled={!cart.length || parseFloat(cartMinimum) > parseFloat(cartSubtotal)} variant="contained" color="primary" size="large" fullWidth>
+	                        Payer Maintenant
+	                    </Button>
+	                </ListItem>
+	                <ListItem>
+	                    <Button onClick={() => setPaymentDrawer(true)} disabled={!cart.length || parseFloat(cartMinimum) > parseFloat(cartSubtotal)} variant="outlined" color="primary" size="large" fullWidth>
+	                        Paiement sur livraison
 	                    </Button>
 	                </ListItem>
 	            </List>

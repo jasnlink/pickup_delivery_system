@@ -12,11 +12,14 @@ import {
 	InputLabel,
 	Backdrop,
 	CircularProgress,
-	Fade
+	Fade,
+	SvgIcon
  } from '@mui/material';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { LoadingButton } from '@mui/lab';
+
+import { ReactComponent as MainIcon } from './assets/noun-food-tray-3895876.svg';
 
 
 function TimeSelectForm({ setStep, storeTimeHours, setOrderDate, setOrderTime }) {
@@ -304,6 +307,9 @@ function TimeSelectForm({ setStep, storeTimeHours, setOrderDate, setOrderTime })
 				)}
 				{!loading && (
 					<>
+					<ListItem style={{display:'flex', justifyContent:'center'}}>
+						<SvgIcon component={MainIcon} sx={{ width: '138px', height: '138px' }} inheritViewBox />
+					</ListItem>
 					<ListItem style={{display:'flex', justifyContent:'center'}}>
 						<ListItemText primary={<Typography variant="h2">Pour quand?</Typography>} style={{display:'flex', justifyContent:'center'}} />
 					</ListItem>

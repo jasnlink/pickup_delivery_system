@@ -7,10 +7,14 @@ import {
 	ListItem,
 	ListItemText,
 	FormControl,
-	Input
+	Input,
+	SvgIcon
  } from '@mui/material';
 
 import { LoadingButton } from '@mui/lab';
+
+import { ReactComponent as MainIcon } from './assets/noun-online-shopping-3895961.svg';
+
 
 function LoginSubmitForm({ email, setEmail, setHash }) {
 
@@ -61,6 +65,9 @@ function LoginSubmitForm({ email, setEmail, setHash }) {
 
 	return (
 		<>
+		<ListItem style={{display:'flex', justifyContent:'center', paddingBottom: '24px'}}>
+			<SvgIcon component={MainIcon} sx={{ width: '128px', height: '128px' }} inheritViewBox />
+		</ListItem>
 		<ListItem style={{display:'flex', justifyContent:'center'}}>
 			<ListItemText primary={<Typography variant="h3" align="center">Entrez votre <span style={{fontWeight: '600'}}>courriel</span></Typography>} style={{display:'flex', justifyContent:'center'}} />
 		</ListItem>

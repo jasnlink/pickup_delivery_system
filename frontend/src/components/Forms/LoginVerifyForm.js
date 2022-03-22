@@ -7,11 +7,13 @@ import {
 	ListItem,
 	ListItemText,
 	FormControl,
-	TextField
+	TextField,
+	SvgIcon
  } from '@mui/material';
 
 import { LoadingButton } from '@mui/lab';
 
+import { ReactComponent as MainIcon } from './assets/noun-radar-4583961.svg';
 
 
 function LoginVerifyForm({ email, hash, setUserData, setUserVerified, setError }) {
@@ -92,6 +94,9 @@ function LoginVerifyForm({ email, hash, setUserData, setUserVerified, setError }
 
 	return (
 		<>
+		<ListItem style={{display:'flex', justifyContent:'center', paddingBottom: '24px'}}>
+			<SvgIcon component={MainIcon} sx={{ width: '128px', height: '128px' }} inheritViewBox />
+		</ListItem>
 		<ListItem style={{display:'flex', justifyContent:'center'}}>
 			<ListItemText primary={<Typography variant="h4" align="center">Un code de vérification à été envoyé à votre courriel, entrez le ici.</Typography>} style={{display:'flex', justifyContent:'center'}} />
 		</ListItem>

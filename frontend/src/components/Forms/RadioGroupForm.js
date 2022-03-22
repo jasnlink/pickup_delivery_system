@@ -107,10 +107,15 @@ function RadioGroupForm({ productOptgroups, productOptions, handleAddProductOpti
 						optionPrice: optionPrice,
 					};
 
-		//first remove previous option
-		handleRemoveProductOption(prevOption);
-		//then add current option
+		//add current option
 		handleAddProductOption(option);
+
+		if(Object.keys(prevOption).length) {
+			//remove previous option
+			handleRemoveProductOption(prevOption);
+		}
+		
+
 		//update to current option
 		//so that next time we call, this will be the previous option
 		setPrevRadioOption(option)

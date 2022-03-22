@@ -175,23 +175,89 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 
 	//handle add product option
 	function handleAddProductOption(option) {
+
+		//temp holding of all selected options
 		let tempOptions = [...selectProductOptions]
-		tempOptions.push(option);
+
+		let object = {
+
+							groupId: option.groupId,
+							groupName: option.groupName,
+							groupOptions: [{
+											optionId: option.optionId,
+											optionName: option.optionName,
+											optionPrice: option.optionPrice
+										}]
+						};
+		
+		//if there are already selected option groups
+		if(tempOptions.length) {
+
+			//found flag, if kept false the option group hasn't been checked before
+			let found = false;
+
+			//loop through selected options to find if current group of the option to be added already exists
+			for(let group of tempOptions) {
+				if(option.groupId === group.groupId) {
+				//group already exists in selected options, so we push the option into the group
+					let currentOption = {
+											optionId: option.optionId,
+											optionName: option.optionName,
+											optionPrice: option.optionPrice
+					}
+
+					group['groupOptions'].push(currentOption);
+					found = true;
+				}
+			}
+
+			if(found === false) {
+			//group doesnt exist in selected options, so we push the whole object, making a new group in selected options
+				tempOptions.push(object);
+			}
+
+		} else {
+		//there are not selected options already, so we just push in the new options and its group
+
+			tempOptions.push(object);
+		}
+
 		setSelectProductOptions(tempOptions)
+		console.log('adding...',tempOptions)
 	}
+
+
 	//handle removing product option
 	function handleRemoveProductOption(option) {
+
+
+		//temp holding of all selected options
 		let tempOptions = [...selectProductOptions]
-		var toBeRemoved;
-		//loop through and find matching product option
-		for(let i = 0; i < tempOptions.length; i++) {
-			if(tempOptions[i].groupId === option.groupId && tempOptions[i].optionId === option.optionId) {
-				toBeRemoved = i;
+
+		
+		var cleanOptions;
+		//loop through selected options to find group of current option to be removed
+		for(let group of tempOptions) {
+
+			if(option.groupId === group.groupId) {
+			//found matching group, so we now filter out the current option by its id
+				cleanOptions = group['groupOptions'].filter(el => el.optionId !== option.optionId)
+				//delete everything from old groups array
+				group['groupOptions'].length = 0;
+				//add in the clean options array
+				group['groupOptions'].push.apply(group['groupOptions'], cleanOptions);
+
 			}
+
 		}
-		//filter out found option
-		let cleanOptions = tempOptions.filter((item, index) => index !== toBeRemoved)
-		setSelectProductOptions(cleanOptions);
+
+		//last element filter will return empty array if last element, and if we deleted the last option we also delete the whole group object
+		if(!cleanOptions.length) {
+			tempOptions = tempOptions.filter(group => group.groupId !== option.groupId);
+		}
+	
+		setSelectProductOptions(tempOptions);
+		console.log('removing...', tempOptions)
 	}
 
 	//handle closing product drawer
@@ -220,11 +286,13 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 	//calculate subtotal amount to be added to cart
 	useEffect(()=> {
 		let subtotal = 0
-
+		//console.log(selectProductOptions)
 		if(selectProductOptions.length) {
 			let sum = 0;
-			for(let o of selectProductOptions) {
-				sum += o.optionPrice
+			for(let g of selectProductOptions) {
+				for(let o of g.groupOptions) {
+					sum += o.optionPrice
+				}
 			}
 			subtotal = (selectProductPrice+sum)*selectProductQty;
 			subtotal = (Math.round((subtotal + Number.EPSILON) * 100) / 100).toFixed(2);
@@ -380,7 +448,7 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 			                                <RemoveCircleIcon fontSize="inherit" />
 			                            </IconButton>
 			                        </Grid>
-			                        <Grid item onClick={() => console.log(checkFilled)}>
+			                        <Grid item>
 			                            <Typography variant="h5">{selectProductQty}</Typography>						
 			                        </Grid>
 			                        <Grid item>

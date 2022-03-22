@@ -59,16 +59,17 @@ function TipInputForm({ cartSubtotal, cartTip, setCartTip, cartTotal, setCartTot
 
 	useEffect(()=> {
 		if(selectTipValue !== "other") {
-			let tempCartTotal = cartTotal-cartTip;
-			let tempCartTip = cartSubtotal*(selectTipValue/100);
+
+			let tempCartTip = (cartSubtotal*1)*(selectTipValue/100);
 			tempCartTip = (Math.round((tempCartTip + Number.EPSILON) * 100) / 100);
-			tempCartTotal += tempCartTip;
 			setCartTip((tempCartTip).toFixed(2));
-			setCartTotal((tempCartTotal).toFixed(2))
-		} else {
-			return;
+
+		} else if(selectTipValue === "other" && inputTipValue !== "") {
+			let tempCartTip = Number.parseFloat(inputTipValue);
+			tempCartTip = (Math.round((tempCartTip + Number.EPSILON) * 100) / 100);
+			setCartTip((tempCartTip).toFixed(2));
 		}
-	}, [selectTipValue]);
+	}, [selectTipValue, cartSubtotal]);
 
 
 	function handleSelectTip(e) {
@@ -83,17 +84,13 @@ function TipInputForm({ cartSubtotal, cartTip, setCartTip, cartTotal, setCartTot
 
 	function handleInputTipSubmit() {
 
-		let tempCartTotal = cartTotal-cartTip;
 		let tempCartTip = Number.parseFloat(inputTipValue);
 		tempCartTip = (Math.round((tempCartTip + Number.EPSILON) * 100) / 100);
-		tempCartTotal += tempCartTip;
 		setCartTip((tempCartTip).toFixed(2));
-		setCartTotal((tempCartTotal).toFixed(2))
 		setInputTip(false)
 
 	}
 
-	//<TipInputForm cartSubtotal={cartSubtotal} cartTip={cartTip} setCartTip={tip => setCartTip(tip)} cartTotal={cartTotal} setCartTotal={total => setCartTotal(total)} />
 
 	return (
 	     

@@ -22,7 +22,8 @@ import {
 	Dialog,
 	DialogTitle,
 	DialogContent,
-	DialogActions
+	DialogActions,
+	SvgIcon
  } from '@mui/material';
 
 import { LoadingButton } from '@mui/lab';
@@ -30,6 +31,9 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ErrorIcon from '@mui/icons-material/Error';
 
 import { usePlacesWidget } from "react-google-autocomplete";
+
+import { ReactComponent as MainIcon } from './assets/noun-digital-location-4583977.svg';
+
 
 function AddressSearch({ setStep, storeLat, storeLng, deliveryZones, setUserAddress, setUserCity, setUserDistrict, setUserPostalCode, setUserLat, setUserLng }) {
 
@@ -186,7 +190,7 @@ function AddressSearch({ setStep, storeLat, storeLng, deliveryZones, setUserAddr
 	            <ArrowBackIcon />
 	          </IconButton>
 	          <Typography variant="h6" color="inherit" component="div">
-	            Livraison
+	            Rechercher votre adresse
 	          </Typography>
 	        </Toolbar>
 	      </AppBar>
@@ -208,6 +212,9 @@ function AddressSearch({ setStep, storeLat, storeLng, deliveryZones, setUserAddr
 				</Box>
 			</Dialog>
 			<List sx={{ mt: '24px' }}>
+				<ListItem style={{display:'flex', justifyContent:'center', paddingBottom: '24px'}}>
+					<SvgIcon component={MainIcon} sx={{ width: '128px', height: '128px' }} inheritViewBox />
+				</ListItem>
 				<ListItem style={{display:'flex', justifyContent:'center'}}>
 					<ListItemText primary={<Typography variant="h2">Quel adresse?</Typography>} style={{display:'flex', justifyContent:'center'}} />
 				</ListItem>

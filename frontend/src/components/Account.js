@@ -18,11 +18,13 @@ import {
 	InputLabel,
 	Button,
 	TextField,
-	Input
+	Input,
+	SvgIcon
  } from '@mui/material';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
+import { ReactComponent as MainIcon } from './assets/noun-search-3895584.svg';
 
 function Account({ setStep, userFirstName, userLastName, userEmail, userPhone, userAddress, userAddress2, userCity, userDistrict, userPostalCode }) {
 
@@ -41,6 +43,9 @@ function Account({ setStep, userFirstName, userLastName, userEmail, userPhone, u
 	    </Box>
 		<Container maxWidth='sm'>
 			<List sx={{ mt: '24px' }}>
+				<ListItem style={{display:'flex', justifyContent:'center'}}>
+					<SvgIcon component={MainIcon} sx={{ width: '108px', height: '108px' }} inheritViewBox />
+				</ListItem>
 				<ListItem>
 					<ListItemText primary={<Typography variant="h3">{userFirstName} {userLastName}</Typography>} style={{display:'flex', justifyContent:'center'}} />
 				</ListItem>

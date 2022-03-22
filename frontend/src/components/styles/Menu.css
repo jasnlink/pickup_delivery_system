@@ -103,3 +103,10 @@ body {
 	max-width: 600px;
 	margin: auto;
 }
+
+.payment-drawer {
+	min-height: 85% !important;
+	max-height: 85% !important;
+	max-width: 600px;
+	margin: auto;
+}

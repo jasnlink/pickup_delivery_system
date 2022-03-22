@@ -75,8 +75,10 @@ function CartDrawer({ cart, setCart, handleCheckout }) {
 			//add selected product options
 			if(currentValue['productOptions'].length) {
 				let optionSum = 0;
-				for(let o of currentValue['productOptions']) {
-					optionSum += o.optionPrice;
+				for(let g of currentValue['productOptions']) {
+					for(let o of g['groupOptions']) {
+						optionSum += o.optionPrice;
+					}
 				}
 				currentTotal = (optionSum+currentValue.productPrice)*currentValue.productQty
 			} else {

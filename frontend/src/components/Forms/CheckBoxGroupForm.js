@@ -111,6 +111,8 @@ function CheckBoxGroupForm({ productOptgroups, productOptions, handleAddProductO
 		let tempChecked = {...isChecked};
 		//temp number of groups of required checkboxes that are filled
 		let tempCheckCurrentFillCount = checkCurrentFillCount
+		
+
 		//current option object to be added to cart
 		let option = {
 						groupId: groupId,
@@ -119,6 +121,7 @@ function CheckBoxGroupForm({ productOptgroups, productOptions, handleAddProductO
 						optionName: optionName,
 						optionPrice: optionPrice,
 					}
+
 
 		//if the current checkbox is not checked, then set it to checked
 		//then add the selected option to cart

@@ -230,6 +230,8 @@ function Core() {
 					userCity={userCity}
 					userDistrict={userDistrict}
 					userPostalCode={userPostalCode}
+					userLat={userLat}
+					userLng={userLng}
 
 					setUserFirstName={first => setUserFirstName(first)}
 					setUserLastName={last => setUserLastName(last)}
@@ -241,6 +243,10 @@ function Core() {
 					storeCity={storeCity}
 					storeDistrict={storeDistrict}
 					storePostalCode={storePostalCode}
+					storeLat={storeLat}
+					storeLng={storeLng}
+
+					deliveryZones={deliveryZones}
 				/>
 	      )
 	    case 21:

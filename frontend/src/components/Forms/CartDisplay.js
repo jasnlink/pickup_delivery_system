@@ -44,34 +44,15 @@ function CartDisplay({ cart, setCart, handleCheckout }) {
 
 	//page loading
 	const [cartLoading, setCartLoading] = useState(true);
-	const [cartOptgroups, setCartOptgroups] = React.useState({});
 
 	useEffect(()=> {
 
-		buildCartProductOptions()
-		.then((result) => {
-			setCartOptgroups(result)
-			setCartLoading(false)
-		})
+		console.log(cart)
+		setCartLoading(false)
+
 
 	}, []);
 
-	//helper function to generate product option groups that are in the cart
-	async function buildCartProductOptions() {
-
-		let cartMap = {};
-		for(let c of cart) {
-			if(c['productOptions'].length) {
-				for(let o of c['productOptions']) {
-					if(!cartMap[o.groupId]) {
-						cartMap[o.groupId] = o.groupName;
-					}
-				}
-			}			
-		}
-
-		return cartMap;
-	}
 
 	//handles removing a product from cart
 	function handleRemoveFromCart(event, id) {
@@ -136,22 +117,21 @@ function CartDisplay({ cart, setCart, handleCheckout }) {
 	                {!!item['productOptions'].length && (
 	                	<>
 	                	<List sx={{ mt: '-16px', pt: 0, pl: 1 }}>
-	                	{Object.keys(cartOptgroups).map((keyId, i) => (
-	                		<>
 	                		<ListItem sx={{ pb: '2px', pt: '2px' }}>
 	                		<Grid container>
 		                		<Grid item xs ={2}>
 		                        	<div></div>
 		                        </Grid>
 		                        <Grid item xs={8}>
-			                		<Typography sx={{ pr: '8px' }} variant="body2">{cartOptgroups[keyId]+':'}</Typography> 
-				                	{item['productOptions'].map((option, index) => (
+				                	{item['productOptions'].map((group, index) => (
 				                		<>
-					                	{option.groupId == keyId && (
+				                		<Typography sx={{ pr: '8px' }} variant="body2">{group.groupName+':'}</Typography> 
+
+					                	{group['groupOptions'].map((option, index) => (
 						                	<>
 						                		<Chip sx={{ mt:'4px' ,mr: '4px' }} variant="filled" size="small" color="default" label={option.optionName} />
 						                	</>
-						                )}
+						                ))}
 					                	</>
 				                	))}
 			                	</Grid>
@@ -160,8 +140,7 @@ function CartDisplay({ cart, setCart, handleCheckout }) {
 		                        </Grid>
 			                </Grid>
 		                	</ListItem>
-		                	</>
-	                	))}
+
 	                	</List>
 	                	</>
 	                )}
