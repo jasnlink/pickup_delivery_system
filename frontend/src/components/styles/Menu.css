@@ -105,8 +105,16 @@ body {
 }
 
 .payment-drawer {
-	min-height: 85% !important;
 	max-height: 85% !important;
 	max-width: 600px;
 	margin: auto;
+}
+
+.credit-btn {
+	height: 56px;
+}
+
+.paypal-btn {
+
+	width: 100%;
 }

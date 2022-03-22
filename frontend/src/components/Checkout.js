@@ -260,7 +260,7 @@ function Checkout({
 	            	<ArrowBackIcon />
 	         	 </IconButton>
 	          <Typography variant="h6" color="inherit" component="div">
-	            Paiement
+	            Sommaire de commande
 	          </Typography>
 	        </Toolbar>
 	      </AppBar>
