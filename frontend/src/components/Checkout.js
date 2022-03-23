@@ -108,7 +108,6 @@ function Checkout({
 
 
 	useEffect(()=> {
-
 		if(orderType === "Livraison") {
 
 			getCurrentZone()

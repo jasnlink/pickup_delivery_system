@@ -159,17 +159,6 @@ function verifyHashOTP(user,hash,otp){
 }
 
 
-// check if user email or phone is in DB
-//  -->IF EXIST IN DB
-//      prepare OTP with hash
-//      send to Amazon SNS
-//  2nd route to verify OTP key 
-
-//  -->IF DOES NOT EXIST IN DB
-
-
-
-
 // async..await is not allowed in global scope, must use a wrapper
 async function sendOtpMail(otp, user) {
 

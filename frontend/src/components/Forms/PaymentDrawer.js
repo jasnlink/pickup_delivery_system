@@ -262,26 +262,44 @@ function PaymentDrawer({
 					                }}
 					              onApprove={(data, actions) => {
 					                    return actions.order.capture().then((details) => {
-
+					                    	//record payment
 					                        Axios.post("http://localhost:3500/api/payment/record", {
 												authId: details.id,
 												date: details.create_time,
 												source: "paypal",
 												amount: cartTotal,
-												userId: userId
+												userId: userId,
 											})
 											.then((response) => {
 
-
 												Axios.post("http://localhost:3500/api/order/place", {
+													//create new order
+													paymentAuthId: details.id,
+													paymentDate: DateTime.fromISO(details.create_time).setZone('America/Toronto').toFormat('yyyy-MM-dd HH:mm:ss')),
+													paymentSource: "paypal",
 
 													cart: cart,
+													cartSubtotal: cartSubtotal,
+													cartDelivery: cartDelivery,
+													cartTip: cartTip,
+													cartQst: cartQst,
+													cartGst: cartGst,
+													cartTotal: cartTotal,
 													orderType: orderType,
 													orderDate: orderDate,
 													orderTime: orderTime,
 													orderNote: inputNote,
 													userId: userId,
-
+													userFirstName: userFirstName,
+													userLastName: userLastName,
+													userEmail: userEmail,
+													userPhone: userPhone,
+													userAddress: userAddress,
+													userCity: userCity,
+													userDistrict: userDistrict,
+													userPostalCode: userPostalCode,
+													userLat: userLat,
+													userLng: userLng,
 
 												})
 												.then((response) => {
