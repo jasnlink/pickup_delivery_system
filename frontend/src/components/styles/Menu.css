@@ -104,14 +104,22 @@ body {
 	margin: auto;
 }
 
+.cart-drawer-close-btn {
+	z-index: 100000;
+}
+
 .payment-drawer {
 	max-height: 85% !important;
 	max-width: 600px;
 	margin: auto;
 }
 
+.payment-drawer-close-btn {
+	z-index: 100000;
+}
+
 .credit-btn {
-	height: 56px;
+	height: 50px;
 }
 
 .paypal-btn {

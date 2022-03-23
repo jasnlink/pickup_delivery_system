@@ -60,8 +60,7 @@ function Checkout({
 	orderType, 
 	orderDate, 
 	orderTime, 
-	setOrderSubtotal, 
-	setOrderNote, 
+	userId, 
 	userFirstName, 
 	userLastName, 
 	userEmail, 
@@ -93,13 +92,11 @@ function Checkout({
 	//order display date and time
 	let [displayDate, setDisplayDate] = useState("")
 
-
 	const [inputNote, setInputNote] = useState("")
 
 	//cart price subtotal and item count
 	const [cartSubtotal, setCartSubtotal] = React.useState(0);
 	const [cartCount, setCartCount] = React.useState(0);
-	const [cartOptgroups, setCartOptgroups] = React.useState({});
 
 	const [cartDelivery, setCartDelivery] = React.useState(0);
 	const [cartMinimum, setCartMinimum] = React.useState(0);
@@ -275,7 +272,39 @@ function Checkout({
 		{!loading && (
 			
 			<Container maxWidth="sm" disableGutters>
-				<PaymentDrawer paymentDrawer={paymentDrawer} setPaymentDrawer={paymentDrawer => setPaymentDrawer(paymentDrawer)} />
+				<PaymentDrawer 
+						paymentDrawer={paymentDrawer} 
+						setPaymentDrawer={paymentDrawer => setPaymentDrawer(paymentDrawer)}
+						inputNote={inputNote}
+
+						orderType={orderType}
+						orderDate={orderDate}
+						orderTime={orderTime}
+
+						cartSubtotal={cartSubtotal}
+						cartDelivery={cartDelivery}
+						cartTip={cartTip}
+						cartQst={cartQst}
+						cartGst={cartGst}
+						cartTotal={cartTotal}
+						cart={cart}
+
+						userId={userId}
+						userFirstName={userFirstName}
+						userLastName={userLastName}
+						userEmail={userEmail}
+						userPhone={userPhone}
+
+						userAddress={userAddress}
+						userCity={userCity}
+						userDistrict={userDistrict}
+						userPostalCode={userPostalCode}
+						userLat={userLat}
+						userLng={userLng}
+
+
+
+						 />
 				<List sx={{ mt: '24px' }}>
 
 					<PersonalInformationForm

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Axios from 'axios';
 import { DateTime } from "luxon";
 import * as Yup from "yup";
+import InputMask from 'react-input-mask';
+
 
 import { 	
 	Typography,
@@ -59,18 +61,151 @@ import '../styles/Menu.css';
 
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
-function PaymentDrawer({ paymentDrawer, setPaymentDrawer }) {
+function PaymentDrawer({ 
+			paymentDrawer, 
+			setPaymentDrawer, 
+			inputNote,
+			orderType,
+			orderDate,
+			orderTime,
+			cartSubtotal,
+			cartDelivery,
+			cartTip,
+			cartQst,
+			cartGst,
+			cartTotal,
+			cart,
+			userId,
+			userFirstName,
+			userLastName,
+			userEmail,
+			userPhone,
+			userAddress,
+			userCity,
+			userDistrict,
+			userPostalCode,
+			userLat,
+			userLng }) {
 
 	const [creditForm, setCreditForm] = useState(false);
+	const [isAmex, setIsAmex] = useState(false)
 
+	//input value state
+	const [inputCardName, setInputCardName] = useState('')
+	const [inputCardNumber, setInputCardNumber] = useState('')
+	const [inputCardExpiration, setInputCardExpiration] = useState('')
+	const [inputCardCvv, setInputCardCvv] = useState('')
+
+	//input validated state
+	const [cardValidated, setCardValidated] = useState(false)
+
+	//payment auth id 
+	const [paymentAuthId, setPaymentAuthId] = useState(null);
+	//payment date
+	const [paymentDate, setPaymentDate] = useState(null);
+	//payment source
+	const [paymentSource, setPaymentSource] = useState(null);
+
+
+	const nameSchema = Yup.object().shape({
+  		cardName: Yup.string().matches(/^[aA-zZ\s]+$/).required("Entrez le nom sur la carte."),
+  	});
+
+
+	//card number validation schema
+	//need to validate if its an amex card, if it is change CVV mask to 4 digits instead of 3
+	const amexSchema = Yup.object().shape({
+  		cardNumber: Yup.string().matches(/^3[47]/),
+  	});
+	//if normal visa or mastercard then validate 16 digits length
+	//if amex then validate 15 digits length
+	var cardSchema;
+	var cvvSchema;
+	if(isAmex) {
+		cardSchema = Yup.object().shape({
+			cardName: Yup.string().matches(/^[aA-zZ\s]+$/).required("Entrez le nom sur la carte."),
+	  		cardNumber: Yup.string().matches(/^[0-9]+$/).min(15).max(15).required("Entrez le numéro de carte."),
+  			cardExpiration: Yup.string().matches(/^(0[1-9]|1[0-2])\/?([0-9]{2})$/).required("Entrez la date d'expiration de la carte."),
+	  		cardCvv: Yup.string().matches(/^[0-9]+$/).min(4).max(4).required("Entrez le code CVV."),
+	  	});
+	} else {
+		cardSchema = Yup.object().shape({
+			cardName: Yup.string().matches(/^[aA-zZ\s]+$/).required("Entrez le nom sur la carte."),
+	  		cardNumber: Yup.string().matches(/^[0-9]+$/).min(16).max(16).required("Entrez le numéro de carte."),
+  			cardExpiration: Yup.string().matches(/^(0[1-9]|1[0-2])\/?([0-9]{2})$/).required("Entrez la date d'expiration de la carte."),
+	  		cardCvv: Yup.string().matches(/^[0-9]+$/).min(3).max(3).required("Entrez le code CVV."),
+	  	});
+	}
+
+  	//real time card number validation
+  	useEffect(() => {
+
+		amexSchema.validate({ cardNumber: (inputCardNumber.replace(/\s/g, '')) })
+		.then((response) => {
+			setIsAmex(true)
+		})
+		.catch((err) => {
+	       	setIsAmex(false)
+	    })
+
+
+	    cardSchema.validate({ 
+	    						cardName: inputCardName,
+	    						cardNumber: (inputCardNumber.replace(/\s/g, '')),
+	    						cardExpiration: inputCardExpiration,
+	    						cardCvv: inputCardCvv,
+
+	    					})
+		.then((response) => {
+			setCardValidated(true)
+		})
+		.catch((err) => {
+	        setCardValidated(false)
+	    })
+
+
+	}, [inputCardName, inputCardNumber, inputCardExpiration, inputCardCvv])
+
+
+  	//handle closing payment drawer, reset all to initial values
+	function handleClosePaymentDrawer() {
+
+		setPaymentDrawer(false)
+		setCreditForm(false)
+		setInputCardName('')
+		setInputCardNumber('')
+		setInputCardExpiration('')
+		setInputCardCvv('')
+
+	}
+	//handle going back from credit card form, reset all values
+	function handleCloseCreditForm() {
+
+		setCreditForm(false)
+		setInputCardName('')
+		setInputCardNumber('')
+		setInputCardExpiration('')
+		setInputCardCvv('')
+
+	}
 
 	return (
 		<>
 		
 		<Drawer classes={{ paper: "payment-drawer", }} anchor="bottom" open={paymentDrawer} onClose={() => setPaymentDrawer(false)}>
+			
 			<List>
-				<ListItem disablePadding style={{display:'flex', justifyContent:'center'}}>
-					<ListItemText primary={<Typography variant="h4">Votre paiement</Typography>} style={{display:'flex', justifyContent:'center'}} />
+				<ListItem disablePadding>
+					<Grid container alignItems="center" justifyContent="flex-start">
+						<Grid item>
+							<IconButton className="payment-drawer-close-btn" size="large" onClick={handleClosePaymentDrawer}>
+								<CloseIcon fontSize="inherit"  />
+							</IconButton>
+						</Grid>
+						<Grid item>
+							<ListItemText primary={<Typography variant="h5">Votre paiement</Typography>} />
+						</Grid>
+					</Grid>
 				</ListItem>
 				<Divider />
 				{!creditForm && (
@@ -107,11 +242,61 @@ function PaymentDrawer({ paymentDrawer, setPaymentDrawer }) {
 						</Button>
 					</ListItem>
 					<ListItem style={{ display:'flex', justifyContent:'center' }}>
-						<PayPalScriptProvider>
+						<PayPalScriptProvider options={{ 
+														"client-id": process.env.REACT_APP_PAYPAL_API_KEY, 
+														currency: 'CAD' }}>
 							<PayPalButtons
 					              style={{ layout: "horizontal", label: "pay" }} 
 					              fundingSource="paypal"
 					              className="paypal-btn"
+					              createOrder={(data, actions) => {
+					                    return actions.order.create({
+					                        purchase_units: [
+					                            {
+					                                amount: {
+					                                    value: cartTotal,
+					                                },
+					                            },
+					                        ],
+					                    });
+					                }}
+					              onApprove={(data, actions) => {
+					                    return actions.order.capture().then((details) => {
+
+					                        Axios.post("http://localhost:3500/api/payment/record", {
+												authId: details.id,
+												date: details.create_time,
+												source: "paypal",
+												amount: cartTotal,
+												userId: userId
+											})
+											.then((response) => {
+
+
+												Axios.post("http://localhost:3500/api/order/place", {
+
+													cart: cart,
+													orderType: orderType,
+													orderDate: orderDate,
+													orderTime: orderTime,
+													orderNote: inputNote,
+													userId: userId,
+
+
+												})
+												.then((response) => {
+													console.log('done')
+												})
+												.catch((err) => {
+											       	console.log("error ", err)});
+
+
+											})
+											.catch((err) => {
+										       	console.log("error ", err)});
+
+					                    });
+					                }}
 					            />
 						</PayPalScriptProvider>
 					</ListItem>
@@ -120,16 +305,9 @@ function PaymentDrawer({ paymentDrawer, setPaymentDrawer }) {
 				{!!creditForm && (
 				<>
 					<ListItem sx={{ pb: '4px' }}>
-						<Grid container alignItems="center" justifyContent="center">
-							<Grid item>
-								<IconButton edge="start" color="inherit" onClick={() => setCreditForm(false)}>
-					            	<ArrowBackIcon />
-					         	 </IconButton>
-							</Grid>
-							<Grid item>
-								<ListItemText primary={<Typography variant="h6">Payer</Typography>} style={{display:'flex', justifyContent:'center'}} />
-							</Grid>
-						</Grid>
+						<Button size="small" onClick={handleCloseCreditForm} startIcon={<ArrowBackIcon />}>
+							Retour
+						</Button>
 					</ListItem>
 					<ListItem>
 						<FormControl variant="outlined" fullWidth>
@@ -139,44 +317,67 @@ function PaymentDrawer({ paymentDrawer, setPaymentDrawer }) {
 		            			size="medium"
 		            			id="outlined-card-name"
 		            			label="Nom sur la carte"
+		            			value={inputCardName}
+		            			onChange={(e) => setInputCardName(e.target.value)}
 		            			fullWidth />
 		            			
 		            	</FormControl>
 					</ListItem>
 					<ListItem>
 						<FormControl variant="outlined" fullWidth>
-		            		<InputLabel htmlFor="outlined-firstname">Numéro de carte</InputLabel>
-		            		<OutlinedInput
-		            			sx={{ paddingRight: 0 }}
+							<InputLabel htmlFor="outlined-firstname">Numéro de carte</InputLabel>
+							<InputMask 
+								mask={isAmex ? "9999  999999  99999" : "9999  9999  9999  9999"}
+								maskChar="*"
+								placeholder="Numéro de carte"
+								sx={{ paddingRight: 0 }}
 		            			size="medium"
 		            			id="outlined-card-number"
 		            			label="Numéro de carte"
-		            			fullWidth />
-		            			
+		            			value={inputCardNumber}
+		            			onChange={(e) => setInputCardNumber(e.target.value)}
+		            			fullWidth
+								>
+								{(inputProps) =>
+  									<OutlinedInput {...inputProps}/>}
+		            		</InputMask>
 		            	</FormControl>
 					</ListItem>
 					<ListItem>
 						<FormControl variant="outlined" fullWidth>
-		            		<InputLabel htmlFor="outlined-lastname">Expiration</InputLabel>
-		            		<OutlinedInput
-		            			sx={{ paddingRight: 0 }}
+		            		<InputLabel htmlFor="outlined-expiration">Expiration MM/AA</InputLabel>
+		            		<InputMask 
+								mask="99/99" 
+								sx={{ paddingRight: 0 }}
 		            			size="medium"
 		            			id="outlined-expiration"
-		            			label="Expiration"
-		            			fullWidth />
-		            			
+		            			label="Expiration MM/AA"
+		            			value={inputCardExpiration}
+		            			onChange={(e) => setInputCardExpiration(e.target.value)}
+		            			fullWidth
+								>
+								{(inputProps) =>
+  									<OutlinedInput {...inputProps}/>}
+		            		</InputMask>	            			
 		            	</FormControl>
 					</ListItem>
 					<ListItem>
 						<FormControl variant="outlined" fullWidth>
 		            		<InputLabel htmlFor="outlined-cvv-code">CVV</InputLabel>
-		            		<OutlinedInput
-		            			sx={{ paddingRight: 0 }}
+		            		<InputMask 
+								mask={isAmex ? "9999" : "999"}
+								maskChar="*"
+								sx={{ paddingRight: 0 }}
 		            			size="medium"
 		            			id="outlined-cvv-code"
 		            			label="CVV"
-		            			fullWidth />
-		            			
+		            			value={inputCardCvv}
+		            			onChange={(e) => setInputCardCvv(e.target.value)}
+		            			fullWidth
+								>
+								{(inputProps) =>
+  									<OutlinedInput {...inputProps}/>}
+		            		</InputMask>		            			
 		            	</FormControl>
 					</ListItem>
 					<ListItem disablePadding style={{ display:'flex', justifyContent:'center', paddingTop: '8px' }}>
@@ -199,7 +400,7 @@ function PaymentDrawer({ paymentDrawer, setPaymentDrawer }) {
 						</Grid>
 					</ListItem>
 					<ListItem sx={{ pt: '12px', pb: '12px' }}>
-						<Button variant="contained" size="large" fullWidth>
+						<Button disabled={!cardValidated} variant="contained" size="large" fullWidth>
 							Placer la commande
 						</Button>
 					</ListItem>

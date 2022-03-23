@@ -31,7 +31,6 @@ const SITE = 'https://mitsuki.qbmenu.ca/';
 const PORT = process.env.PORT || 3500;
 
 
-
 //database connection info
 var connection;
 const connectionInfo = {
@@ -40,6 +39,7 @@ const connectionInfo = {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME
 };
+
 
 //secret keys declaration, to be fetched from DB
 var OTP_SECRET_KEY = null;
@@ -58,6 +58,7 @@ let transporter = nodemailer.createTransport({
       pass: process.env.SMTP_PASSWORD, // generated ethereal password
     },
 });
+
 
 //express json cors setup
 var app = express();

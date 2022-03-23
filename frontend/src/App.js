@@ -7,6 +7,7 @@ import { createTheme, ThemeProvider, responsiveFontSizes } from '@mui/material/s
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 
+
 function App() {
 
   //create responsive font size theme
@@ -15,7 +16,7 @@ function App() {
 
   return (
     <>
-      <PayPalScriptProvider options={{ "client-id": process.env.REACT_APP_PAYPAL_API_KEY }} />
+      <PayPalScriptProvider options={{ "client-id": process.env.REACT_APP_PAYPAL_API_KEY, currency: 'CAD' }} />
       <ThemeProvider theme={theme}>
         <Core />
       </ThemeProvider>

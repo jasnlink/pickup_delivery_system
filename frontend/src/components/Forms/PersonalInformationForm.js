@@ -53,9 +53,10 @@ import { ReactComponent as MainIcon } from './assets/noun-read-3895940.svg';
 
 function PersonalInformationForm({ userFirstName, userLastName, userEmail, userPhone, setUserFirstName, setUserLastName, setUserEmail, setUserPhone }) {
 
+	//info input form dialog open/close state
 	const [personalDialog, setPersonalDialog] = useState(false)
-	const [editInfo, setEditInfo] = useState(false)
 
+	//input value state
 	const [inputFirstName, setInputFirstName] = useState('')
 	const [inputLastName, setInputLastName] = useState('')
 	const [inputEmail, setInputEmail] = useState('')
@@ -70,6 +71,38 @@ function PersonalInformationForm({ userFirstName, userLastName, userEmail, userP
 		}
 
 	}, [])
+
+
+
+	//input validated state
+	const [formValidated, setFormValidated] = useState(false)
+
+	const formSchema = Yup.object().shape({
+  		firstName: Yup.string().matches(/^[aA-zZ\s]+$/).required("Entrez votre prénom."),
+  		lastName: Yup.string().matches(/^[aA-zZ\s]+$/).required("Entrez votre nom."),
+  		email: Yup.string().email().required("Entrez votre courriel."),
+  		phone: Yup.string().matches(/^[0-9]+$/).min(10).required("Entrez votre numéro de téléphone.")
+  	});
+	
+	//real time form validation
+  	useEffect(() => {
+
+	    formSchema.validate({ 
+	    						firstName: inputFirstName,
+	    						lastName: inputLastName,
+	    						email: inputEmail,
+	    						phone: inputPhone,
+
+	    					})
+		.then((response) => {
+			setFormValidated(true)
+		})
+		.catch((err) => {
+	        setFormValidated(false)
+	    })
+
+
+	}, [inputFirstName, inputLastName, inputEmail, inputPhone])
 
 
 
@@ -92,6 +125,9 @@ function PersonalInformationForm({ userFirstName, userLastName, userEmail, userP
 		setPersonalDialog(false)
 
 	}
+
+
+
 
 
 	return (
@@ -213,7 +249,7 @@ function PersonalInformationForm({ userFirstName, userLastName, userEmail, userP
 		            	</FormControl>
 					</ListItem>
 					<ListItem sx={{ pt: '12px', pb: '12px' }}>
-						<Button variant="contained" size="large" onClick={() => handlePersonalConfirm()} fullWidth>
+						<Button disabled={!formValidated} variant="contained" size="large" onClick={() => handlePersonalConfirm()} fullWidth>
 							Confirmer
 						</Button>
 					</ListItem>

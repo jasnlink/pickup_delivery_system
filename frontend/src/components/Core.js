@@ -57,8 +57,6 @@ function Core() {
 	const [orderDate, setOrderDate] = useState(null);
 	//order time to be delivered or collected 
 	const [orderTime, setOrderTime] = useState(null);
-	//order note
-	const [orderNote, setOrderNote] = useState('');
 	//order tip amount 
 	const [orderTip, setOrderTip] = useState(0);
 	//order GST amount 
@@ -218,9 +216,8 @@ function Core() {
 					orderType={orderType}
 					orderDate={orderDate}
 					orderTime={orderTime}
-					setOrderSubtotal={subtotal => setOrderSubtotal(subtotal)}
-					setOrderNote={note => setOrderNote(note)}
 
+					userId={userId}
 					userFirstName={userFirstName}
 					userLastName={userLastName}
 					userEmail={userEmail}

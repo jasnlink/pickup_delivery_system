@@ -112,10 +112,19 @@ function CartDrawer({ cart, setCart, handleCheckout }) {
 		)]}
 		<Drawer classes={{ paper: "cart-drawer", }} anchor="bottom" open={cartDrawer} onClose={() => setCartDrawer(false)}>
         	<List>
-                <ListItem>
-                    <Typography variant="h6" onClick={() => console.log(cart)}>
-                        Votre commande
-                    </Typography>
+                <ListItem disablePadding>
+					<Grid container alignItems="center" justifyContent="flex-start">
+						<Grid item>
+							<IconButton className="cart-drawer-close-btn" size="large" onClick={() => setCartDrawer(false)}>
+								<CloseIcon fontSize="inherit"  />
+							</IconButton>
+						</Grid>
+						<Grid item>
+		                    <Typography variant="h5" onClick={() => console.log(cart)}>
+		                        Votre commande
+		                    </Typography>
+	                    </Grid>
+	                </Grid>
                 </ListItem>
                 <Divider />
 
