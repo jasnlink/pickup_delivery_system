@@ -31,6 +31,7 @@ const SITE = 'https://mitsuki.qbmenu.ca/';
 const PORT = process.env.PORT || 3500;
 
 
+/*
 //database connection info
 var connection;
 const connectionInfo = {
@@ -38,6 +39,16 @@ const connectionInfo = {
     user: process.env.DB_USER, 
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME
+};
+*/
+
+//database connection info
+var connection;
+const connectionInfo = {
+    host: '127.0.0.1', 
+    user: 'admin', 
+    password: '29sGp%jYbk!GhxY',
+    database: 'order_system_db'
 };
 
 
@@ -48,6 +59,7 @@ var AWS_SECRET_ACCESS_KEY = null;
 const AWS_REGION='ca-central-1';
 
 
+/*
 // create reusable transporter object using the default SMTP transport
 let transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -56,6 +68,18 @@ let transporter = nodemailer.createTransport({
     auth: {
       user: process.env.SMTP_USER, // generated ethereal user
       pass: process.env.SMTP_PASSWORD, // generated ethereal password
+    },
+});
+*/
+
+// create reusable transporter object using the default SMTP transport
+let transporter = nodemailer.createTransport({
+    host: 'shadow.mxrouting.net',
+    port: 25,
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: 'noreply@2kfusion.com', // generated ethereal user
+      pass: 'xFe3Ehl1gB', // generated ethereal password
     },
 });
 
@@ -543,48 +567,101 @@ app.post('/api/order/paid/pickup/place', (req, res) => {
     const orderTime = req.body.orderTime;
     const orderNote = req.body.orderNote;
 
-    let userId = req.body.userId;
     const userFirstName = req.body.userFirstName;
     const userLastName = req.body.userLastName;
     const userEmail = req.body.userEmail;
     const userPhone = req.body.userPhone;
-    const userAddress = req.body.userAddress;
-    const userCity = req.body.userCity;
-    const userDistrict = req.body.userDistrict;
-    const userPostalCode = req.body.userPostalCode;
-    const userLat = req.body.userLat;
-    const userLng = req.body.userLng;
 
+    //formatted delivery date and time for insertion
     const orderDeliveryTime = orderDate+" "+orderTime;
+
+    //order id to be obtained on insertion
     var orderId;
+    //user id to be obtained from search
+    var userId;
 
-    //record new payment
-    const NewPaymentRequest =   "INSERT INTO osd_payments (payment_auth_id, payment_source, payment_status, payment_amount, payment_currency, payment_date, order_id, user_id) VALUES (?, ?, 'COMPLETED', ?, 'CAD', STR_TO_DATE(?, '%Y-%m-%d %H:%i:%s'), ?, ?);";
-    
-    //insert new pickup order
-    const request =   "INSERT INTO osd_orders (order_status, order_type, order_note, order_delivery_time, user_id) VALUES ('NEW', 'PICKUP', ?, STR_TO_DATE(?, '%Y-%m-%d %H:%i'), ? );";
-    
-    //create new user
-    const request =   "INSERT INTO osd_users (user_first_name, user_last_name, user_email, user_phone) VALUES (?,?,?,?);"
-    
-
-
-
-    //first we search for user if exists
+    //first we search if the user exists
     const searchUserRequest =   "SELECT user_id FROM osd_users WHERE user_email=?;"
-
     connection.query(searchUserRequest, [userEmail], (err, result) => {
 
         if(err) {
+            console.log('error...', err);
             res.status(400).send(err);
-            return;
+            return false;
         }
-        console.log('search if user email already exists...');
+        console.log('searching if user email already exists...');
 
 
         if(result.length) {
         //user exists, so we get the user id
-            result[0].user_id
+
+            //get user id from the found user
+            userId = result[0].user_id;
+
+            //now we update their info in case they changed it
+            //edit user
+            const editUserRequest =   "UPDATE osd_users SET user_first_name=?, user_last_name=?, user_email=?, user_phone=? WHERE user_id=?;"
+            connection.query(editUserRequest, [userFirstName, userLastName, userEmail, userPhone, userId], (err, result) => {
+
+                if(err) {
+                    console.log('error...', err);
+                    res.status(400).send(err);
+                    return false;
+                }
+
+                console.log('user found, updating user information...');
+
+                //we now have the user id, we can start inserting the order
+                //insert new pickup order
+                const newOrderRequest =   "INSERT INTO osd_orders (order_status, order_type, order_note, order_delivery_time, order_subtotal, order_tip, order_gst, order_qst, order_total, user_id) VALUES ('NEW', 'PICKUP', ?, STR_TO_DATE(?, '%Y-%m-%d %H:%i'), ?, ?, ?, ?, ?, ?);";
+                connection.query(newOrderRequest, [orderNote, orderDeliveryTime, cartSubtotal, cartTip, cartGst, cartQst, cartTotal, userId], (err, result) => {
+
+                    if(err) {
+                        console.log('error...', err);
+                        res.status(400).send(err);
+                        return false;
+                    }
+
+                    console.log('placing new order...');
+                    //get the new order id
+                    orderId = result.insertId;
+
+
+                        //record new payment
+                        const NewPaymentRequest =   "INSERT INTO osd_payments (payment_auth_id, payment_source, payment_status, payment_amount, payment_currency, payment_date, order_id, user_id) VALUES (?, ?, 'COMPLETED', ?, 'CAD', STR_TO_DATE(?, '%Y-%m-%d %H:%i:%s'), ?, ?);";
+                        connection.query(NewPaymentRequest, [paymentAuthId, paymentSource, cartTotal, paymentDate, orderId, userId], (err, result) => {
+
+                            if(err) {
+                                console.log('error...', err);
+                                res.status(400).send(err);
+                                return false;
+                            }
+
+                            console.log('recording new payment...');
+
+                            //finally insert the cart into order
+                            insertCart(cart, orderId)
+                            .then((result) => {
+
+                                if(result === true) {
+                                    res.json({status:1});
+                                    return true;
+                                }
+                                else {
+                                    return false;
+                                }
+                                
+                            })
+                            
+
+                        })
+
+
+                })
+
+
+            })
+
 
         } else {
         //user doesnt exist so we create a new user
@@ -594,21 +671,24 @@ app.post('/api/order/paid/pickup/place', (req, res) => {
             connection.query(newUserRequest, [userFirstName, userLastName, userEmail, userPhone], (err, result) => {
 
                 if(err) {
+                    console.log('error...', err);
                     res.status(400).send(err);
-                    return;
+                    return false;
                 }
 
                 console.log('user does not exist, creating new user...');
                 //get the new user id
                 userId = result.insertId;
 
+                //we now have the user id, we can start inserting the order
                 //insert new pickup order
                 const newOrderRequest =   "INSERT INTO osd_orders (order_status, order_type, order_note, order_delivery_time, order_subtotal, order_tip, order_gst, order_qst, order_total, user_id) VALUES ('NEW', 'PICKUP', ?, STR_TO_DATE(?, '%Y-%m-%d %H:%i'), ?, ?, ?, ?, ?, ?);";
                 connection.query(newOrderRequest, [orderNote, orderDeliveryTime, cartSubtotal, cartTip, cartGst, cartQst, cartTotal, userId], (err, result) => {
 
                     if(err) {
+                        console.log('error...', err);
                         res.status(400).send(err);
-                        return;
+                        return false;
                     }
 
                     console.log('placing new order...');
@@ -616,24 +696,30 @@ app.post('/api/order/paid/pickup/place', (req, res) => {
                     orderId = result.insertId;
 
 
-                        //finally record new payment
+                        //record new payment
                         const NewPaymentRequest =   "INSERT INTO osd_payments (payment_auth_id, payment_source, payment_status, payment_amount, payment_currency, payment_date, order_id, user_id) VALUES (?, ?, 'COMPLETED', ?, 'CAD', STR_TO_DATE(?, '%Y-%m-%d %H:%i:%s'), ?, ?);";
                         connection.query(NewPaymentRequest, [paymentAuthId, paymentSource, cartTotal, paymentDate, orderId, userId], (err, result) => {
 
                             if(err) {
+                                console.log('error...', err);
                                 res.status(400).send(err);
-                                return;
+                                return false;
                             }
 
                             console.log('recording new payment...');
 
-                            //insert the cart
+                            //finally insert the cart into order
                             insertCart(cart, orderId)
                             .then((result) => {
 
-                                res.json({status:1});
-                                return;
-
+                                if(result === true) {
+                                    res.json({status:1});
+                                    return true;
+                                }
+                                else {
+                                    return false;
+                                }
+                                
                             })
                             
 
@@ -645,10 +731,7 @@ app.post('/api/order/paid/pickup/place', (req, res) => {
 
             })
         }
-       
-
     })
-
 
 
     //helper function to insert cart items into the order
@@ -663,10 +746,11 @@ app.post('/api/order/paid/pickup/place', (req, res) => {
 
             //insert each item in cart
             let insertRequest = "INSERT INTO osd_orders_in (order_id, product_id, quantity) VALUES (?, ?, ?);"
-            connection.query(insertRequest, [orderId, product.productId, productQty], (err, result) => {
+            connection.query(insertRequest, [orderId, product.productId, product.productQty], (err, result) => {
                 if(err) {
+                    console.log('error...', err);
                     res.status(400).send(err);
-                    return;
+                    return false;
                 }
                 console.log('inserting new item in order...');
                 
@@ -679,14 +763,15 @@ app.post('/api/order/paid/pickup/place', (req, res) => {
 
                     //loop through the product option groups
                     return Promise.all(product['productOptions'].map((group) => {
-
+                        console.log(group)
 
                         //insert option group for that order_in row
                         insertRequest = "INSERT INTO osd_order_in_optgroups (order_in_id, optgroup_id) VALUES (?, ?);"
-                        connection.query(insertRequest, [orderInId, , group.groupId], (err, result) => {
+                        connection.query(insertRequest, [orderInId, group.groupId], (err, result) => {
                             if(err) {
+                                console.log('error...', err);
                                 res.status(400).send(err);
-                                return;
+                                return false;
                             }
                             console.log('inserting new option group in order...');
                             orderInOptgroupId = result.insertId;
@@ -696,7 +781,7 @@ app.post('/api/order/paid/pickup/place', (req, res) => {
 
                                 //insert option for that optgroup row
                                 insertRequest = "INSERT INTO osd_order_in_options (order_in_optgroup_id, option_id) VALUES (?, ?);"
-                                connection.query(insertRequest, [orderInOptgroupId, , option.optionId], (err, result) => {
+                                connection.query(insertRequest, [orderInOptgroupId, option.optionId], (err, result) => {
                                     if(err) {
                                         res.status(400).send(err);
                                         return;
@@ -714,7 +799,7 @@ app.post('/api/order/paid/pickup/place', (req, res) => {
 
 
                 } else {
-                //no product options to be added, so we return success
+                //no product options to be added, so we return
                     return true;
                 }
 
@@ -726,18 +811,20 @@ app.post('/api/order/paid/pickup/place', (req, res) => {
             console.log('done!', result)
             return true;
         })
+        .catch(console.error);
 
     }
+
 
 });
 
 
-//place a delivery order
-app.post('/api/order/delivery/place', (req, res) => {
+//place a paid delivery order
+app.post('/api/order/paid/delivery/place', (req, res) => {
 
-   const authId = req.body.authId;
-    const date = req.body.date;
-    const source = req.body.source;
+    const paymentAuthId = req.body.paymentAuthId;
+    const paymentDate = req.body.paymentDate;
+    const paymentSource = req.body.paymentSource;
 
     const cart = req.body.cart;
     const cartSubtotal = req.body.cartSubtotal;
@@ -764,26 +851,249 @@ app.post('/api/order/delivery/place', (req, res) => {
     const userLat = req.body.userLat;
     const userLng = req.body.userLng;
 
-    //record new payment
-    const request =   "INSERT INTO osd_payments (payment_auth_id, payment_source, payment_status, payment_amount, payment_currency, payment_date);";
-    //insert new order
-    const request =   "INSERT INTO osd_orders (order_status, order_type, order_note, order_delivery_time, user_id);";
-    //create new user
-    const request =   "INSERT INTO osd_users (user_first_name, user_last_name, user_email, user_phone, user_address, user_city, user_district, user_postal_code, user_lat, user_lng);"
 
-    connection.query(request, [id], (err, result) => {
+    //formatted delivery date and time for insertion
+    const orderDeliveryTime = orderDate+" "+orderTime;
+
+    //order id to be obtained on insertion
+    var orderId;
+
+
+
+    //first we search if the user exists
+    const searchUserRequest =   "SELECT user_id FROM osd_users WHERE user_email=?;"
+    connection.query(searchUserRequest, [userEmail], (err, result) => {
 
         if(err) {
+            console.log('error...', err);
             res.status(400).send(err);
-            return;
+            return false;
         }
+        console.log('searching if user email already exists...');
 
-        
-        res.send(result)
-        console.log('fetching product option groups...');
 
+        if(result.length) {
+        //user exists, so we get the user id
+
+            //get user id from the found user
+            userId = result[0].user_id;
+
+            //now we update their info in case they changed it
+            //edit user
+            const editUserRequest =   "UPDATE osd_users SET user_first_name=?, user_last_name=?, user_email=?, user_phone=?, user_address=?, user_city=?, user_district=?, user_postal_code=?, user_lat=?, user_lng=? WHERE user_id=?;"
+            connection.query(editUserRequest, [userFirstName, userLastName, userEmail, userPhone, userAddress, userCity, userDistrict, userPostalCode, userLat, userLng, userId], (err, result) => {
+
+                if(err) {
+                    console.log('error...', err);
+                    res.status(400).send(err);
+                    return false;
+                }
+
+                console.log('user found, updating user information...');
+
+                //we now have the user id, we can start inserting the order
+                //insert new paid delivery order
+                const newOrderRequest =   "INSERT INTO osd_orders (order_status, order_type, order_note, order_delivery_time, order_subtotal, order_tip, order_gst, order_qst, order_total, user_id) VALUES ('NEW', 'DELIVERY', ?, STR_TO_DATE(?, '%Y-%m-%d %H:%i'), ?, ?, ?, ?, ?, ?);";
+                connection.query(newOrderRequest, [orderNote, orderDeliveryTime, cartSubtotal, cartTip, cartGst, cartQst, cartTotal, userId], (err, result) => {
+
+                    if(err) {
+                        console.log('error...', err);
+                        res.status(400).send(err);
+                        return false;
+                    }
+
+                    console.log('placing new order...');
+                    //get the new order id
+                    orderId = result.insertId;
+
+
+                        //record new payment
+                        const NewPaymentRequest =   "INSERT INTO osd_payments (payment_auth_id, payment_source, payment_status, payment_amount, payment_currency, payment_date, order_id, user_id) VALUES (?, ?, 'COMPLETED', ?, 'CAD', STR_TO_DATE(?, '%Y-%m-%d %H:%i:%s'), ?, ?);";
+                        connection.query(NewPaymentRequest, [paymentAuthId, paymentSource, cartTotal, paymentDate, orderId, userId], (err, result) => {
+
+                            if(err) {
+                                console.log('error...', err);
+                                res.status(400).send(err);
+                                return false;
+                            }
+
+                            console.log('recording new payment...');
+
+                            //finally insert the cart into order
+                            insertCart(cart, orderId)
+                            .then((result) => {
+
+                                if(result === true) {
+                                    res.json({status:1});
+                                    return true;
+                                }
+                                else {
+                                    return false;
+                                }
+                                
+                            })
+                            
+
+                        })
+
+
+                })
+
+            })
+
+
+        } else {
+        //user doesnt exist so we create a new user
+
+            //create new user
+            const newUserRequest =   "INSERT INTO osd_users (user_first_name, user_last_name, user_email, user_phone, user_address, user_city, user_district, user_postal_code, user_lat, user_lng) VALUES (?,?,?,?,?,?,?,?,?,?);"
+            connection.query(newUserRequest, [userFirstName, userLastName, userEmail, userPhone, userAddress, userCity, userDistrict, userPostalCode, userLat, userLng], (err, result) => {
+
+                if(err) {
+                    console.log('error...', err);
+                    res.status(400).send(err);
+                    return false;
+                }
+
+                console.log('user does not exist, creating new user...');
+                //get the new user id
+                userId = result.insertId;
+
+                //we now have the user id, we can start inserting the order
+                //insert new paid delivery order
+                const newOrderRequest =   "INSERT INTO osd_orders (order_status, order_type, order_note, order_delivery_time, order_subtotal, order_tip, order_gst, order_qst, order_total, user_id) VALUES ('NEW', 'DELIVERY', ?, STR_TO_DATE(?, '%Y-%m-%d %H:%i'), ?, ?, ?, ?, ?, ?);";
+                connection.query(newOrderRequest, [orderNote, orderDeliveryTime, cartSubtotal, cartTip, cartGst, cartQst, cartTotal, userId], (err, result) => {
+
+                    if(err) {
+                        console.log('error...', err);
+                        res.status(400).send(err);
+                        return false;
+                    }
+
+                    console.log('placing new order...');
+                    //get the new order id
+                    orderId = result.insertId;
+
+
+                        //record new payment
+                        const NewPaymentRequest =   "INSERT INTO osd_payments (payment_auth_id, payment_source, payment_status, payment_amount, payment_currency, payment_date, order_id, user_id) VALUES (?, ?, 'COMPLETED', ?, 'CAD', STR_TO_DATE(?, '%Y-%m-%d %H:%i:%s'), ?, ?);";
+                        connection.query(NewPaymentRequest, [paymentAuthId, paymentSource, cartTotal, paymentDate, orderId, userId], (err, result) => {
+
+                            if(err) {
+                                console.log('error...', err);
+                                res.status(400).send(err);
+                                return false;
+                            }
+
+                            console.log('recording new payment...');
+
+                            //finally insert the cart into order
+                            insertCart(cart, orderId)
+                            .then((result) => {
+
+                                if(result === true) {
+                                    res.json({status:1});
+                                    return true;
+                                }
+                                else {
+                                    return false;
+                                }
+                                
+                            })
+                            
+
+                        })
+
+
+                })
+
+
+            })
+        }
     })
 
+
+    //helper function to insert cart items into the order
+    async function insertCart(cart, orderId) {
+
+        var orderInId;
+        var orderInOptgroupId;
+
+
+        //loop through the cart
+        Promise.all(cart.map((product) => {
+
+            //insert each item in cart
+            let insertRequest = "INSERT INTO osd_orders_in (order_id, product_id, quantity) VALUES (?, ?, ?);"
+            connection.query(insertRequest, [orderId, product.productId, product.productQty], (err, result) => {
+                if(err) {
+                    console.log('error...', err);
+                    res.status(400).send(err);
+                    return false;
+                }
+                console.log('inserting new item in order...');
+                
+
+                //check if there are product options to be added
+                if(product['productOptions'].length) {
+
+                    //get last inserted order_in_id to be used for next request
+                    orderInId = result.insertId;
+
+                    //loop through the product option groups
+                    return Promise.all(product['productOptions'].map((group) => {
+
+
+                        //insert option group for that order_in row
+                        insertRequest = "INSERT INTO osd_order_in_optgroups (order_in_id, optgroup_id) VALUES (?, ?);"
+                        connection.query(insertRequest, [orderInId, group.groupId], (err, result) => {
+                            if(err) {
+                                console.log('error...', err);
+                                res.status(400).send(err);
+                                return false;
+                            }
+                            console.log('inserting new option group in order...');
+                            orderInOptgroupId = result.insertId;
+
+                            //loop through the product options themselves
+                            return Promise.all(group['groupOptions'].map((option) => {
+
+                                //insert option for that optgroup row
+                                insertRequest = "INSERT INTO osd_order_in_options (order_in_optgroup_id, option_id) VALUES (?, ?);"
+                                connection.query(insertRequest, [orderInOptgroupId, option.optionId], (err, result) => {
+                                    if(err) {
+                                        console.log('error...', err);
+                                        res.status(400).send(err);
+                                        return false;
+                                    }
+                                    console.log('inserting new option in order option group...');
+                                    //end of promise
+                                    return true;
+                                })
+
+                            }))//3rd level promise
+
+                        })
+
+                    }))//2nd level promise
+
+
+                } else {
+                //no product options to be added, so we return
+                    return true;
+                }
+
+            })
+
+        }))//1st level promise
+        .then((result) => {
+        //once all promises are done
+            console.log('done!', result)
+            return true;
+        })
+        .catch(console.error);
+
+    }
 
 });
 

@@ -4,6 +4,8 @@ import { DateTime } from "luxon";
 import * as Yup from "yup";
 import InputMask from 'react-input-mask';
 
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+
 
 import { 	
 	Typography,
@@ -59,7 +61,6 @@ import { ReactComponent as SecureIcon } from './assets/noun-secure-3711283.svg';
 
 import '../styles/Menu.css';
 
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 function PaymentDrawer({ 
 			paymentDrawer, 
@@ -86,6 +87,20 @@ function PaymentDrawer({
 			userPostalCode,
 			userLat,
 			userLng }) {
+
+
+
+	//payment drawer loading
+	let [paymentDrawerLoading, setPaymentDrawerLoading] = useState(true);
+
+
+  	useEffect(() => {
+
+  		setPaymentDrawerLoading(false);
+
+	}, [])	
+
+
 
 	const [creditForm, setCreditForm] = useState(false);
 	const [isAmex, setIsAmex] = useState(false)
@@ -194,6 +209,13 @@ function PaymentDrawer({
 		
 		<Drawer classes={{ paper: "payment-drawer", }} anchor="bottom" open={paymentDrawer} onClose={() => setPaymentDrawer(false)}>
 			
+		{paymentDrawerLoading && (
+			<Fade in={paymentDrawerLoading} sx={{ color: '#000' }} unmountOnExit>
+				<CircularProgress size={64} style={{position: 'fixed', top: '50%', left:'50%', marginTop: '-32px', marginLeft: '-32px'}} color="inherit" />
+			</Fade>
+		)}
+		{!paymentDrawerLoading && (
+
 			<List>
 				<ListItem disablePadding>
 					<Grid container alignItems="center" justifyContent="flex-start">
@@ -202,7 +224,7 @@ function PaymentDrawer({
 								<CloseIcon fontSize="inherit"  />
 							</IconButton>
 						</Grid>
-						<Grid item>
+						<Grid item onClick={() => console.log(cart[0]['productOptions'][0]['groupId'])}>
 							<ListItemText primary={<Typography variant="h5">Votre paiement</Typography>} />
 						</Grid>
 					</Grid>
@@ -243,7 +265,8 @@ function PaymentDrawer({
 					</ListItem>
 					<ListItem style={{ display:'flex', justifyContent:'center' }}>
 						<PayPalScriptProvider options={{ 
-														"client-id": process.env.REACT_APP_PAYPAL_API_KEY, 
+														//"client-id": process.env.REACT_APP_PAYPAL_API_KEY,
+														"client-id": 'AR2qxEkod_ECVuOYG1bqm70SQ6kkIv4FKpPh2pTR6cVl0JyA_QyJdbASGExi9yVfDR8z3Sf4fmUHKfi5', 
 														currency: 'CAD' }}>
 							<PayPalButtons
 					              style={{ layout: "horizontal", label: "pay" }} 
@@ -262,21 +285,15 @@ function PaymentDrawer({
 					                }}
 					              onApprove={(data, actions) => {
 					                    return actions.order.capture().then((details) => {
-					                    	//record payment
-					                        Axios.post("http://localhost:3500/api/payment/record", {
-												authId: details.id,
-												date: details.create_time,
-												source: "paypal",
-												amount: cartTotal,
-												userId: userId,
-											})
-											.then((response) => {
+					                    	
+					                    	if(orderType === "Livraison") {
+					                    	//delivery order
 
-												Axios.post("http://localhost:3500/api/order/place", {
+					                    		Axios.post("http://localhost:3500/api/order/paid/delivery/place", {
 													//create new order
 													paymentAuthId: details.id,
-													paymentDate: DateTime.fromISO(details.create_time).setZone('America/Toronto').toFormat('yyyy-MM-dd HH:mm:ss')),
-													paymentSource: "paypal",
+													paymentDate: DateTime.fromISO(details.create_time).setZone('America/Toronto').toFormat('yyyy-MM-dd HH:mm:ss'),
+													paymentSource: "PAYPAL",
 
 													cart: cart,
 													cartSubtotal: cartSubtotal,
@@ -303,15 +320,49 @@ function PaymentDrawer({
 
 												})
 												.then((response) => {
-													console.log('done')
+													console.log('done', response)
 												})
 												.catch((err) => {
 											       	console.log("error ", err)});
 
 
-											})
-											.catch((err) => {
-										       	console.log("error ", err)});
+					                    	} else {
+					                    	//pickup order
+
+					                    		Axios.post("http://localhost:3500/api/order/paid/pickup/place", {
+
+													//create new order
+													paymentAuthId: details.id,
+													paymentDate: DateTime.fromISO(details.create_time).setZone('America/Toronto').toFormat('yyyy-MM-dd HH:mm:ss'),
+													paymentSource: "PAYPAL",
+
+													cart: cart,
+													cartSubtotal: cartSubtotal,
+													cartDelivery: cartDelivery,
+													cartTip: cartTip,
+													cartQst: cartQst,
+													cartGst: cartGst,
+													cartTotal: cartTotal,
+													orderType: orderType,
+													orderDate: orderDate,
+													orderTime: orderTime,
+													orderNote: inputNote,
+													userId: userId,
+													userFirstName: userFirstName,
+													userLastName: userLastName,
+													userEmail: userEmail,
+													userPhone: userPhone,
+
+												})
+												.then((response) => {
+													console.log('done', response)
+												})
+												.catch((err) => {
+											       	console.log("error ", err)});
+
+
+					                    	}
+																							
 
 					                    });
 					                }}
@@ -425,6 +476,7 @@ function PaymentDrawer({
 				</>
 				)}
 			</List>
+		)}
 		</Drawer>
 		</>
 	)
