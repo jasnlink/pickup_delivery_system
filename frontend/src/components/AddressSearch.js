@@ -37,24 +37,9 @@ import { ReactComponent as MainIcon } from './assets/noun-digital-location-45839
 
 function AddressSearch({ setStep, storeLat, storeLng, deliveryZones, setUserAddress, setUserCity, setUserDistrict, setUserPostalCode, setUserLat, setUserLng }) {
 
-/*
 	//google places autocomplete ref used by search input
 	const { ref: autoCompleteRef } = usePlacesWidget({
 	    apiKey: process.env.REACT_APP_GOOGLE_API_KEY,
-	    onPlaceSelected: (place, inputRef, autocomplete) => handlePlaceSelected(place),
-	    options: {
-	      componentRestrictions: { country: ["ca"] },
-	      fields: ["formatted_address","address_components","geometry"],
-	      types: ["address"],
-	    },
-	    language: "fr-CA",
-	    libraries: ["places","geometry"],
-	  });
-*/
-
-	//google places autocomplete ref used by search input
-	const { ref: autoCompleteRef } = usePlacesWidget({
-	    apiKey: 'AIzaSyA4I5APOf8GJC9hSLyx270OL5hOwj2iajU',
 	    onPlaceSelected: (place, inputRef, autocomplete) => handlePlaceSelected(place),
 	    options: {
 	      componentRestrictions: { country: ["ca"] },

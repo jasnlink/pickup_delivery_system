@@ -16,7 +16,7 @@ function App() {
 
   return (
     <>
-      <PayPalScriptProvider options={{ "client-id": 'AR2qxEkod_ECVuOYG1bqm70SQ6kkIv4FKpPh2pTR6cVl0JyA_QyJdbASGExi9yVfDR8z3Sf4fmUHKfi5', currency: 'CAD' }} />
+      <PayPalScriptProvider options={{ "client-id": process.env.REACT_APP_PAYPAL_API_KEY, currency: 'CAD' }} />
       <ThemeProvider theme={theme}>
         <Core />
       </ThemeProvider>

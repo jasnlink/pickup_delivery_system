@@ -63,8 +63,11 @@ import '../styles/Menu.css';
 
 
 function PaymentDrawer({ 
+			setStep,
 			paymentDrawer, 
 			setPaymentDrawer, 
+			paymentError,
+			setPaymentError,
 			inputNote,
 			orderType,
 			orderDate,
@@ -91,8 +94,7 @@ function PaymentDrawer({
 
 
 	//payment drawer loading
-	let [paymentDrawerLoading, setPaymentDrawerLoading] = useState(true);
-
+	const [paymentDrawerLoading, setPaymentDrawerLoading] = useState(true);
 
   	useEffect(() => {
 
@@ -265,8 +267,7 @@ function PaymentDrawer({
 					</ListItem>
 					<ListItem style={{ display:'flex', justifyContent:'center' }}>
 						<PayPalScriptProvider options={{ 
-														//"client-id": process.env.REACT_APP_PAYPAL_API_KEY,
-														"client-id": 'AR2qxEkod_ECVuOYG1bqm70SQ6kkIv4FKpPh2pTR6cVl0JyA_QyJdbASGExi9yVfDR8z3Sf4fmUHKfi5', 
+														"client-id": process.env.REACT_APP_PAYPAL_API_KEY,
 														currency: 'CAD' }}>
 							<PayPalButtons
 					              style={{ layout: "horizontal", label: "pay" }} 
@@ -283,6 +284,11 @@ function PaymentDrawer({
 					                        ],
 					                    });
 					                }}
+					              onError={(err) => {
+
+					              	setPaymentError(true)
+
+					              }}
 					              onApprove={(data, actions) => {
 					                    return actions.order.capture().then((details) => {
 					                    	
@@ -320,7 +326,9 @@ function PaymentDrawer({
 
 												})
 												.then((response) => {
-													console.log('done', response)
+												//order successfully placed, move to order status page
+													console.log(response);
+													setStep(16);
 												})
 												.catch((err) => {
 											       	console.log("error ", err)});
@@ -355,7 +363,9 @@ function PaymentDrawer({
 
 												})
 												.then((response) => {
-													console.log('done', response)
+												//order successfully placed, move to order status page
+													console.log(response);
+													setStep(16)
 												})
 												.catch((err) => {
 											       	console.log("error ", err)});
@@ -366,6 +376,8 @@ function PaymentDrawer({
 
 					                    });
 					                }}
+
+
 					            />
 						</PayPalScriptProvider>
 					</ListItem>

@@ -10,6 +10,7 @@ import Login from './Login';
 import AddressSearch from './AddressSearch'
 import Menu from './Menu'
 import Checkout from './Checkout'
+import OrderStatus from './OrderStatus'
 
 function Core() {
 
@@ -244,6 +245,13 @@ function Core() {
 					storeLng={storeLng}
 
 					deliveryZones={deliveryZones}
+				/>
+	      )
+	    case 16:
+	    return (
+				<OrderStatus 
+
+
 				/>
 	      )
 	    case 21:

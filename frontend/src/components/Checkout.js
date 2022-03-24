@@ -35,7 +35,11 @@ import {
 	ToggleButton,
 	ToggleButtonGroup,
 	ButtonBase,
-	Alert
+	Alert,
+	Dialog,
+	DialogTitle,
+	DialogActions,
+	DialogContent
  } from '@mui/material';
 
 import { LoadingButton } from '@mui/lab';
@@ -45,6 +49,7 @@ import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import KeyboardReturnIcon from '@mui/icons-material/KeyboardReturn';
+import ErrorIcon from '@mui/icons-material/Error';
 
 import CartDisplay from './Forms/CartDisplay';
 import TipInputForm from './Forms/TipInputForm';
@@ -86,9 +91,11 @@ function Checkout({
 }) {
 	
 	//page loading
-	let [loading, setLoading] = useState(true);
+	const [loading, setLoading] = useState(true);
 	//payment drawer open state
-	let [paymentDrawer, setPaymentDrawer] = useState(false);
+	const [paymentDrawer, setPaymentDrawer] = useState(false);
+	//payment error
+	const [paymentError, setPaymentError] = useState(false);
 	//order display date and time
 	let [displayDate, setDisplayDate] = useState("")
 
@@ -261,6 +268,21 @@ function Checkout({
 	        </Toolbar>
 	      </AppBar>
 	    </Box>
+	    <Dialog open={paymentError} maxWidth="xs" fullWidth onClose={() => setPaymentError(false)}>
+			<Box style={{ padding: '16px 8px' }}>
+				<DialogTitle style={{display:'flex', justifyContent:'center', paddingBottom: 24}}>
+					<ErrorIcon color="error" style={{fontSize:108}} />
+				</DialogTitle>
+				<DialogContent style={{display:'flex', justifyContent:'center'}}>
+					<Typography align="center" variant="h4">Votre paiement a échoué. Une erreur s'est produite.</Typography>
+				</DialogContent>
+				<DialogActions style={{display:'flex', justifyContent:'center', paddingTop: 8}}>
+					<Button variant="contained" size="large" fullWidth onClick={() => setPaymentError(false)}>
+						OK
+					</Button>
+				</DialogActions>
+			</Box>
+		</Dialog>
 	    {loading && (
 	    	
 			<Fade in={loading} sx={{ color: '#000' }} unmountOnExit>
@@ -272,8 +294,11 @@ function Checkout({
 			
 			<Container maxWidth="sm" disableGutters>
 				<PaymentDrawer 
+						setStep={(step) => setStep(step)}
 						paymentDrawer={paymentDrawer} 
 						setPaymentDrawer={paymentDrawer => setPaymentDrawer(paymentDrawer)}
+						paymentError={paymentError}
+						setPaymentError={error => setPaymentError(error)}
 						inputNote={inputNote}
 
 						orderType={orderType}

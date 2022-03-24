@@ -31,7 +31,6 @@ const SITE = 'https://mitsuki.qbmenu.ca/';
 const PORT = process.env.PORT || 3500;
 
 
-/*
 //database connection info
 var connection;
 const connectionInfo = {
@@ -40,16 +39,7 @@ const connectionInfo = {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME
 };
-*/
 
-//database connection info
-var connection;
-const connectionInfo = {
-    host: '127.0.0.1', 
-    user: 'admin', 
-    password: '29sGp%jYbk!GhxY',
-    database: 'order_system_db'
-};
 
 
 //secret keys declaration, to be fetched from DB
@@ -59,7 +49,6 @@ var AWS_SECRET_ACCESS_KEY = null;
 const AWS_REGION='ca-central-1';
 
 
-/*
 // create reusable transporter object using the default SMTP transport
 let transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -68,18 +57,6 @@ let transporter = nodemailer.createTransport({
     auth: {
       user: process.env.SMTP_USER, // generated ethereal user
       pass: process.env.SMTP_PASSWORD, // generated ethereal password
-    },
-});
-*/
-
-// create reusable transporter object using the default SMTP transport
-let transporter = nodemailer.createTransport({
-    host: 'shadow.mxrouting.net',
-    port: 25,
-    secure: false, // true for 465, false for other ports
-    auth: {
-      user: 'noreply@2kfusion.com', // generated ethereal user
-      pass: 'xFe3Ehl1gB', // generated ethereal password
     },
 });
 
@@ -641,15 +618,10 @@ app.post('/api/order/paid/pickup/place', (req, res) => {
 
                             //finally insert the cart into order
                             insertCart(cart, orderId)
-                            .then((result) => {
-
-                                if(result === true) {
-                                    res.json({status:1});
-                                    return true;
-                                }
-                                else {
-                                    return false;
-                                }
+                            .then((results) => {
+                                
+                                res.json({status:1});
+                                return true;
                                 
                             })
                             
@@ -710,18 +682,12 @@ app.post('/api/order/paid/pickup/place', (req, res) => {
 
                             //finally insert the cart into order
                             insertCart(cart, orderId)
-                            .then((result) => {
-
-                                if(result === true) {
-                                    res.json({status:1});
-                                    return true;
-                                }
-                                else {
-                                    return false;
-                                }
+                            .then((results) => {
+                                
+                                res.json({status:1});
+                                return true;
                                 
                             })
-                            
 
                         })
 
@@ -742,11 +708,11 @@ app.post('/api/order/paid/pickup/place', (req, res) => {
 
 
         //loop through the cart
-        Promise.all(cart.map((product) => {
+        return Promise.all(cart.map((product) => {
 
             //insert each item in cart
             let insertRequest = "INSERT INTO osd_orders_in (order_id, product_id, quantity) VALUES (?, ?, ?);"
-            connection.query(insertRequest, [orderId, product.productId, product.productQty], (err, result) => {
+            return connection.query(insertRequest, [orderId, product.productId, product.productQty], (err, result) => {
                 if(err) {
                     console.log('error...', err);
                     res.status(400).send(err);
@@ -763,11 +729,10 @@ app.post('/api/order/paid/pickup/place', (req, res) => {
 
                     //loop through the product option groups
                     return Promise.all(product['productOptions'].map((group) => {
-                        console.log(group)
 
                         //insert option group for that order_in row
                         insertRequest = "INSERT INTO osd_order_in_optgroups (order_in_id, optgroup_id) VALUES (?, ?);"
-                        connection.query(insertRequest, [orderInId, group.groupId], (err, result) => {
+                        return connection.query(insertRequest, [orderInId, group.groupId], (err, result) => {
                             if(err) {
                                 console.log('error...', err);
                                 res.status(400).send(err);
@@ -781,7 +746,7 @@ app.post('/api/order/paid/pickup/place', (req, res) => {
 
                                 //insert option for that optgroup row
                                 insertRequest = "INSERT INTO osd_order_in_options (order_in_optgroup_id, option_id) VALUES (?, ?);"
-                                connection.query(insertRequest, [orderInOptgroupId, option.optionId], (err, result) => {
+                                return connection.query(insertRequest, [orderInOptgroupId, option.optionId], (err, result) => {
                                     if(err) {
                                         res.status(400).send(err);
                                         return;
@@ -806,12 +771,6 @@ app.post('/api/order/paid/pickup/place', (req, res) => {
             })
 
         }))//1st level promise
-        .then((result) => {
-        //once all promises are done
-            console.log('done!', result)
-            return true;
-        })
-        .catch(console.error);
 
     }
 
@@ -921,16 +880,11 @@ app.post('/api/order/paid/delivery/place', (req, res) => {
 
                             //finally insert the cart into order
                             insertCart(cart, orderId)
-                            .then((result) => {
-
-                                if(result === true) {
-                                    res.json({status:1});
-                                    return true;
-                                }
-                                else {
-                                    return false;
-                                }
-                                
+                            .then((results) => {
+                               
+                                res.json({status:1});
+                                return true;
+                         
                             })
                             
 
@@ -989,15 +943,10 @@ app.post('/api/order/paid/delivery/place', (req, res) => {
 
                             //finally insert the cart into order
                             insertCart(cart, orderId)
-                            .then((result) => {
-
-                                if(result === true) {
-                                    res.json({status:1});
-                                    return true;
-                                }
-                                else {
-                                    return false;
-                                }
+                            .then((results) => {
+                                
+                                res.json({status:1});
+                                return true;
                                 
                             })
                             
@@ -1021,11 +970,11 @@ app.post('/api/order/paid/delivery/place', (req, res) => {
 
 
         //loop through the cart
-        Promise.all(cart.map((product) => {
+        return Promise.all(cart.map((product) => {
 
             //insert each item in cart
             let insertRequest = "INSERT INTO osd_orders_in (order_id, product_id, quantity) VALUES (?, ?, ?);"
-            connection.query(insertRequest, [orderId, product.productId, product.productQty], (err, result) => {
+            return connection.query(insertRequest, [orderId, product.productId, product.productQty], (err, result) => {
                 if(err) {
                     console.log('error...', err);
                     res.status(400).send(err);
@@ -1046,7 +995,7 @@ app.post('/api/order/paid/delivery/place', (req, res) => {
 
                         //insert option group for that order_in row
                         insertRequest = "INSERT INTO osd_order_in_optgroups (order_in_id, optgroup_id) VALUES (?, ?);"
-                        connection.query(insertRequest, [orderInId, group.groupId], (err, result) => {
+                        return connection.query(insertRequest, [orderInId, group.groupId], (err, result) => {
                             if(err) {
                                 console.log('error...', err);
                                 res.status(400).send(err);
@@ -1060,7 +1009,7 @@ app.post('/api/order/paid/delivery/place', (req, res) => {
 
                                 //insert option for that optgroup row
                                 insertRequest = "INSERT INTO osd_order_in_options (order_in_optgroup_id, option_id) VALUES (?, ?);"
-                                connection.query(insertRequest, [orderInOptgroupId, option.optionId], (err, result) => {
+                                return connection.query(insertRequest, [orderInOptgroupId, option.optionId], (err, result) => {
                                     if(err) {
                                         console.log('error...', err);
                                         res.status(400).send(err);
@@ -1079,23 +1028,21 @@ app.post('/api/order/paid/delivery/place', (req, res) => {
 
 
                 } else {
-                //no product options to be added, so we return
                     return true;
                 }
 
             })
 
         }))//1st level promise
-        .then((result) => {
-        //once all promises are done
-            console.log('done!', result)
-            return true;
-        })
-        .catch(console.error);
 
     }
 
 });
+
+
+
+
+
 
 // async..await is not allowed in global scope, must use a wrapper
 async function main() {
