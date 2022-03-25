@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Axios from 'axios';
-import { BrowserRouter as Router, Route, Switch, useParams } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, useParams } from "react-router-dom";
 import { DateTime } from "luxon";
 
 import Welcome from './Welcome';
@@ -12,6 +12,8 @@ import Menu from './Menu'
 import Checkout from './Checkout'
 import OrderStatus from './OrderStatus'
 
+import Admin from './Admin/Admin'
+
 function Core() {
 
 	//Application step var
@@ -21,7 +23,7 @@ function Core() {
 
 	//user handling vars
 	//auth token for user login
-	const [userToken, setUserToken] = useState(null);
+	const [userAuth, setUserAuth] = useState({ accessType: null, accessEmail: null, accessToken: null, accessOtp: null });
 	//user verified otp
 	const [userVerified, setUserVerified] = useState(false)
 
@@ -98,7 +100,7 @@ function Core() {
 	//get store details and populate into state
 	useEffect(() => {
 
-		Axios.post("http://localhost:3500/api/store/detail")
+		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/store/detail")
 		.then((response) => {
 
 			response = response.data[0];
@@ -117,7 +119,7 @@ function Core() {
 	       	console.log("error ", err)});
 
 		//get store delivery zones
-		Axios.post("http://localhost:3500/api/store/zones")
+		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/store/zones")
 		.then((response) => {
 			setDeliveryZones(response.data);
 		})
@@ -128,7 +130,7 @@ function Core() {
 		//get store hours
 		const currentWeekday = DateTime.now().setZone("America/Toronto").get('weekday');
 
-		Axios.post("http://localhost:3500/api/timegroup/hours/operation", {
+		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/timegroup/hours/operation", {
 			day: currentWeekday,
 		})
 		.then((response) => {
@@ -137,24 +139,44 @@ function Core() {
 		.catch((err) => {
 	       	console.log("error ", err)});
 
-		
+		//check if user has auth object
+		//get user auth from localStorage
+		if(localStorage.getItem('accessType') !== null) {
+
+			setUserAuth({	
+							accessType: localStorage.getItem('accessType'), 
+							accessEmail: localStorage.getItem('accessEmail'), 
+							accessToken: localStorage.getItem('accessToken')
+						});
+
+			setUserVerified(true);
+
+		}
+
 	}, [])
 
 
 	switch(step) {
 	  case 1:
 	    return (
-				<Welcome
-					setStep={step => setStep(step)}
-					setOrderType={type => setOrderType(type)}
-				/>
+	    		<Router basename="/app">
+					<Routes>
+						<Route exact path="/" element={ 
+							<Welcome
+								setStep={step => setStep(step)}
+								setOrderType={type => setOrderType(type)}
+							/>} />
+						<Route exact path="admin" element={<Admin />} />
+					</Routes>
+				</Router>
 	      )
 	   case 11:
 	    return (
 				<Login
 					setStep={step => setStep(step)}
-					userToken={userToken}
-					setUserToken={token => setUserToken(token)}
+					orderType={orderType}
+					userAuth={userAuth}
+					setUserAuth={auth => setUserAuth(auth)}
 					userVerified={userVerified}
 					setUserVerified={verify => setUserVerified(verify)}
 
@@ -179,12 +201,15 @@ function Core() {
 					storeLat={storeLat}
 					storeLng={storeLng}
 					deliveryZones={deliveryZones}
+					userId={userId}
 					setUserAddress={address => setUserAddress(address)}
 					setUserCity={city => setUserCity(city)}
 					setUserDistrict={district => setUserDistrict(district)}
 					setUserPostalCode={postalcode => setUserPostalCode(postalcode)}
 					setUserLat={lat => setUserLat(lat)}
 					setUserLng={lng => setUserLng(lng)}
+					userAuth={userAuth}
+					setUserVerified={verify => setUserVerified(verify)}
 				 />
 	      )
 	    case 13:
@@ -195,6 +220,8 @@ function Core() {
 					storeTimeHours={storeTimeHours}
 					setOrderDate={setOrderDate}
 					setOrderTime={setOrderTime}
+					userAuth={userAuth}
+					setUserVerified={verify => setUserVerified(verify)}
 				/>
 	      )
 	    case 14:
@@ -206,6 +233,8 @@ function Core() {
 					orderType={orderType}
 					orderDate={orderDate}
 					orderTime={orderTime}
+					userAuth={userAuth}
+					setUserVerified={verify => setUserVerified(verify)}
 				/>
 	      )
 	    case 15:
@@ -245,12 +274,30 @@ function Core() {
 					storeLng={storeLng}
 
 					deliveryZones={deliveryZones}
+
+					userAuth={userAuth}
+					setUserVerified={verify => setUserVerified(verify)}
 				/>
 	      )
 	    case 16:
 	    return (
 				<OrderStatus 
+					orderType={orderType}
+					orderDate={orderDate}
+					orderTime={orderTime}
 
+					userFirstName={userFirstName}
+					userLastName={userLastName}
+					userAddress={userAddress}
+					userCity={userCity}
+					userDistrict={userDistrict}
+					userPostalCode={userPostalCode}
+
+					storeName={storeName}
+					storeAddress={storeAddress}
+					storeCity={storeCity}
+					storeDistrict={storeDistrict}
+					storePostalCode={storePostalCode}
 
 				/>
 	      )
@@ -267,6 +314,27 @@ function Core() {
 					userCity={userCity}
 					userDistrict={userDistrict}
 					userPostalCode={userPostalCode}
+					userAuth={userAuth}
+					setUserVerified={verify => setUserVerified(verify)}
+
+					setUserId={id => setUserId(id)}
+					setUserFirstName={first => setUserFirstName(first)}
+					setUserLastName={last => setUserLastName(last)}
+					setUserEmail={email => setUserEmail(email)}
+					setUserPhone={phone => setUserPhone(phone)}
+					setUserAddress={address => setUserAddress(address)}
+					setUserAddress2={address2 => setUserAddress2(address2)}
+					setUserCity={city => setUserCity(city)}
+					setUserDistrict={district => setUserDistrict(district)}
+					setUserPostalCode={postalcode => setUserPostalCode(postalcode)}
+					setUserLat={lat => setUserLat(lat)}
+					setUserLng={lng => setUserLng(lng)}
+				/>
+	      )
+	    case 1001:
+	    return (
+				<Admin
+					
 				/>
 	      )
 

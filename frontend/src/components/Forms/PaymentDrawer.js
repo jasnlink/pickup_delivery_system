@@ -40,7 +40,7 @@ import {
 	ToggleButtonGroup,
 	ButtonBase,
 	Alert,
-	SvgIcon
+	SvgIcon,
  } from '@mui/material';
 
 import { LoadingButton } from '@mui/lab';
@@ -58,20 +58,20 @@ import { ReactComponent as VisaIcon } from './assets/visa.svg';
 import { ReactComponent as MasterCardIcon } from './assets/mastercard.svg';
 import { ReactComponent as AmexIcon } from './assets/amex.svg';
 import { ReactComponent as SecureIcon } from './assets/noun-secure-3711283.svg';
+import { ReactComponent as BillIcon } from './assets/noun-bill-3895891.svg';
 
 import '../styles/Menu.css';
 
 
 function PaymentDrawer({ 
 			setStep,
-			paymentDrawer, 
-			setPaymentDrawer, 
 			paymentError,
 			setPaymentError,
 			inputNote,
 			orderType,
 			orderDate,
 			orderTime,
+			cartMinimum,
 			cartSubtotal,
 			cartDelivery,
 			cartTip,
@@ -95,6 +95,12 @@ function PaymentDrawer({
 
 	//payment drawer loading
 	const [paymentDrawerLoading, setPaymentDrawerLoading] = useState(true);
+	//payment drawer open state
+	const [paymentDrawer, setPaymentDrawer] = useState(false);
+	//pay at the door payment method form
+  	const [methodForm, setMethodForm] = useState(false);
+  	//order placed loading
+	const [orderLoading, setOrderLoading] = useState(false);
 
   	useEffect(() => {
 
@@ -102,9 +108,14 @@ function PaymentDrawer({
 
 	}, [])	
 
+  	
+  	//payment method input
+  	const [inputMethod, setInputMethod] = useState('');
 
-
+  	//pay now credit card form
 	const [creditForm, setCreditForm] = useState(false);
+
+	//if the card is an AMEX card
 	const [isAmex, setIsAmex] = useState(false)
 
 	//input value state
@@ -187,12 +198,11 @@ function PaymentDrawer({
   	//handle closing payment drawer, reset all to initial values
 	function handleClosePaymentDrawer() {
 
-		setPaymentDrawer(false)
-		setCreditForm(false)
-		setInputCardName('')
-		setInputCardNumber('')
-		setInputCardExpiration('')
-		setInputCardCvv('')
+		setInputMethod('');
+		setMethodForm(false);
+		setPaymentDrawer(false);
+		handleCloseCreditForm();
+
 
 	}
 	//handle going back from credit card form, reset all values
@@ -206,9 +216,130 @@ function PaymentDrawer({
 
 	}
 
+	function handleOpenMethodForm() {
+
+  		setPaymentDrawer(true)
+  		setMethodForm(true)
+  		handleCloseCreditForm();
+  	}
+
+  	function handleOpenPayNow() {
+
+  		setPaymentDrawer(true)
+  		setMethodForm(false)
+  	}
+
+  	function handlePlaceOrder(paymentAuthId, paymentDate, paymentSource, paymentStatus) {
+
+  		setOrderLoading(true)
+
+  		if(orderType === "Livraison") {
+    	//delivery order
+
+    		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/order/delivery/place", {
+				//create new order
+				paymentAuthId: paymentAuthId,
+				paymentDate: paymentDate,
+				paymentSource: paymentSource,
+				paymentStatus: paymentStatus,
+
+				cart: cart,
+				cartSubtotal: cartSubtotal,
+				cartDelivery: cartDelivery,
+				cartTip: cartTip,
+				cartQst: cartQst,
+				cartGst: cartGst,
+				cartTotal: cartTotal,
+				orderType: orderType,
+				orderDate: orderDate,
+				orderTime: orderTime,
+				orderNote: inputNote,
+				userId: userId,
+				userFirstName: userFirstName,
+				userLastName: userLastName,
+				userEmail: userEmail,
+				userPhone: userPhone,
+				userAddress: userAddress,
+				userCity: userCity,
+				userDistrict: userDistrict,
+				userPostalCode: userPostalCode,
+				userLat: userLat,
+				userLng: userLng,
+
+			})
+			.then((response) => {
+			//order successfully placed, move to order status page
+				//data coming back too fast, wait 1 second
+				if(response.data.status === 1) {
+					setTimeout(() => {
+						setStep(16);
+					}, 1000)
+				}
+				
+			})
+			.catch((err) => {
+		       	console.log("error ", err)});
+
+
+    	} else {
+    	//pickup order
+
+    		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/order/pickup/place", {
+
+				//create new order
+				paymentAuthId: paymentAuthId,
+				paymentDate: paymentDate,
+				paymentSource: paymentSource,
+				paymentStatus: paymentStatus,
+
+				cart: cart,
+				cartSubtotal: cartSubtotal,
+				cartDelivery: cartDelivery,
+				cartTip: cartTip,
+				cartQst: cartQst,
+				cartGst: cartGst,
+				cartTotal: cartTotal,
+				orderType: orderType,
+				orderDate: orderDate,
+				orderTime: orderTime,
+				orderNote: inputNote,
+				userId: userId,
+				userFirstName: userFirstName,
+				userLastName: userLastName,
+				userEmail: userEmail,
+				userPhone: userPhone,
+
+			})
+			.then((response) => {
+			//order successfully placed, move to order status page
+				//data coming back too fast, wait 1 second
+				if(response.data.status === 1) {
+					setTimeout(() => {
+						setStep(16);
+					}, 1000)
+				}
+			})
+			.catch((err) => {
+		       	console.log("error ", err)});
+
+
+    	}
+
+
+  	}
+
 	return (
 		<>
-		
+		<ListItem>
+            <Button onClick={handleOpenPayNow} disabled={!cart.length || parseFloat(cartMinimum) > parseFloat(cartSubtotal)} variant="contained" color="primary" size="large" fullWidth>
+                Payer Maintenant
+            </Button>
+        </ListItem>
+        <ListItem>
+            <Button onClick={handleOpenMethodForm} disabled={!cart.length || parseFloat(cartMinimum) > parseFloat(cartSubtotal)} variant="outlined" color="primary" size="large" fullWidth>
+                Paiement à la porte
+            </Button>
+        </ListItem>
 		<Drawer classes={{ paper: "payment-drawer", }} anchor="bottom" open={paymentDrawer} onClose={() => setPaymentDrawer(false)}>
 			
 		{paymentDrawerLoading && (
@@ -232,7 +363,48 @@ function PaymentDrawer({
 					</Grid>
 				</ListItem>
 				<Divider />
-				{!creditForm && (
+				{!!methodForm && (
+				<>
+					<ListItem style={{display:'flex', justifyContent:'center'}}>
+						<SvgIcon component={BillIcon} sx={{ width: '96px', height: '96px' }} inheritViewBox />
+					</ListItem>
+					<ListItem style={{display:'flex', justifyContent:'center'}}>
+						<ListItemText primary={<Typography style={{ textAlign: 'center' }} variant="h5">Sélectionnez votre modalité de paiement à la porte.</Typography>} style={{display:'flex', justifyContent:'center'}} />
+					</ListItem>
+					<ListItem style={{ display:'flex', justifyContent:'center', paddingTop: '8px' }}>
+						<ToggleButtonGroup
+							orientation="vertical"
+							exclusive
+							color="primary"
+							sx={{ width: '100%' }}
+							value={inputMethod}
+							onChange={(e) => setInputMethod(e.target.value)}
+						>
+							<ToggleButton value="CREDIT">
+								Carte de crédit
+							</ToggleButton>
+							<ToggleButton value="DEBIT">
+								Débit
+							</ToggleButton>
+							<ToggleButton value="CASH">
+								Comptant
+							</ToggleButton>
+						</ToggleButtonGroup>
+					</ListItem>
+					<ListItem sx={{ pt: '12px', pb: '12px' }}>
+						<LoadingButton 
+							onClick={() => handlePlaceOrder(null, orderDate+" "+orderTime, inputMethod, "UNPAID")} 
+							disabled={!inputMethod} 
+							variant="contained" 
+							size="large" 
+							loading={orderLoading}
+							fullWidth>
+							Placer la commande
+						</LoadingButton>
+					</ListItem>
+				</>
+				)}
+				{!creditForm && [ !methodForm && (
 				<>
 					<ListItem disablePadding style={{ display:'flex', justifyContent:'center', paddingTop: '8px' }}>
 						<Grid container alignItems="center" justifyContent="center">
@@ -292,87 +464,7 @@ function PaymentDrawer({
 					              onApprove={(data, actions) => {
 					                    return actions.order.capture().then((details) => {
 					                    	
-					                    	if(orderType === "Livraison") {
-					                    	//delivery order
-
-					                    		Axios.post("http://localhost:3500/api/order/paid/delivery/place", {
-													//create new order
-													paymentAuthId: details.id,
-													paymentDate: DateTime.fromISO(details.create_time).setZone('America/Toronto').toFormat('yyyy-MM-dd HH:mm:ss'),
-													paymentSource: "PAYPAL",
-
-													cart: cart,
-													cartSubtotal: cartSubtotal,
-													cartDelivery: cartDelivery,
-													cartTip: cartTip,
-													cartQst: cartQst,
-													cartGst: cartGst,
-													cartTotal: cartTotal,
-													orderType: orderType,
-													orderDate: orderDate,
-													orderTime: orderTime,
-													orderNote: inputNote,
-													userId: userId,
-													userFirstName: userFirstName,
-													userLastName: userLastName,
-													userEmail: userEmail,
-													userPhone: userPhone,
-													userAddress: userAddress,
-													userCity: userCity,
-													userDistrict: userDistrict,
-													userPostalCode: userPostalCode,
-													userLat: userLat,
-													userLng: userLng,
-
-												})
-												.then((response) => {
-												//order successfully placed, move to order status page
-													console.log(response);
-													setStep(16);
-												})
-												.catch((err) => {
-											       	console.log("error ", err)});
-
-
-					                    	} else {
-					                    	//pickup order
-
-					                    		Axios.post("http://localhost:3500/api/order/paid/pickup/place", {
-
-													//create new order
-													paymentAuthId: details.id,
-													paymentDate: DateTime.fromISO(details.create_time).setZone('America/Toronto').toFormat('yyyy-MM-dd HH:mm:ss'),
-													paymentSource: "PAYPAL",
-
-													cart: cart,
-													cartSubtotal: cartSubtotal,
-													cartDelivery: cartDelivery,
-													cartTip: cartTip,
-													cartQst: cartQst,
-													cartGst: cartGst,
-													cartTotal: cartTotal,
-													orderType: orderType,
-													orderDate: orderDate,
-													orderTime: orderTime,
-													orderNote: inputNote,
-													userId: userId,
-													userFirstName: userFirstName,
-													userLastName: userLastName,
-													userEmail: userEmail,
-													userPhone: userPhone,
-
-												})
-												.then((response) => {
-												//order successfully placed, move to order status page
-													console.log(response);
-													setStep(16)
-												})
-												.catch((err) => {
-											       	console.log("error ", err)});
-
-
-					                    	}
-																							
+					                    	handlePlaceOrder(details.id, DateTime.fromISO(details.create_time).setZone('America/Toronto').toFormat('yyyy-MM-dd HH:mm:ss'), "PAYPAL", "COMPLETED");
 
 					                    });
 					                }}
@@ -382,7 +474,7 @@ function PaymentDrawer({
 						</PayPalScriptProvider>
 					</ListItem>
 				</>
-				)}
+				)]}
 				{!!creditForm && (
 				<>
 					<ListItem sx={{ pb: '4px' }}>

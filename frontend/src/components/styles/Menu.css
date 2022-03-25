@@ -43,6 +43,7 @@ body {
 	max-width: 600px;
 	margin: auto;
 	padding-bottom: 64px;
+	z-index: 0;
 }
 .product-drawer-media {
 	min-width: 100%;
@@ -73,6 +74,8 @@ body {
 	max-width: 600px !important;
 	padding: 2px 0 !important;
 	background-color: #ffffff !important;
+	z-index: 1000000000000;
+	position: absolute;
 }
 
 .product-drawer-close-btn {

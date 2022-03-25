@@ -25,18 +25,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 function Welcome({ setStep, setOrderType }) {
 
 	return (<>
-		<Box sx={{ flexGrow: 1 }}>
-	      <AppBar position="static">
-	        <Toolbar variant="regular">
-	          <IconButton edge="start" color="inherit" sx={{ mr: 2 }}>
-	            <MenuIcon />
-	          </IconButton>
-	          <Typography variant="h6" color="inherit" component="div">
-	            Commande en ligne
-	          </Typography>
-	        </Toolbar>
-	      </AppBar>
-	    </Box>
+		
 		<Container maxWidth='sm'>
 			<List sx={{ mt: '24px' }}>
 				<ListItem disablePadding style={{display:'flex', justifyContent:'center'}}>
@@ -47,7 +36,7 @@ function Welcome({ setStep, setOrderType }) {
 				</ListItem>
 				<Divider />
 				<ListItem disablePadding>
-					<ListItemButton onClick={() => {setStep(13); setOrderType('Emporter')}}>
+					<ListItemButton onClick={() => {setStep(11); setOrderType('Emporter')}}>
 						<ListItemText primary={<Typography variant="h3">Emporter</Typography>} style={{display:'flex', justifyContent:'center'}} />
 					</ListItemButton>
 				</ListItem>

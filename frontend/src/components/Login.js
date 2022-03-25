@@ -35,9 +35,10 @@ import LoginVerifyForm from './Forms/LoginVerifyForm';
 
 
 function Login({ 
-	setStep, 
-	userToken, 
-	setUserToken,  
+	setStep,
+	orderType, 
+	userAuth, 
+	setUserAuth,  
 	userVerified, 
 	setUserVerified, 
 	setUserId,
@@ -58,39 +59,37 @@ function Login({
 	const [email, setEmail] = useState('');
   	//hash for verification
 	const [hash, setHash] = useState(null);
-	//registered user data aggregate from DB
-	const [userData, setUserData] = useState(null);
-
-	async function setUser() {
-		try {
-			setUserId(userData.user_id)
-			setUserFirstName(userData.user_first_name)
-			setUserLastName(userData.user_last_name)
-			setUserEmail(userData.user_email)
-			setUserPhone(userData.user_phone)
-			setUserAddress(userData.user_address)
-			setUserAddress2(userData.user_address2)
-			setUserCity(userData.user_city)
-			setUserDistrict(userData.user_district)
-			setUserPostalCode(userData.user_postal_code)
-			setUserLat(userData.user_lat)
-			setUserLng(userData.user_lng)
-		} finally {
-			setStep(21)
-		}
-		
-	}
+	
 
 	//check if verified
   	useEffect(() => {
 		if(userVerified) {
-			if(userData) {
-			//verified and registered
-				setUser();
-				//setStep(21) // go to account page
+			if(userAuth.accessType === 'jwt') {
+			//auth with jwt
+				if(orderType === "Livraison") {
+					setStep(21) // go to account page
+				} else if(orderType === "Emporter") {
+					setStep(13) // go to time select
+				} else {
+					//no order type set
+					setStep(1)
+				}
+				
+			}
+			else if(userAuth.accessType === 'otp') {
+			//verified via otp but not registered
+				if(orderType === "Livraison") {
+					setStep(12) // go to address search
+				} else if(orderType === "Emporter") {
+					setStep(13) // go to time select
+				} else {
+					//no order type set
+					setStep(1)
+				}
 			} else {
-			//verified but not registered
-				setStep(12) // go to address search
+			//catchall, verified but no valid auth
+				setUserVerified(false)
+				return;
 			}
 		}
 	}, [userVerified])
@@ -102,18 +101,6 @@ function Login({
 
 
 	return (<>
-			<Box sx={{ flexGrow: 1 }}>
-		      <AppBar position="static">
-		        <Toolbar variant="regular">
-		          <IconButton edge="start" color="inherit" sx={{ mr: 2 }} onClick={() => setStep(1)}>
-		            <ArrowBackIcon />
-		          </IconButton>
-	          <Typography variant="h6" color="inherit" component="div">
-	            Accéder à mon compte
-	          </Typography>
-	        </Toolbar>
-	      </AppBar>
-	    </Box>
 		<Container maxWidth='sm'>
 			<Snackbar open={error} anchorOrigin={{vertical: 'top', horizontal: 'center'}} autoHideDuration={1250} onClose={() => setError(false)}>
 				<Alert
@@ -124,7 +111,12 @@ function Login({
 			      	Le code de vérification est incorrect.
 			      </Alert>
 			</Snackbar>
-			<List sx={{ mt: '24px' }}>
+			<List sx={{ mt: '12px' }}>
+				<ListItem sx={{ pb: '12px' }}>
+					<Button onClick={() => setStep(1)} size="small" color="inherit" startIcon={<ArrowBackIcon />}>
+						Retour
+					</Button>
+				</ListItem>
 			{!hash && (
 				<LoginSubmitForm 
 					email={email} 
@@ -137,8 +129,21 @@ function Login({
 					email={email} 
 					hash={hash} 
 					setUserVerified={verify => setUserVerified(verify)}
-					setUserData={(data) => setUserData(data)}  
 					setError={error => setError(error)}
+					setUserAuth={auth => setUserAuth(auth)}
+
+					setUserId={id => setUserId(id)}
+					setUserFirstName={first => setUserFirstName(first)}
+					setUserLastName={last => setUserLastName(last)}
+					setUserEmail={email => setUserEmail(email)}
+					setUserPhone={phone => setUserPhone(phone)}
+					setUserAddress={address => setUserAddress(address)}
+					setUserAddress2={address2 => setUserAddress2(address2)}
+					setUserCity={city => setUserCity(city)}
+					setUserDistrict={district => setUserDistrict(district)}
+					setUserPostalCode={postalcode => setUserPostalCode(postalcode)}
+					setUserLat={lat => setUserLat(lat)}
+					setUserLng={lng => setUserLng(lng)}
 				 />
 			)}
 			</List>

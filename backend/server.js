@@ -6,6 +6,7 @@ import fileUpload from 'express-fileupload';
 import path from 'path';
 import otpService from 'otp-generator';
 import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import util from 'util';
@@ -26,7 +27,7 @@ const __dirname = path.resolve();
 // public image directory
 const CDN_DIR = path.join(__dirname, 'public');
 // set website address
-const SITE = 'https://mitsuki.qbmenu.ca/';
+const SITE = 'https://staging.2kfusion.com/';
 // set port, listen for requests
 const PORT = process.env.PORT || 3500;
 
@@ -43,10 +44,16 @@ const connectionInfo = {
 
 
 //secret keys declaration, to be fetched from DB
-var OTP_SECRET_KEY = null;
-var AWS_SNS_ACCESS_KEY_ID = null; 
-var AWS_SECRET_ACCESS_KEY = null;
+let OTP_SECRET_KEY = null;
+//JWT token generation secret keys
+let JWT_ACCESS_SECRET_KEY = null;
+let JWT_REFRESH_SECRET_KEY = null;
+
+let AWS_SNS_ACCESS_KEY_ID = null; 
+let AWS_SECRET_ACCESS_KEY = null;
 const AWS_REGION='ca-central-1';
+
+
 
 
 // create reusable transporter object using the default SMTP transport
@@ -122,6 +129,8 @@ connectToDb( () => {
             OTP_SECRET_KEY = result[0].key_value;
             AWS_SNS_ACCESS_KEY_ID = result[1].key_value;
             AWS_SECRET_ACCESS_KEY = result[2].key_value;
+            JWT_ACCESS_SECRET_KEY = result[3].key_value;
+            JWT_REFRESH_SECRET_KEY = result[4].key_value;
             console.log('initialising keys... ');
         })
     }
@@ -144,10 +153,11 @@ app.listen(PORT, () => console.log(`server is running on port ${PORT}.`));
 
 
 // generate OTP hash
+// uses user email as unique identifier to generate a hash and otp
 function newHashOTP(user, otp){
     
-    const ttl      = 5 * 60 * 1000; //5 Minutes in miliseconds
-    const expires  = Date.now() + ttl; //timestamp to 5 minutes in the future
+    const ttl      = 30 * 60 * 1000; //30 Minutes in miliseconds
+    const expires  = Date.now() + ttl; //timestamp to 30 minutes in the future
     const data     = `${user}.${otp}.${expires}`; // phone.otp.expiry_timestamp
     const hash     = crypto.createHmac("sha256",OTP_SECRET_KEY).update(data).digest("hex"); // creating SHA256 hash of the data
     const fullHash = `${hash}.${expires}`; // Hash.expires, format to send to the user
@@ -156,6 +166,7 @@ function newHashOTP(user, otp){
 }
 
 // verify OTP hash
+// uses supplied email and otp to generate a matching hash with the supplied hash to see if it matches.
 function verifyHashOTP(user,hash,otp){
     // Seperate Hash value and expires from the hash returned from the user
     let [hashValue,expires] = hash.split(".");
@@ -193,7 +204,8 @@ async function sendOtpMail(otp, user) {
 }
 
 
-//check if email is in DB so user can login
+//generate new otp from given email then sends otp to email, sends back generated hash
+//requester must extract otp from sent mail, and send in otp to verify matching hash
 app.post('/api/login/submit', (req, res) => {
 
         const email = req.body.email;
@@ -216,11 +228,15 @@ app.post('/api/login/verify', (req, res) => {
         const hash = req.body.hash;
         const otp = req.body.otp;
 
+        var accessToken;
+        var userId;
+        var userInfo;
+
         console.log('verify otp... '+hash);
         const verify = verifyHashOTP(email,hash,otp);
 
         if(verify) {
-            //otp is verified
+        //otp is verified
             console.log('otp verified...')
 
             //search for email in DB
@@ -231,28 +247,149 @@ app.post('/api/login/verify', (req, res) => {
                     return;
                 }
                 console.log('logging in with email...');
-                //if email is found
+
+
+                //if email is found, user exists, issue token to remember user
                 if(result.length > 0) {
-                    console.log('found user...')
-                    res.send(result);
+                    //save user id from last request to update user with token
+                    userId = result[0].user_id
+                    //save user info so we can send it back later on
+                    userInfo = result[0];
+
+                    //issue new jwt for this email
+                    //expiry of 30 days
+                    accessToken = jwt.sign({ accessEmail: email }, JWT_ACCESS_SECRET_KEY, { expiresIn: '30d' });
+                    console.log('found user, signing new jwt token...')
+
+                    //then we record token in database so we can authenticate the user later on
+                    const jwtUserRequest = "UPDATE osd_users SET user_token=? WHERE user_id=?;";
+                    connection.query(jwtUserRequest, [accessToken, userId], (err, result) => {
+                        if(err) {
+                            res.status(400).send(err);
+                            return;
+                        }
+                        console.log('recording new jwt for user...');
+
+                        //finally we can reply that user is verified and authenticated,
+                        //send back all user info and new access token that will auth the user for 30 days
+                        res.json({status: 1, verify: 1, accessToken:accessToken, userInfo: userInfo});
+
+                    })
+                    
                 }
                 //if no email is found 
                 if(result.length === 0) {
+                    //new user, so email is not yet registered in DB
+                    //we will not issue an auth jwt token, because user has not placed and order before,
+                    //so still an uncertain user not recorded in DB
+                    //we will instead use the OTP hash with a lower expiry time of 30 mins
                     console.log('no user found...');
                     res.json({status:0,verify:1});
                     return;
                 }
             });
         } else {
-            //otp wrong, so try again
+        //otp wrong, so try again
             console.log('otp wrong...')
             res.json({status:0,verify:0});
         }
 });
 
 
+//jwt authentication verification
+app.post('/api/login/jwt/auth', (req, res) => {
+
+    //user authentication object
+    const userAuth = req.body.userAuth;
+
+    //check auth type is jwt
+    if(userAuth.accessType === 'jwt') {
+
+        //get email and token from info
+        const accessEmail = userAuth.accessEmail;
+        const accessToken = userAuth.accessToken;
+
+        console.log('checking user auth...');
+
+        jwt.verify(accessToken, JWT_ACCESS_SECRET_KEY, (err, user) => {
+            if(err) {
+                res.status(400).send(err);
+                return;
+            }
+            if(user.accessEmail === accessEmail) {
+            //decoded email is same as provided email
+                //user is authenticated
+                console.log('user is authenticated...');
+
+                //search for email in DB
+                const userInfoRequest = "SELECT * FROM osd_users WHERE user_email=?;";
+                connection.query(userInfoRequest, [accessEmail], (err, result) => {
+                    if(err) {
+                        res.status(400).send(err);
+                        return;
+                    }
+                    console.log('getting user info with email...');
+                    res.json({status:1, userInfo: result[0]})
+                })
+                
+
+            } else {
+            //decoded email does not match
+                //user is not authenticated
+                console.log('user is not authenticated...');
+                res.json({status:0})
+
+            }
+        })
+
+    } else { 
+    //not a valid request
+        console.log('invalid request...');
+        res.json({status:0})
+
+    }
 
 
+});
+
+
+//otp authentication verification
+app.post('/api/login/otp/auth', (req, res) => {
+
+    //user authentication object
+    const userAuth = req.body.userAuth;
+
+    //check auth type is otp
+    if(userAuth.accessType === 'otp') {
+
+        //get email, token and OTP from info
+        const accessEmail = userAuth.accessEmail;
+        const accessToken = userAuth.accessToken;
+        const accessOtp = userAuth.accessOtp;
+
+        console.log('checking user auth...');
+
+        console.log('verify otp... '+accessToken);
+        const verify = verifyHashOTP(accessEmail,accessToken,accessOtp);
+
+        if(verify) {
+        //otp is verified, send go ahead
+            res.json({status:1})
+
+        } else {
+        //otp not verified
+            res.json({status:0})
+        }
+
+    } else { 
+    //not a valid request
+        console.log('invalid request...');
+        res.json({status:0})
+
+    }
+
+
+});
 
 
 /********************************************************************************************************
@@ -525,12 +662,13 @@ app.post('/api/product/list/options', async (req, res) => {
 
 
 //place a paid pickup order
-app.post('/api/order/paid/pickup/place', (req, res) => {
+app.post('/api/order/pickup/place', (req, res) => {
 
 
     const paymentAuthId = req.body.paymentAuthId;
     const paymentDate = req.body.paymentDate;
     const paymentSource = req.body.paymentSource;
+    const paymentStatus = req.body.paymentStatus;
 
     const cart = req.body.cart;
     const cartSubtotal = req.body.cartSubtotal;
@@ -605,8 +743,8 @@ app.post('/api/order/paid/pickup/place', (req, res) => {
 
 
                         //record new payment
-                        const NewPaymentRequest =   "INSERT INTO osd_payments (payment_auth_id, payment_source, payment_status, payment_amount, payment_currency, payment_date, order_id, user_id) VALUES (?, ?, 'COMPLETED', ?, 'CAD', STR_TO_DATE(?, '%Y-%m-%d %H:%i:%s'), ?, ?);";
-                        connection.query(NewPaymentRequest, [paymentAuthId, paymentSource, cartTotal, paymentDate, orderId, userId], (err, result) => {
+                        const NewPaymentRequest =   "INSERT INTO osd_payments (payment_auth_id, payment_source, payment_status, payment_amount, payment_currency, payment_date, order_id, user_id) VALUES (?, ?, ?, ?, 'CAD', STR_TO_DATE(?, '%Y-%m-%d %H:%i:%s'), ?, ?);";
+                        connection.query(NewPaymentRequest, [paymentAuthId, paymentSource, paymentStatus, cartTotal, paymentDate, orderId, userId], (err, result) => {
 
                             if(err) {
                                 console.log('error...', err);
@@ -669,8 +807,8 @@ app.post('/api/order/paid/pickup/place', (req, res) => {
 
 
                         //record new payment
-                        const NewPaymentRequest =   "INSERT INTO osd_payments (payment_auth_id, payment_source, payment_status, payment_amount, payment_currency, payment_date, order_id, user_id) VALUES (?, ?, 'COMPLETED', ?, 'CAD', STR_TO_DATE(?, '%Y-%m-%d %H:%i:%s'), ?, ?);";
-                        connection.query(NewPaymentRequest, [paymentAuthId, paymentSource, cartTotal, paymentDate, orderId, userId], (err, result) => {
+                        const NewPaymentRequest =   "INSERT INTO osd_payments (payment_auth_id, payment_source, payment_status, payment_amount, payment_currency, payment_date, order_id, user_id) VALUES (?, ?, ?, ?, 'CAD', STR_TO_DATE(?, '%Y-%m-%d %H:%i:%s'), ?, ?);";
+                        connection.query(NewPaymentRequest, [paymentAuthId, paymentSource, paymentStatus, cartTotal, paymentDate, orderId, userId], (err, result) => {
 
                             if(err) {
                                 console.log('error...', err);
@@ -779,11 +917,12 @@ app.post('/api/order/paid/pickup/place', (req, res) => {
 
 
 //place a paid delivery order
-app.post('/api/order/paid/delivery/place', (req, res) => {
+app.post('/api/order/delivery/place', (req, res) => {
 
     const paymentAuthId = req.body.paymentAuthId;
     const paymentDate = req.body.paymentDate;
     const paymentSource = req.body.paymentSource;
+    const paymentStatus = req.body.paymentStatus;
 
     const cart = req.body.cart;
     const cartSubtotal = req.body.cartSubtotal;
@@ -798,7 +937,6 @@ app.post('/api/order/paid/delivery/place', (req, res) => {
     const orderTime = req.body.orderTime;
     const orderNote = req.body.orderNote;
 
-    const userId = req.body.userId;
     const userFirstName = req.body.userFirstName;
     const userLastName = req.body.userLastName;
     const userEmail = req.body.userEmail;
@@ -814,8 +952,10 @@ app.post('/api/order/paid/delivery/place', (req, res) => {
     //formatted delivery date and time for insertion
     const orderDeliveryTime = orderDate+" "+orderTime;
 
-    //order id to be obtained on insertion
+   //order id to be obtained on insertion
     var orderId;
+    //user id to be obtained from search
+    var userId;
 
 
 
@@ -867,8 +1007,8 @@ app.post('/api/order/paid/delivery/place', (req, res) => {
 
 
                         //record new payment
-                        const NewPaymentRequest =   "INSERT INTO osd_payments (payment_auth_id, payment_source, payment_status, payment_amount, payment_currency, payment_date, order_id, user_id) VALUES (?, ?, 'COMPLETED', ?, 'CAD', STR_TO_DATE(?, '%Y-%m-%d %H:%i:%s'), ?, ?);";
-                        connection.query(NewPaymentRequest, [paymentAuthId, paymentSource, cartTotal, paymentDate, orderId, userId], (err, result) => {
+                        const NewPaymentRequest =   "INSERT INTO osd_payments (payment_auth_id, payment_source, payment_status, payment_amount, payment_currency, payment_date, order_id, user_id) VALUES (?, ?, ?, ?, 'CAD', STR_TO_DATE(?, '%Y-%m-%d %H:%i:%s'), ?, ?);";
+                        connection.query(NewPaymentRequest, [paymentAuthId, paymentSource, paymentStatus, cartTotal, paymentDate, orderId, userId], (err, result) => {
 
                             if(err) {
                                 console.log('error...', err);
@@ -930,8 +1070,8 @@ app.post('/api/order/paid/delivery/place', (req, res) => {
 
 
                         //record new payment
-                        const NewPaymentRequest =   "INSERT INTO osd_payments (payment_auth_id, payment_source, payment_status, payment_amount, payment_currency, payment_date, order_id, user_id) VALUES (?, ?, 'COMPLETED', ?, 'CAD', STR_TO_DATE(?, '%Y-%m-%d %H:%i:%s'), ?, ?);";
-                        connection.query(NewPaymentRequest, [paymentAuthId, paymentSource, cartTotal, paymentDate, orderId, userId], (err, result) => {
+                        const NewPaymentRequest =   "INSERT INTO osd_payments (payment_auth_id, payment_source, payment_status, payment_amount, payment_currency, payment_date, order_id, user_id) VALUES (?, ?, ?, ?, 'CAD', STR_TO_DATE(?, '%Y-%m-%d %H:%i:%s'), ?, ?);";
+                        connection.query(NewPaymentRequest, [paymentAuthId, paymentSource, paymentStatus, cartTotal, paymentDate, orderId, userId], (err, result) => {
 
                             if(err) {
                                 console.log('error...', err);
@@ -1044,6 +1184,7 @@ app.post('/api/order/paid/delivery/place', (req, res) => {
 
 
 
+
 // async..await is not allowed in global scope, must use a wrapper
 async function main() {
   // Generate test SMTP service account from ethereal.email
@@ -1070,4 +1211,25 @@ async function main() {
 app.get('/api/mail/test', (req, res) => {
 
     main().catch(console.error);
+})
+
+app.get('/api/test', (req, res) => {
+
+    var userId;
+    const email = 'test@msmtech.ca'
+    //search for email in DB
+    const query = "SELECT * FROM osd_users WHERE user_email=?;";
+    connection.query(query, [email], (err, result) => {
+        if(err) {
+            res.status(400).send(err);
+            return;
+        }
+        userId = result[0].user_id
+
+        console.log('logging in with email...');
+        console.log('userId', userId)
+
+    })
+
+
 })

@@ -57,10 +57,10 @@ function PersonalInformationForm({ userFirstName, userLastName, userEmail, userP
 	const [personalDialog, setPersonalDialog] = useState(false)
 
 	//input value state
-	const [inputFirstName, setInputFirstName] = useState('')
-	const [inputLastName, setInputLastName] = useState('')
-	const [inputEmail, setInputEmail] = useState('')
-	const [inputPhone, setInputPhone] = useState('')
+	const [inputFirstName, setInputFirstName] = useState(userFirstName)
+	const [inputLastName, setInputLastName] = useState(userLastName)
+	const [inputEmail, setInputEmail] = useState(userEmail)
+	const [inputPhone, setInputPhone] = useState(userPhone)
 
 
 	useEffect(() => {

@@ -49,7 +49,7 @@ function LoginSubmitForm({ email, setEmail, setHash }) {
 		const formData = new FormData();
 		formData.append('email', email);
 		//send otp request to backend
-		Axios.post("http://localhost:3500/api/login/submit", formData, {
+		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/login/submit", formData, {
 				headers: {
 					'Content-Type': 'application/json'
 				}
@@ -60,7 +60,6 @@ function LoginSubmitForm({ email, setEmail, setHash }) {
 		.catch((err) => {
 	       	console.log("error ", err)});
 	}
-
 
 
 	return (
@@ -80,6 +79,7 @@ function LoginSubmitForm({ email, setEmail, setHash }) {
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
 					required
+					onKeyUp={(e) => {if(e.keyCode === 13 && isEmail) {handleSubmit()}}}
 				 />
 			</FormControl>
 		</ListItem>

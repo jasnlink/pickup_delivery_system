@@ -46,7 +46,7 @@ import RadioGroupForm from './Forms/RadioGroupForm';
 import CartDrawer from './Forms/CartDrawer';
 
 
-function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
+function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime, userAuth, setUserVerified }) {
 	
 	//page loading
 	let [loading, setLoading] = useState(true);
@@ -85,10 +85,38 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 
 	useEffect(() => {
 
+
+		if(userAuth.accessType === 'jwt' || userAuth.accessType === 'otp') {
+		//claims to be authenticated with jwt or otp accessToken
+		//verify auth with server
+			Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/login/"+userAuth.accessType+"/auth", {
+				userAuth: userAuth,
+			})
+			.then((response) => {
+				if(response.data.status === 1) {
+				//user is authenticated, we may continue
+					return;
+				} else {
+				//user is not authenticated, send to login
+					setUserVerified(false)
+					setStep(11)
+				}
+				
+			})
+			.catch((err) => {
+		       	console.log("error ", err)});
+
+		} else {
+		//no valid auth type, not supposed to be here, unverify and send to login
+			setUserVerified(false)
+			setStep(11)
+		}
+
+
 		const orderWeekday = DateTime.fromFormat(orderDate, 'yyyy-MM-dd').get('weekday');
 
 		//get categories
-		Axios.post("http://localhost:3500/api/category/list/operation", {
+		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/category/list/operation", {
 			day: orderWeekday,
 			time: orderTime,
 		})
@@ -96,7 +124,7 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 			setCategories(response.data)
 			getIdArray(response.data, 'category_id')
 			.then((result) => {
-				Axios.post("http://localhost:3500/api/product/list/category", {
+				Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/product/list/category", {
 					categories: result,
 				})
 				.then((response) => {
@@ -145,7 +173,7 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 	//helper function to fetch product option groups given a product id
 	async function getProductOptiongroups(id) {
 		//get option groups
-		Axios.post("http://localhost:3500/api/product/list/optiongroups", {
+		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/product/list/optiongroups", {
 			id: id,
 		})
 		.then((response) => {
@@ -161,7 +189,7 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 	async function getProductOptions(data) {
 		getIdArray(data, 'optgroup_id')
 			.then((result) => {
-				Axios.post("http://localhost:3500/api/product/list/options", {
+				Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/product/list/options", {
 					optiongroups: result,
 				})
 				.then((response) => {
@@ -329,15 +357,6 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 
 	return (<>
 
-		<Box sx={{ flexGrow: 1 }}>
-	      <AppBar position="static">
-	        <Toolbar variant="regular">
-	          <Typography variant="h6" color="inherit" component="div">
-	            Menu
-	          </Typography>
-	        </Toolbar>
-	      </AppBar>
-	    </Box>
 	    {loading && (
 			<Fade in={loading} sx={{ color: '#000' }} unmountOnExit>
 				<CircularProgress size={64} style={{position: 'fixed', top: '50%', left:'50%', marginTop: '-32px', marginLeft: '-32px'}} color="inherit" />
@@ -390,7 +409,7 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime }) {
 				))}
 				</List>
 
-				<CartDrawer cart={cart} setCart={cart => setCart(cart)} handleCheckout={handleCheckout} />
+				<CartDrawer cart={cart} setCart={cart => setCart(cart)} handleCheckout={handleCheckout} productDrawer={productDrawer} />
 
 			</Container>
 			

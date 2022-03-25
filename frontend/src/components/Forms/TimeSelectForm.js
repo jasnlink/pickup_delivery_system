@@ -80,7 +80,7 @@ function TimeSelectForm({ setStep, storeTimeHours, setOrderDate, setOrderTime })
 			}
 
 
-			Axios.post("http://localhost:3500/api/timegroup/hours/operation", {
+			Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/timegroup/hours/operation", {
 				day: weekday,
 			})
 			.then((response) => {
@@ -113,7 +113,7 @@ function TimeSelectForm({ setStep, storeTimeHours, setOrderDate, setOrderTime })
 		selectWeekdayRef.current = weekday
 		setSelectWeekday(weekday)
 		setDataLoading(true)
-		Axios.post("http://localhost:3500/api/timegroup/hours/operation", {
+		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/timegroup/hours/operation", {
 			day: weekday,
 		})
 		.then((response) => {

@@ -35,7 +35,41 @@ import { usePlacesWidget } from "react-google-autocomplete";
 import { ReactComponent as MainIcon } from './assets/noun-digital-location-4583977.svg';
 
 
-function AddressSearch({ setStep, storeLat, storeLng, deliveryZones, setUserAddress, setUserCity, setUserDistrict, setUserPostalCode, setUserLat, setUserLng }) {
+function AddressSearch({ setStep, storeLat, storeLng, deliveryZones, userId, setUserAddress, setUserCity, setUserDistrict, setUserPostalCode, setUserLat, setUserLng, userAuth, setUserVerified }) {
+
+
+	//check if user is authenticated
+	useEffect(() => {
+
+		if(userAuth.accessType === 'jwt' || userAuth.accessType === 'otp') {
+		//claims to be authenticated with jwt or otp accessToken
+		//verify auth with server
+			Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/login/"+userAuth.accessType+"/auth", {
+				userAuth: userAuth,
+			})
+			.then((response) => {
+				if(response.data.status === 1) {
+				//user is authenticated, we may continue
+					return;
+				} else {
+				//user is not authenticated, send to login
+					setUserVerified(false)
+					setStep(11)
+				}
+				
+			})
+			.catch((err) => {
+		       	console.log("error ", err)});
+
+		} else {
+		//no valid auth type, not supposed to be here, unverify and send to login
+			setUserVerified(false)
+			setStep(11)
+		}
+
+	}, [])
+
+
 
 	//google places autocomplete ref used by search input
 	const { ref: autoCompleteRef } = usePlacesWidget({
@@ -183,18 +217,7 @@ function AddressSearch({ setStep, storeLat, storeLng, deliveryZones, setUserAddr
 	}
 
 	return (<>
-		<Box sx={{ flexGrow: 1 }}>
-	      <AppBar position="static">
-	        <Toolbar variant="regular">
-	          <IconButton edge="start" color="inherit" sx={{ mr: 2 }} onClick={() => setStep(1)}>
-	            <ArrowBackIcon />
-	          </IconButton>
-	          <Typography variant="h6" color="inherit" component="div">
-	            Rechercher votre adresse
-	          </Typography>
-	        </Toolbar>
-	      </AppBar>
-	    </Box>
+
 		<Container maxWidth='sm'>
 			<Dialog open={error} maxWidth="xs" fullWidth onClose={() => setError(false)}>
 				<Box style={{ padding: '16px 8px' }}>
@@ -211,7 +234,12 @@ function AddressSearch({ setStep, storeLat, storeLng, deliveryZones, setUserAddr
 					</DialogActions>
 				</Box>
 			</Dialog>
-			<List sx={{ mt: '24px' }}>
+			<List sx={{ mt: '12px' }}>
+				<ListItem sx={{ pb: '12px' }}>
+					<Button onClick={() => userId ? setStep(21) : setStep(1)} size="small" color="inherit" startIcon={<ArrowBackIcon />}>
+						Retour
+					</Button>
+				</ListItem>
 				<ListItem style={{display:'flex', justifyContent:'center', paddingBottom: '24px'}}>
 					<SvgIcon component={MainIcon} sx={{ width: '128px', height: '128px' }} inheritViewBox />
 				</ListItem>

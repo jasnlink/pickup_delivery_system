@@ -28,26 +28,48 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 import TimeSelectForm from './Forms/TimeSelectForm'
 
-function TimeSelect({ orderType, setStep, storeTimeHours, setOrderDate, setOrderTime }) {
+function TimeSelect({ orderType, setStep, storeTimeHours, setOrderDate, setOrderTime, userAuth, setUserVerified }) {
 
+	//check if user is authenticated
+	useEffect(() => {
 
+		if(userAuth.accessType === 'jwt' || userAuth.accessType === 'otp') {
+		//claims to be authenticated with jwt or otp accessToken
+		//verify auth with server
+			Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/login/"+userAuth.accessType+"/auth", {
+				userAuth: userAuth,
+			})
+			.then((response) => {
+				if(response.data.status === 1) {
+				//user is authenticated, we may continue
+					return;
+				} else {
+				//user is not authenticated, send to login
+					setUserVerified(false)
+					setStep(11)
+				}
+				
+			})
+			.catch((err) => {
+		       	console.log("error ", err)});
+
+		} else {
+		//no valid auth type, not supposed to be here, unverify and send to login
+			setUserVerified(false)
+			setStep(11)
+		}
+
+	}, [])
 
 
 	return (<>
-		<Box sx={{ flexGrow: 1 }}>
-	      <AppBar position="static">
-	        <Toolbar variant="regular">
-	          <IconButton edge="start" color="inherit" sx={{ mr: 2 }} onClick={() => setStep(1)}>
-	            <ArrowBackIcon />
-	          </IconButton>
-	          <Typography variant="h6" color="inherit" component="div">
-	            {orderType}
-	          </Typography>
-	        </Toolbar>
-	      </AppBar>
-	    </Box>
 		<Container maxWidth='sm'>
-			<List sx={{ mt: '24px' }}>
+			<List sx={{ mt: '12px' }}>
+				<ListItem sx={{ pb: '12px' }}>
+					<Button onClick={() => orderType==="Emporter" ? setStep(1) : setStep(12)} size="small" color="inherit" startIcon={<ArrowBackIcon />}>
+						Retour
+					</Button>
+				</ListItem>
 				<TimeSelectForm setStep={step => setStep(step)} storeTimeHours={storeTimeHours} setOrderDate={setOrderDate} setOrderTime={setOrderTime} />
 			</List>
 		</Container>

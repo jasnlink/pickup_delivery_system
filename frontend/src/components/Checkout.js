@@ -87,15 +87,18 @@ function Checkout({
 	storePostalCode,
 	storeLat,
 	storeLng,
-	deliveryZones
+	deliveryZones,
+	userAuth,
+	setUserVerified
 }) {
 	
 	//page loading
 	const [loading, setLoading] = useState(true);
-	//payment drawer open state
-	const [paymentDrawer, setPaymentDrawer] = useState(false);
+	
 	//payment error
 	const [paymentError, setPaymentError] = useState(false);
+	
+
 	//order display date and time
 	let [displayDate, setDisplayDate] = useState("")
 
@@ -115,6 +118,35 @@ function Checkout({
 
 
 	useEffect(()=> {
+
+		if(userAuth.accessType === 'jwt' || userAuth.accessType === 'otp') {
+		//claims to be authenticated with jwt or otp accessToken
+		//verify auth with server
+			Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/login/"+userAuth.accessType+"/auth", {
+				userAuth: userAuth,
+			})
+			.then((response) => {
+				if(response.data.status === 1) {
+				//user is authenticated, we may continue
+					return;
+				} else {
+				//user is not authenticated, send to login
+					setUserVerified(false)
+					setStep(11)
+				}
+				
+			})
+			.catch((err) => {
+		       	console.log("error ", err)});
+
+		} else {
+		//no valid auth type, not supposed to be here, unverify and send to login
+			setUserVerified(false)
+			setStep(11)
+		}
+
+
+		
 		if(orderType === "Livraison") {
 
 			getCurrentZone()
@@ -139,6 +171,10 @@ function Checkout({
 		}
 		
 	}, []);
+
+
+	
+
 
 	async function getCurrentZone() {
 		//calculate distance between user and store with helper function
@@ -256,18 +292,6 @@ function Checkout({
 
 	return (
 		<>
-		<Box sx={{ flexGrow: 1 }}>
-	      <AppBar position="static">
-	        <Toolbar variant="regular">
-	        	<IconButton edge="start" color="inherit" sx={{ mr: 2 }} onClick={() => setStep(14)}>
-	            	<ArrowBackIcon />
-	         	 </IconButton>
-	          <Typography variant="h6" color="inherit" component="div">
-	            Sommaire de commande
-	          </Typography>
-	        </Toolbar>
-	      </AppBar>
-	    </Box>
 	    <Dialog open={paymentError} maxWidth="xs" fullWidth onClose={() => setPaymentError(false)}>
 			<Box style={{ padding: '16px 8px' }}>
 				<DialogTitle style={{display:'flex', justifyContent:'center', paddingBottom: 24}}>
@@ -293,43 +317,12 @@ function Checkout({
 		{!loading && (
 			
 			<Container maxWidth="sm" disableGutters>
-				<PaymentDrawer 
-						setStep={(step) => setStep(step)}
-						paymentDrawer={paymentDrawer} 
-						setPaymentDrawer={paymentDrawer => setPaymentDrawer(paymentDrawer)}
-						paymentError={paymentError}
-						setPaymentError={error => setPaymentError(error)}
-						inputNote={inputNote}
-
-						orderType={orderType}
-						orderDate={orderDate}
-						orderTime={orderTime}
-
-						cartSubtotal={cartSubtotal}
-						cartDelivery={cartDelivery}
-						cartTip={cartTip}
-						cartQst={cartQst}
-						cartGst={cartGst}
-						cartTotal={cartTotal}
-						cart={cart}
-
-						userId={userId}
-						userFirstName={userFirstName}
-						userLastName={userLastName}
-						userEmail={userEmail}
-						userPhone={userPhone}
-
-						userAddress={userAddress}
-						userCity={userCity}
-						userDistrict={userDistrict}
-						userPostalCode={userPostalCode}
-						userLat={userLat}
-						userLng={userLng}
-
-
-
-						 />
-				<List sx={{ mt: '24px' }}>
+				<List sx={{ mt: '12px' }}>
+					<ListItem sx={{ pb: '12px' }}>
+						<Button onClick={() => setStep(14)} size="small" startIcon={<ArrowBackIcon />}>
+							Retour
+						</Button>
+					</ListItem>
 
 					<PersonalInformationForm
 						userFirstName={userFirstName}
@@ -483,17 +476,49 @@ function Checkout({
 	                    </Grid>
 	                </ListItem>
 	                <Divider />
-	                <ListItem>
-	                    <Button onClick={() => setPaymentDrawer(true)} disabled={!cart.length || parseFloat(cartMinimum) > parseFloat(cartSubtotal)} variant="contained" color="primary" size="large" fullWidth>
-	                        Payer Maintenant
-	                    </Button>
-	                </ListItem>
-	                <ListItem>
-	                    <Button onClick={() => setPaymentDrawer(true)} disabled={!cart.length || parseFloat(cartMinimum) > parseFloat(cartSubtotal)} variant="outlined" color="primary" size="large" fullWidth>
-	                        Paiement sur livraison
-	                    </Button>
-	                </ListItem>
+
+	                <PaymentDrawer 
+						setStep={(step) => setStep(step)}
+						paymentError={paymentError}
+						setPaymentError={error => setPaymentError(error)}
+						
+						inputNote={inputNote}
+
+						orderType={orderType}
+						orderDate={orderDate}
+						orderTime={orderTime}
+
+						cartMinimum={cartMinimum}
+						cartSubtotal={cartSubtotal}
+						cartDelivery={cartDelivery}
+						cartTip={cartTip}
+						cartQst={cartQst}
+						cartGst={cartGst}
+						cartTotal={cartTotal}
+						cart={cart}
+
+						userId={userId}
+						userFirstName={userFirstName}
+						userLastName={userLastName}
+						userEmail={userEmail}
+						userPhone={userPhone}
+
+						userAddress={userAddress}
+						userCity={userCity}
+						userDistrict={userDistrict}
+						userPostalCode={userPostalCode}
+						userLat={userLat}
+						userLng={userLng}
+
+
+
+						 />
+
+	                
 	            </List>
+
+
+
 	        </Container>    
 	        
 		)}

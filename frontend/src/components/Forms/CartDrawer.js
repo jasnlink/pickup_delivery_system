@@ -43,7 +43,7 @@ import '../styles/Menu.css';
 
 import CartDisplay from './CartDisplay';
 
-function CartDrawer({ cart, setCart, handleCheckout }) {
+function CartDrawer({ cart, setCart, handleCheckout, productDrawer }) {
 
 	//cart drawer open state
 	let [cartDrawer, setCartDrawer] = useState(false);
@@ -100,7 +100,7 @@ function CartDrawer({ cart, setCart, handleCheckout }) {
 
 	return (
 		<>
-		{!!cart.length && [ !cartDrawer && (
+		{!!cart.length && [ !cartDrawer && [ !productDrawer && (
 			<AppBar position="fixed" className="cart-btn-container">
 				<Toolbar>
 					<Button onClick={() => setCartDrawer(true)} variant="contained" color="primary" size="large" className="cart-btn" fullWidth>
@@ -109,7 +109,7 @@ function CartDrawer({ cart, setCart, handleCheckout }) {
 				</Toolbar>
 			</AppBar>
 
-		)]}
+		)]]}
 		<Drawer classes={{ paper: "cart-drawer", }} anchor="bottom" open={cartDrawer} onClose={() => setCartDrawer(false)}>
         	<List>
                 <ListItem disablePadding>
