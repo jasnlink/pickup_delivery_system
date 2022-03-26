@@ -2,6 +2,8 @@ apps:
   - script: './server.js'
     exec_mode: 'fork'
     name: 'worker-0'
+    autorestart: true
+    node_args: '-r esm'
     env:
       PORT: 3500
       NODE_ENV: production

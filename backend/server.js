@@ -9,10 +9,7 @@ import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
-import util from 'util';
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-require('util.promisify').shim();
+
 
 
 //read .env file
@@ -1178,6 +1175,83 @@ app.post('/api/order/delivery/place', (req, res) => {
     }
 
 });
+
+
+
+//Fetch selected order content
+app.get('/api/order/fetch/selected', (req, res) => {
+
+    //current order id to be queried
+    let orderId = req.body.orderId
+    orderId = 56
+
+    //fetch all items in the order
+    const fetchOrderRequest = "SELECT o.order_in_id, o.order_id, p.product_id, p.product_name, p.product_price, o.quantity FROM osd_orders_in o INNER JOIN osd_products p ON p.product_id = o.product_id WHERE order_id=?;"
+    connection.query(fetchOrderRequest, [orderId], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('fetching selected order... '+orderId);
+        
+        let promise = Promise.all(result.map((row, index) => {
+
+
+
+
+            return new Promise((resolve, reject) => {
+
+                let fetchOptionsRequest = "SELECT osd_order_in_options.order_in_option_id, osd_optgroups.optgroup_id, osd_optgroups.optgroup_name, osd_options.option_id, osd_options.option_name, osd_options.option_price FROM osd_orders_in INNER JOIN osd_order_in_optgroups ON osd_order_in_optgroups.order_in_id = osd_orders_in.order_in_id INNER JOIN osd_optgroups ON osd_optgroups.optgroup_id = osd_order_in_optgroups.optgroup_id INNER JOIN osd_order_in_options ON osd_order_in_options.order_in_optgroup_id = osd_order_in_optgroups.order_in_optgroup_id INNER JOIN osd_options ON osd_options.option_id = osd_order_in_options.option_id WHERE osd_orders_in.order_in_id=?;";
+
+                connection.query(fetchOptionsRequest, [row.order_in_id], (err, result) => {
+                    if(err) {
+                        console.log('error...', err);
+                        res.status(400).send(err);
+                        return false;
+                    }
+
+                    if(result.length) {
+
+                        resolve({   
+                            rowId: row.order_in_id,
+                            productId: row.product_id,
+                            productName: row.product_name,
+                            productPrice: row.product_price,
+                            productQty: row.quantity,
+                            productOptions: result
+
+                        })
+
+                    }
+
+                    resolve({   
+                        rowId: row.order_in_id,
+                        productId: row.product_id,
+                        productName: row.product_name,
+                        productPrice: row.product_price,
+                        productQty: row.quantity,
+                        productOptions: []
+
+                    })
+
+                })//connection.query
+
+            })//Promise
+
+            
+        }))
+        .then((order) => res.send(order))
+
+        
+    })
+
+
+    async function buildOptions(data) {
+        return data
+    }
+
+})
 
 
 

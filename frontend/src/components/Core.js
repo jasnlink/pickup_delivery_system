@@ -97,6 +97,27 @@ function Core() {
 	const [deliveryZones, setDeliveryZones] = useState();
 
 
+	async function setUser(userData) {
+		try {
+			setUserId(userData.user_id)
+			setUserFirstName(userData.user_first_name)
+			setUserLastName(userData.user_last_name)
+			setUserEmail(userData.user_email)
+			setUserPhone(userData.user_phone)
+			setUserAddress(userData.user_address)
+			setUserAddress2(userData.user_address2)
+			setUserCity(userData.user_city)
+			setUserDistrict(userData.user_district)
+			setUserPostalCode(userData.user_postal_code)
+			setUserLat(userData.user_lat)
+			setUserLng(userData.user_lng)
+		} finally {
+			return;
+		}
+		
+	}
+
+
 	//get store details and populate into state
 	useEffect(() => {
 
@@ -141,7 +162,7 @@ function Core() {
 
 		//check if user has auth object
 		//get user auth from localStorage
-		if(localStorage.getItem('accessType') !== null) {
+		if(localStorage.getItem('accessType') === 'jwt') {
 
 			setUserAuth({	
 							accessType: localStorage.getItem('accessType'), 
@@ -149,7 +170,27 @@ function Core() {
 							accessToken: localStorage.getItem('accessToken')
 						});
 
-			setUserVerified(true);
+			//check saved auth token
+			Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/login/jwt/auth", {
+				userAuth: {	
+							accessType: localStorage.getItem('accessType'), 
+							accessEmail: localStorage.getItem('accessEmail'), 
+							accessToken: localStorage.getItem('accessToken')
+						},
+			})
+			.then((response) => {
+				if(response.data.status === 1) {
+				//user is authenticated, set user data
+					setUser(response.data.userInfo);
+					setUserVerified(true)
+				} else {
+				//user is not authenticated
+					setUserVerified(false)
+				}
+				
+			})
+			.catch((err) => {
+		       	console.log("error ", err)});
 
 		}
 

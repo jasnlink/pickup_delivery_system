@@ -365,7 +365,7 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime, userAut
 		{!loading && (
 			<>
 		    <Container maxWidth='sm'>
-				<List style={{ paddingBottom: 64 }}>
+				<List style={{ paddingBottom: 96 }}>
 				{categories.map((category, cIndex) => (
 					<>
 					<ListItem disablePadding key={cIndex} sx={{ mt: '24px' }}>
@@ -455,7 +455,7 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime, userAut
 
 								</>
 							)}
-							<ListItem sx={{ mt: '4px', mb: '4px' }}>
+							<ListItem sx={{ mt: '4px', mb: '48px' }}>
 								<Grid container spacing={2} justifyContent="center" alignItems="center">
 			                        <Grid item>
 			                            <IconButton

@@ -58,6 +58,8 @@ import CheckoutAddressDisplay from './Forms/CheckoutAddressDisplay';
 import PaymentDrawer from './Forms/PaymentDrawer';
 
 
+import './styles/Menu.css';
+
 function Checkout({ 
 	setStep, 
 	cart, 
@@ -315,15 +317,13 @@ function Checkout({
 
 		)}
 		{!loading && (
-			
+		<>
+			<Button onClick={() => setStep(14)} className="checkout-back-btn" size="small" startIcon={<ArrowBackIcon />}>
+				Retour
+			</Button>
 			<Container maxWidth="sm" disableGutters>
-				<List sx={{ mt: '12px' }}>
-					<ListItem sx={{ pb: '12px' }}>
-						<Button onClick={() => setStep(14)} size="small" startIcon={<ArrowBackIcon />}>
-							Retour
-						</Button>
-					</ListItem>
-
+				
+				<List sx={{ mt: '48px' }}>	
 					<PersonalInformationForm
 						userFirstName={userFirstName}
 						userLastName={userLastName}
@@ -365,6 +365,7 @@ function Checkout({
 	                <CartDisplay cart={cart} setCart={cart => setCart(cart)} />
 	            	<ListItem sx={{ pt: '48px', pb: '24px' }}>
 						<TextField 
+							variant="filled"
 							label="Ajouter une note à la commande" 
 							multiline 
 							minRows={4} 
@@ -520,7 +521,7 @@ function Checkout({
 
 
 	        </Container>    
-	        
+	    </>
 		)}
 		</>
 	

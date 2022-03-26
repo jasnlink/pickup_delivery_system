@@ -60,26 +60,6 @@ function Account({
 	let [loading, setLoading] = useState(true);
 
 
-	async function setUser(userData) {
-		try {
-			setUserId(userData.user_id)
-			setUserFirstName(userData.user_first_name)
-			setUserLastName(userData.user_last_name)
-			setUserEmail(userData.user_email)
-			setUserPhone(userData.user_phone)
-			setUserAddress(userData.user_address)
-			setUserAddress2(userData.user_address2)
-			setUserCity(userData.user_city)
-			setUserDistrict(userData.user_district)
-			setUserPostalCode(userData.user_postal_code)
-			setUserLat(userData.user_lat)
-			setUserLng(userData.user_lng)
-		} finally {
-			setLoading(false);
-		}
-		
-	}
-
 
 	//check if user is authenticated
 	useEffect(() => {
@@ -93,7 +73,7 @@ function Account({
 			.then((response) => {
 				if(response.data.status === 1) {
 				//user is authenticated, we may continue
-					setUser(response.data.userInfo);
+					setLoading(false);
 				} else {
 				//user is not authenticated, send to login
 					setUserVerified(false)
