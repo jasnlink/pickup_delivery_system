@@ -9,8 +9,10 @@ import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import esm from 'esm';
 
-
+import { Server } from 'socket.io';
+import { createServer } from "http";
 
 //read .env file
 dotenv.config();
@@ -27,7 +29,8 @@ const CDN_DIR = path.join(__dirname, 'public');
 const SITE = 'https://staging.2kfusion.com/';
 // set port, listen for requests
 const PORT = process.env.PORT || 3500;
-
+//socket io listening port
+const SOCKET_PORT = 8000
 
 //database connection info
 var connection;
@@ -81,6 +84,10 @@ app.use(fileUpload({
     abortOnLimit: true
  }));
 
+app.listen(PORT, () => {
+    console.log(`server is running on port ${PORT}.`)
+});
+
 
 
 //auto connect and reconnect to database function
@@ -133,10 +140,28 @@ connectToDb( () => {
     }
 })
 
-app.listen(PORT, () => console.log(`server is running on port ${PORT}.`));
 
 
+//socket io setup
+//need to create httpserver to listen in order to appease cors policies
+const httpServer = createServer(app);
+const io = new Server(httpServer, { 
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST']
+    }
+})
 
+//listen for socket
+io.listen(SOCKET_PORT);
+
+io.on('connection', (socket) => {
+    console.log('socket client has connected...');
+
+    socket.on('disconnect', (reason) => {
+        console.log('socket client has disconnected...', reason);
+    });
+});
 
 /********************************************************************************************************
  * 
@@ -643,6 +668,7 @@ app.post('/api/product/list/options', async (req, res) => {
 
 
 
+
 /********************************************************************************************************
  * 
  * 
@@ -755,6 +781,7 @@ app.post('/api/order/pickup/place', (req, res) => {
                             insertCart(cart, orderId)
                             .then((results) => {
                                 
+                                io.emit('refresh_orders');
                                 res.json({status:1});
                                 return true;
                                 
@@ -819,6 +846,7 @@ app.post('/api/order/pickup/place', (req, res) => {
                             insertCart(cart, orderId)
                             .then((results) => {
                                 
+                                io.emit('refresh_orders');
                                 res.json({status:1});
                                 return true;
                                 
@@ -846,8 +874,8 @@ app.post('/api/order/pickup/place', (req, res) => {
         return Promise.all(cart.map((product) => {
 
             //insert each item in cart
-            let insertRequest = "INSERT INTO osd_orders_in (order_id, product_id, quantity) VALUES (?, ?, ?);"
-            return connection.query(insertRequest, [orderId, product.productId, product.productQty], (err, result) => {
+            let insertRequest = "INSERT INTO osd_orders_in (order_id, product_id, quantity, order_in_subtotal) VALUES (?, ?, ?, ?);"
+            return connection.query(insertRequest, [orderId, product.productId, product.productQty, product.productSubtotal], (err, result) => {
                 if(err) {
                     console.log('error...', err);
                     res.status(400).send(err);
@@ -989,8 +1017,8 @@ app.post('/api/order/delivery/place', (req, res) => {
 
                 //we now have the user id, we can start inserting the order
                 //insert new paid delivery order
-                const newOrderRequest =   "INSERT INTO osd_orders (order_status, order_type, order_note, order_delivery_time, order_subtotal, order_tip, order_gst, order_qst, order_total, user_id) VALUES ('NEW', 'DELIVERY', ?, STR_TO_DATE(?, '%Y-%m-%d %H:%i'), ?, ?, ?, ?, ?, ?);";
-                connection.query(newOrderRequest, [orderNote, orderDeliveryTime, cartSubtotal, cartTip, cartGst, cartQst, cartTotal, userId], (err, result) => {
+                const newOrderRequest =   "INSERT INTO osd_orders (order_status, order_type, order_note, order_address, order_city, order_district, order_postal_code, order_lat, order_lng, order_delivery_time, order_subtotal, order_delivery_fee, order_tip, order_gst, order_qst, order_total, user_id) VALUES ('NEW', 'DELIVERY', ?, ?, ?, ?, ?, ?, ?, STR_TO_DATE(?, '%Y-%m-%d %H:%i'), ?, ?, ?, ?, ?, ?, ?);";
+                connection.query(newOrderRequest, [orderNote, userAddress, userCity, userDistrict, userPostalCode, userLat, userLng, orderDeliveryTime, cartSubtotal, cartDelivery, cartTip, cartGst, cartQst, cartTotal, userId], (err, result) => {
 
                     if(err) {
                         console.log('error...', err);
@@ -1019,6 +1047,7 @@ app.post('/api/order/delivery/place', (req, res) => {
                             insertCart(cart, orderId)
                             .then((results) => {
                                
+                                io.emit('refresh_orders');
                                 res.json({status:1});
                                 return true;
                          
@@ -1052,8 +1081,8 @@ app.post('/api/order/delivery/place', (req, res) => {
 
                 //we now have the user id, we can start inserting the order
                 //insert new paid delivery order
-                const newOrderRequest =   "INSERT INTO osd_orders (order_status, order_type, order_note, order_delivery_time, order_subtotal, order_tip, order_gst, order_qst, order_total, user_id) VALUES ('NEW', 'DELIVERY', ?, STR_TO_DATE(?, '%Y-%m-%d %H:%i'), ?, ?, ?, ?, ?, ?);";
-                connection.query(newOrderRequest, [orderNote, orderDeliveryTime, cartSubtotal, cartTip, cartGst, cartQst, cartTotal, userId], (err, result) => {
+                const newOrderRequest =   "INSERT INTO osd_orders (order_status, order_type, order_note, order_address, order_city, order_district, order_postal_code, order_lat, order_lng, order_delivery_time, order_subtotal, order_delivery_fee, order_tip, order_gst, order_qst, order_total, user_id) VALUES ('NEW', 'DELIVERY', ?, ?, ?, ?, ?, ?, ?, STR_TO_DATE(?, '%Y-%m-%d %H:%i'), ?, ?, ?, ?, ?, ?, ?);";
+                connection.query(newOrderRequest, [orderNote, userAddress, userCity, userDistrict, userPostalCode, userLat, userLng, orderDeliveryTime, cartSubtotal, cartDelivery, cartTip, cartGst, cartQst, cartTotal, userId], (err, result) => {
 
                     if(err) {
                         console.log('error...', err);
@@ -1082,6 +1111,7 @@ app.post('/api/order/delivery/place', (req, res) => {
                             insertCart(cart, orderId)
                             .then((results) => {
                                 
+                                io.emit('refresh_orders');
                                 res.json({status:1});
                                 return true;
                                 
@@ -1110,8 +1140,8 @@ app.post('/api/order/delivery/place', (req, res) => {
         return Promise.all(cart.map((product) => {
 
             //insert each item in cart
-            let insertRequest = "INSERT INTO osd_orders_in (order_id, product_id, quantity) VALUES (?, ?, ?);"
-            return connection.query(insertRequest, [orderId, product.productId, product.productQty], (err, result) => {
+            let insertRequest = "INSERT INTO osd_orders_in (order_id, product_id, quantity, order_in_subtotal) VALUES (?, ?, ?, ?);"
+            return connection.query(insertRequest, [orderId, product.productId, product.productQty, product.productSubtotal], (err, result) => {
                 if(err) {
                     console.log('error...', err);
                     res.status(400).send(err);
@@ -1178,15 +1208,64 @@ app.post('/api/order/delivery/place', (req, res) => {
 
 
 
+
+/********************************************************************************************************
+ ********************************************************************************************************
+ ********************************************************************************************************
+ ********************************************************************************************************
+ ********************************************************************************************************
+ ********************************************************************************************************
+ ********************************************************************************************************
+ * 
+ * *************** ADMIN ADMIN ADMIN ADMIN ADMIN ADMIN ADMIN ADMIN ADMIN ADMIN ADMIN ADMIN **************
+ * 
+ ********************************************************************************************************
+ ********************************************************************************************************
+ ********************************************************************************************************
+ ********************************************************************************************************
+ ********************************************************************************************************
+ ********************************************************************************************************
+ ********************************************************************************************************
+********************************************************************************************************/
+
+
+/********************************************************************************************************
+ * 
+ * 
+ * 
+ * HANDLING ORDERS
+ * 
+ * 
+ * 
+********************************************************************************************************/
+
+
+
+
+
+//fetch today's orders ordered by delivery time
+app.post('/api/admin/order/list/today', (req, res) => {
+
+    const fetchOrderRequest = "SELECT u.user_id, u.user_first_name, u.user_last_name, u.user_email, u.user_phone, o.order_address, o.order_city, o.order_district, o.order_postal_code, o.order_lat, o.order_lng, o.order_id, o.order_status, o.order_type, o.order_delivery_time, o.order_subtotal, o.order_delivery_fee, o.order_tip, o.order_gst, o.order_qst, o.order_total, p.payment_auth_id, p.payment_source, p.payment_status, p.payment_date FROM osd_orders o INNER JOIN osd_payments p ON p.order_id = o.order_id INNER JOIN osd_users u ON u.user_id = o.user_id WHERE DATE(order_delivery_time)=CURDATE() ORDER BY order_delivery_time ASC;";
+    connection.query(fetchOrderRequest, (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+
+        console.log('fetching today\'s orders...')
+        res.send(result);
+    })
+})
+
 //Fetch selected order content
-app.get('/api/order/fetch/selected', (req, res) => {
+app.post('/api/admin/order/fetch/selected', (req, res) => {
 
     //current order id to be queried
     let orderId = req.body.orderId
-    orderId = 56
-
     //fetch all items in the order
-    const fetchOrderRequest = "SELECT o.order_in_id, o.order_id, p.product_id, p.product_name, p.product_price, o.quantity FROM osd_orders_in o INNER JOIN osd_products p ON p.product_id = o.product_id WHERE order_id=?;"
+    const fetchOrderRequest = "SELECT o.order_in_id, o.order_id, p.product_id, p.product_name, p.product_price, o.quantity, o.order_in_subtotal FROM osd_orders_in o INNER JOIN osd_products p ON p.product_id = o.product_id WHERE order_id=?;"
     connection.query(fetchOrderRequest, [orderId], (err, result) => {
         if(err) {
             console.log('error...', err);
@@ -1195,15 +1274,15 @@ app.get('/api/order/fetch/selected', (req, res) => {
         }
         console.log('fetching selected order... '+orderId);
         
+        //start a new promise.all to await the map loop through each order row
         let promise = Promise.all(result.map((row, index) => {
 
-
-
-
+            //promise wrapper to await for mysql query
+            //for each row in the order we need to query the DB for product options that were added for that row
             return new Promise((resolve, reject) => {
 
+                //fetch all order options given an order row id
                 let fetchOptionsRequest = "SELECT osd_order_in_options.order_in_option_id, osd_optgroups.optgroup_id, osd_optgroups.optgroup_name, osd_options.option_id, osd_options.option_name, osd_options.option_price FROM osd_orders_in INNER JOIN osd_order_in_optgroups ON osd_order_in_optgroups.order_in_id = osd_orders_in.order_in_id INNER JOIN osd_optgroups ON osd_optgroups.optgroup_id = osd_order_in_optgroups.optgroup_id INNER JOIN osd_order_in_options ON osd_order_in_options.order_in_optgroup_id = osd_order_in_optgroups.order_in_optgroup_id INNER JOIN osd_options ON osd_options.option_id = osd_order_in_options.option_id WHERE osd_orders_in.order_in_id=?;";
-
                 connection.query(fetchOptionsRequest, [row.order_in_id], (err, result) => {
                     if(err) {
                         console.log('error...', err);
@@ -1211,26 +1290,35 @@ app.get('/api/order/fetch/selected', (req, res) => {
                         return false;
                     }
 
+                    //if we find products options related to that order row
                     if(result.length) {
 
-                        resolve({   
-                            rowId: row.order_in_id,
-                            productId: row.product_id,
-                            productName: row.product_name,
-                            productPrice: row.product_price,
-                            productQty: row.quantity,
-                            productOptions: result
+                        //resolve the promise by building the row object for this order row
+                        //we use the helper options builder function
+                        //to rebuild the options we received from DB into the productOptions array
+                        return buildOptions(result).then((productOptions) => {
+                            resolve({   
+                                rowId: row.order_in_id,
+                                productId: row.product_id,
+                                productName: row.product_name,
+                                productPrice: row.product_price,
+                                productQty: row.quantity,
+                                productSubtotal: row.order_in_subtotal,
+                                productOptions: productOptions
 
+                            })
                         })
 
                     }
-
+                    //we didnt find any product options for this order row,
+                    //we resolve a row object with an empty productOptions array for this promise
                     resolve({   
                         rowId: row.order_in_id,
                         productId: row.product_id,
                         productName: row.product_name,
                         productPrice: row.product_price,
                         productQty: row.quantity,
+                        productSubtotal: row.order_in_subtotal,
                         productOptions: []
 
                     })
@@ -1246,14 +1334,192 @@ app.get('/api/order/fetch/selected', (req, res) => {
         
     })
 
-
+    //helper async function to build productOptions array from the results we receive from DB
     async function buildOptions(data) {
-        return data
-    }
+
+        //initial empty product options array
+        let productOptions = []
+
+        //loop through each row of data from DB
+        for(let row of data){
+
+            //build option object with a group to be inserted into productOptions array
+            let optionObject = {
+
+                groupId: row.optgroup_id,
+                groupName: row.optgroup_name,
+                groupOptions: [{
+                                optionId: row.option_id,
+                                optionName: row.option_name,
+                                optionPrice: row.option_price
+                            }]
+            };
+
+            //if the productOptions array is empty then we just push the option object into it
+            if(!productOptions.length) {
+
+                productOptions.push(optionObject);
+
+            } else {
+            //if the productOptions array is not empty then
+            //we loop through each group object in the array to see if the group for the current row already exists
+
+                //inital found flag
+                let found = false;
+
+                //loop through each group object
+                for(let group of productOptions) {
+
+                    //if we find a matching row group id and object group id in array
+                    if(row.optgroup_id === group.groupId) {
+                    //group already exists in selected options, so we push the option into the group instead
+                        let currentOption = {
+
+                            optionId: row.option_id,
+                            optionName: row.option_name,
+                            optionPrice: row.option_price
+
+                        }
+                        group['groupOptions'].push(currentOption);
+                        //set found flag to be true
+                        found = true;
+                    }
+
+                }//for group of productOptions
+
+
+                if(found === false) {
+                //matching group object doesnt exist in the array yet, so we push in the whole option object with group into the array
+                    productOptions.push(optionObject);
+                }
+
+            }//if else
+
+        }//for row of data
+
+        //return the populated productOptions
+        return productOptions;
+
+    }//function
 
 })
 
 
+//move order to next status
+app.post('/api/admin/order/status/next', (req, res) => {
+
+    //get current order status and order id;
+    const status = req.body.status;
+    const orderId = req.body.orderId;
+
+
+    const statusFlow = ['ABORTED', 'NEW', 'PROCESSING', 'READY', 'COMPLETED'];
+
+    const currentStatus = statusFlow.findIndex((el) => el === status);
+    const nextStatus = statusFlow[currentStatus+1];
+
+
+    const nextStatusRequest = "UPDATE osd_orders SET order_status=? WHERE order_id=?;";
+    connection.query(nextStatusRequest, [nextStatus, orderId], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        
+        io.emit('refresh_orders');
+        res.send({status:1})
+
+    })
+
+
+})
+
+
+/********************************************************************************************************
+ * 
+ * 
+ * 
+ * HANDLING CATEGORIES
+ * 
+ * 
+ * 
+********************************************************************************************************/
+
+
+
+//fetch all categories
+app.post('/api/admin/categories/fetch/all', (req, res) => {
+
+
+    const fetchCategoriesRequest = "SELECT * FROM osd_product_categories;";
+    connection.query(fetchCategoriesRequest, (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('fetching all categories...')
+        res.send(result)
+
+    })
+
+
+})
+
+
+
+/********************************************************************************************************
+ * 
+ * 
+ * 
+ * HANDLING PRODUCTS
+ * 
+ * 
+ * 
+********************************************************************************************************/
+
+
+
+//fetch all products in given category
+app.post('/api/admin/products/fetch/category', (req, res) => {
+
+    const categoryId = req.body.categoryId
+
+    const fetchProductsRequest = "SELECT * FROM osd_products WHERE category_id=?;";
+    connection.query(fetchProductsRequest, [categoryId], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('fetching all products from category...', categoryId)
+        res.send(result)
+
+    })
+
+
+})
+
+
+/********************************************************************************************************
+ ********************************************************************************************************
+ ********************************************************************************************************
+ ********************************************************************************************************
+ ********************************************************************************************************
+ ********************************************************************************************************
+ ********************************************************************************************************
+ * 
+ * *************** ADMIN ADMIN ADMIN ADMIN ADMIN ADMIN ADMIN ADMIN ADMIN ADMIN ADMIN ADMIN **************
+ * 
+ ********************************************************************************************************
+ ********************************************************************************************************
+ ********************************************************************************************************
+ ********************************************************************************************************
+ ********************************************************************************************************
+ ********************************************************************************************************
+ ********************************************************************************************************
+********************************************************************************************************/
 
 
 
@@ -1307,3 +1573,16 @@ app.get('/api/test', (req, res) => {
 
 
 })
+
+
+app.get('/api/test/io', (req, res) => {
+
+   io.emit('refresh_orders');
+   res.send({status: 1})
+
+
+})
+
+
+
+

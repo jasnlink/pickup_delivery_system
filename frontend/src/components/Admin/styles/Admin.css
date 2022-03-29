@@ -1,0 +1,14 @@
+.nav-drawer {
+	min-width: 248px;
+	margin: auto;
+	padding-bottom: 64px;
+	z-index: 0;
+}
+
+.product-edit-drawer {
+	min-height: 85% !important;
+	max-height: 85% !important;
+	margin: auto;
+	padding-bottom: 64px;
+	z-index: 0;
+}

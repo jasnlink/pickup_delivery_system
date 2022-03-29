@@ -13,6 +13,7 @@ import Checkout from './Checkout'
 import OrderStatus from './OrderStatus'
 
 import Admin from './Admin/Admin'
+import AdminProductManager from './Admin/AdminProductManager'
 
 function Core() {
 
@@ -207,7 +208,7 @@ function Core() {
 								setStep={step => setStep(step)}
 								setOrderType={type => setOrderType(type)}
 							/>} />
-						<Route exact path="admin" element={<Admin />} />
+						<Route exact path="admin" element={<Admin setStep={step => setStep(step)} />} />
 					</Routes>
 				</Router>
 	      )
@@ -375,7 +376,13 @@ function Core() {
 	    case 1001:
 	    return (
 				<Admin
-					
+					setStep={step => setStep(step)}
+				/>
+	      )
+	    case 1011:
+	    return (
+				<AdminProductManager
+					setStep={step => setStep(step)}
 				/>
 	      )
 
