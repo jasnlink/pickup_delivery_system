@@ -101,6 +101,11 @@ function AdminOrderDashboard() {
 		.catch((err) => {
    			console.log("error ", err)});
 
+		return () => {
+		   	ioClient.disconnect();
+		  }
+
+
 	}, [])
 
 
@@ -125,7 +130,7 @@ function AdminOrderDashboard() {
 	return (
 	<>
 			<Grid container>
-			<Grid item xs={1} style={{ backgroundColor: '#d9d9d994' }}>
+			<Grid item xs={1} style={{ backgroundColor: '#d9d9d994', minHeight: '100vh', maxHeight: '100vh' }}>
 				<Paper sx={{ minHeight: '70vh', mt: '16vh', mb: '14vh' }} elevation={8} square>
 					<Stack sx={{ minWidth: '100%' }}>
 
@@ -153,7 +158,7 @@ function AdminOrderDashboard() {
 					</Stack>
 				</Paper>
 			</Grid>
-				<Grid item xs={11} style={{ maxHeight: '100vh', overflow: 'auto', backgroundColor: '#d9d9d994' }}>
+				<Grid item xs={11} style={{ minHeight: '100vh', maxHeight: '100vh', overflow: 'auto', backgroundColor: '#d9d9d994' }}>
 					{loading && (
 						<Fade in={loading}>
 						<CircularProgress size={64} style={{position: 'relative', top: '50%', left:'50%', marginTop: '-32px', marginLeft: '-32px'}} color="inherit" />
@@ -166,6 +171,7 @@ function AdminOrderDashboard() {
 							<Typography variant="h4">
 								Nouvelles commandes
 							</Typography>
+							<Divider color="black" sx={{ mt: '8px' }} />
 							<Stack spacing={2} sx={{ pt: '12px', pb: '24px' }}>
 								{orders.map((order, index) => (
 								<>
@@ -184,6 +190,7 @@ function AdminOrderDashboard() {
 							<Typography variant="h4">
 								En préparation
 							</Typography>
+							<Divider color="black" sx={{ mt: '8px' }} />
 							<Stack spacing={2} sx={{ pt: '12px', pb: '24px' }}>
 								{orders.map((order, index) => (
 								<>
@@ -202,6 +209,7 @@ function AdminOrderDashboard() {
 							<Typography variant="h4">
 								Prêtes
 							</Typography>
+							<Divider color="black" sx={{ mt: '8px' }} />
 							<Stack spacing={2} sx={{ pt: '12px', pb: '24px' }}>
 								{orders.map((order, index) => (
 								<>

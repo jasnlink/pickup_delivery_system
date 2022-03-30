@@ -8,8 +8,10 @@ body {
 
 }
 .product-media {
-	max-height: 118px;
+	height: 118px;
 	min-width: 118px;
+	width: 118px;
+	object-fit: cover;
 }
 .product-title {
 	max-width: 100%;

@@ -14,6 +14,7 @@ import esm from 'esm';
 import { Server } from 'socket.io';
 import { createServer } from "http";
 
+
 //read .env file
 dotenv.config();
 // disable TLS for testing mail SMTP
@@ -21,16 +22,20 @@ process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 //set time zone
 process.env.TZ = 'America/Toronto';
 
+
+
 // set current working directory
 const __dirname = path.resolve();
 // public image directory
 const CDN_DIR = path.join(__dirname, 'public');
 // set website address
-const SITE = 'https://staging.2kfusion.com/';
+const SITE = 'https://staging.2kfusion.com';
 // set port, listen for requests
 const PORT = process.env.PORT || 3500;
 //socket io listening port
 const SOCKET_PORT = 8000
+
+
 
 //database connection info
 var connection;
@@ -79,7 +84,7 @@ app.use(bodyParser.json({extended: true}));
 app.use(express.static(CDN_DIR));
 app.use(fileUpload({
     limits: {
-        fileSize: 1024 * 10240 // 10 MB
+        fileSize: 1024 * 1024 * 10 // 10 MB
     },
     abortOnLimit: true
  }));
@@ -1469,6 +1474,39 @@ app.post('/api/admin/categories/fetch/all', (req, res) => {
 
 
 
+
+/********************************************************************************************************
+ * 
+ * 
+ * 
+ * HANDLING PRODUCT OPTIONS
+ * 
+ * 
+ * 
+********************************************************************************************************/
+
+
+//fetch all product options
+app.post('/api/admin/optiongroups/fetch/all', (req, res) => {
+
+
+    const fetchOptionsgroupsRequest = "SELECT * FROM osd_optgroups;";
+    connection.query(fetchOptionsgroupsRequest, (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('fetching all optiongroups...')
+        res.send(result)
+
+    })
+
+
+})
+
+
+
 /********************************************************************************************************
  * 
  * 
@@ -1486,7 +1524,7 @@ app.post('/api/admin/products/fetch/category', (req, res) => {
 
     const categoryId = req.body.categoryId
 
-    const fetchProductsRequest = "SELECT * FROM osd_products WHERE category_id=?;";
+    const fetchProductsRequest = "SELECT * FROM osd_products WHERE category_id=? ORDER BY order_index;";
     connection.query(fetchProductsRequest, [categoryId], (err, result) => {
         if(err) {
             console.log('error...', err);
@@ -1498,6 +1536,408 @@ app.post('/api/admin/products/fetch/category', (req, res) => {
 
     })
 
+
+})
+
+
+//add a new product
+app.post('/api/admin/products/insert', (req, res) => {
+
+
+    const categorySelectId = req.body.categorySelectId
+
+    const editName = req.body.editName
+    const editDesc = req.body.editDesc
+    const editPrice = req.body.editPrice
+    let optiongroups = req.body.optiongroups
+
+    const file = req.files.file;
+
+    //set upload path
+    const uploadPath = CDN_DIR+'/assets/';
+    const timestamp = Date.now();
+    const fileExtension = (file.name).split('.').pop()
+    const fileName = timestamp+'.'+fileExtension;
+    const filePath = uploadPath+fileName;
+
+    const fileUrl = SITE+'/assets/'+fileName;
+
+    //move file to directory
+    file.mv(filePath, err => {
+
+        if(err) {
+            console.error(err);
+            res.status(400).send(err);
+        }
+        console.log("uploading file..."+file.name) 
+
+    })
+    
+
+
+    const insertProductRequest = "INSERT INTO osd_products (product_name, product_desc, product_image, product_price, category_id) VALUES (?, ?, ?, ?, ?);"
+    connection.query(insertProductRequest, [editName, editDesc, fileUrl, editPrice, categorySelectId], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('inserting product...', editName)
+
+
+        //if we got option groups
+        if(JSON.parse(optiongroups).length) {
+
+            //use newly inserted product id for next request
+            const lastInsertID = result.insertId;
+
+            //decode the stringified array
+            optiongroups = JSON.parse(optiongroups)
+
+            //build the insert request
+            //by looping through option groups
+            let insertRequest = "INSERT INTO osd_optgroup_products (optgroup_id, product_id) VALUES "
+            let promise = Promise.all(optiongroups.map((group, index) => {
+
+                if(index+1 === optiongroups.length) {
+                    return insertRequest += "("+group+","+lastInsertID+");" 
+                }
+                return insertRequest += "("+group+","+lastInsertID+")," 
+                
+
+            })).then((results) => {
+    
+                //then we insert the newly selected optiongroups
+                connection.query(insertRequest, (err, result) => {
+                    if(err) {
+                        console.log('error...', err);
+                        res.status(400).send(err);
+                        return false;
+                    }
+                    console.log('inserting new selected option groups...')
+
+                    //finally we fetch the updated product list
+                    const fetchQuery = "SELECT * FROM osd_products WHERE category_id=? ORDER BY order_index;";
+                    connection.query(fetchQuery, [categorySelectId], (err, result) => {
+                        if(err) {
+                            console.log('error...', err);
+                            res.status(400).send(err);
+                            return false;
+                        }
+                        console.log('fetching updated products from cateogry...', categorySelectId);
+                        res.send(result);
+
+                    });
+
+
+                })
+
+            })
+        //no option groups
+        } else {
+
+
+            //no option groups to insert, so we just fetch the updated product list
+            const fetchQuery = "SELECT * FROM osd_products WHERE category_id=? ORDER BY order_index;";
+            connection.query(fetchQuery, [categorySelectId], (err, result) => {
+                if(err) {
+                    console.log('error...', err);
+                    res.status(400).send(err);
+                    return false;
+                }
+                console.log('fetching updated products from cateogry...', categorySelectId);
+                res.send(result);
+
+            });
+
+
+        }
+
+    })
+
+})
+
+
+//update a product given a product id
+app.post('/api/admin/products/update', (req, res) => {
+
+
+    const categorySelectId = req.body.categorySelectId
+
+    const editId = req.body.editId
+    const editName = req.body.editName
+    const editDesc = req.body.editDesc
+    const editPrice = req.body.editPrice
+    let optiongroups = req.body.optiongroups
+
+
+    //if we uploaded a new image file
+    if(req.files) {
+
+        const file = req.files.file;
+
+        //set upload path
+        const uploadPath = CDN_DIR+'/assets/';
+        const timestamp = Date.now();
+        const fileExtension = (file.name).split('.').pop()
+        const fileName = timestamp+'.'+fileExtension;
+        const filePath = uploadPath+fileName;
+
+        const fileUrl = SITE+'/assets/'+fileName;
+
+        //move file to directory
+        file.mv(filePath, err => {
+
+            if(err) {
+                console.error(err);
+                res.status(400).send(err);
+            }
+            console.log("uploading file..."+file.name) 
+
+        })
+        
+
+
+        const updateRequest = "UPDATE osd_products SET product_name=?, product_desc=?, product_image=?, product_price=? WHERE product_id=?;"
+        connection.query(updateRequest, [editName, editDesc, fileUrl, editPrice, editId], (err, result) => {
+            if(err) {
+                console.log('error...', err);
+                res.status(400).send(err);
+                return false;
+            }
+            console.log('updating product...', editId)
+
+
+            //if we got option groups
+            if(optiongroups) {
+
+                //decode the stringified array
+                optiongroups = JSON.parse(optiongroups)
+
+                //build the insert request
+                //by looping through option groups
+                let insertRequest = "INSERT INTO osd_optgroup_products (optgroup_id, product_id) VALUES "
+                let promise = Promise.all(optiongroups.map((group, index) => {
+
+                    if(index+1 === optiongroups.length) {
+                        return insertRequest += "("+group+","+editId+");" 
+                    }
+                    return insertRequest += "("+group+","+editId+")," 
+                    
+
+                })).then((results) => {
+                    //first delete existing option groups
+                    const deleteRequest = "DELETE FROM osd_optgroup_products WHERE product_id=?"
+                    connection.query(deleteRequest, [editId], (err, result) => {
+                        if(err) {
+                            console.log('error...', err);
+                            res.status(400).send(err);
+                            return false;
+                        }
+                        console.log('deleting all optiongroups from product...', editId)
+
+                        //then we insert the newly selected optiongroups
+                        connection.query(insertRequest, (err, result) => {
+                            if(err) {
+                                console.log('error...', err);
+                                res.status(400).send(err);
+                                return false;
+                            }
+                            console.log('inserting new selected option groups...')
+
+                            //finally we fetch the updated product list
+                            const fetchQuery = "SELECT * FROM osd_products WHERE category_id=? ORDER BY order_index;";
+                            connection.query(fetchQuery, [categorySelectId], (err, result) => {
+                                if(err) {
+                                    console.log('error...', err);
+                                    res.status(400).send(err);
+                                    return false;
+                                }
+                                console.log('fetching updated products from cateogry...', categorySelectId);
+                                res.send(result);
+
+                            });
+
+                        })
+
+
+                    })
+
+                })
+            //no option groups
+            } else {
+
+
+                //no option groups to insert, so we just fetch the updated product list
+                const fetchQuery = "SELECT * FROM osd_products WHERE category_id=? ORDER BY order_index;";
+                connection.query(fetchQuery, [categorySelectId], (err, result) => {
+                    if(err) {
+                        console.log('error...', err);
+                        res.status(400).send(err);
+                        return false;
+                    }
+                    console.log('fetching updated products from cateogry...', categorySelectId);
+                    res.send(result);
+
+                });
+
+
+            }
+
+
+        })
+
+    //if we didnt upload an image file
+    } else {
+
+        //update product with new data
+        const updateRequest = "UPDATE osd_products SET product_name=?, product_desc=?, product_price=? WHERE product_id=?;"
+        connection.query(updateRequest, [editName, editDesc, editPrice, editId], (err, result) => {
+            if(err) {
+                console.log('error...', err);
+                res.status(400).send(err);
+                return false;
+            }
+            console.log('updating product...', editId);
+
+            //if we got option groups
+            if(optiongroups) {
+
+                //decode the stringified array
+                optiongroups = JSON.parse(optiongroups)
+
+                //build the insert request
+                //by looping through option groups
+                let insertRequest = "INSERT INTO osd_optgroup_products (optgroup_id, product_id) VALUES "
+                let promise = Promise.all(optiongroups.map((group, index) => {
+
+                    if(index+1 === optiongroups.length) {
+                        return insertRequest += "("+group+","+editId+");" 
+                    }
+                    return insertRequest += "("+group+","+editId+")," 
+                    
+
+                })).then((results) => {
+                    //first delete existing option groups
+                    const deleteRequest = "DELETE FROM osd_optgroup_products WHERE product_id=?"
+                    connection.query(deleteRequest, [editId], (err, result) => {
+                        if(err) {
+                            console.log('error...', err);
+                            res.status(400).send(err);
+                            return false;
+                        }
+                        console.log('deleting all optiongroups from product...', editId)
+
+                        //then we insert the newly selected optiongroups
+                        connection.query(insertRequest, (err, result) => {
+                            if(err) {
+                                console.log('error...', err);
+                                res.status(400).send(err);
+                                return false;
+                            }
+                            console.log('inserting new selected option groups...')
+
+                            //finally we fetch the updated product list
+                            const fetchQuery = "SELECT * FROM osd_products WHERE category_id=? ORDER BY order_index;";
+                            connection.query(fetchQuery, [categorySelectId], (err, result) => {
+                                if(err) {
+                                    console.log('error...', err);
+                                    res.status(400).send(err);
+                                    return false;
+                                }
+                                console.log('fetching updated products from cateogry...', categorySelectId);
+                                res.send(result);
+
+                            });
+
+                        })
+
+
+                    })
+
+                })
+            //no option groups
+            } else {
+
+
+                //no option groups to insert, so we just fetch the updated product list
+                const fetchQuery = "SELECT * FROM osd_products WHERE category_id=? ORDER BY order_index;";
+                connection.query(fetchQuery, [categorySelectId], (err, result) => {
+                    if(err) {
+                        console.log('error...', err);
+                        res.status(400).send(err);
+                        return false;
+                    }
+                    console.log('fetching updated products from cateogry...', categorySelectId);
+                    res.send(result);
+
+                });
+
+
+            }
+
+
+
+        })
+
+    }
+    
+    
+
+
+})
+
+
+//update a product given a product id
+app.post('/api/admin/products/move', (req, res) => {
+
+
+    const categorySelectId = req.body.categorySelectId
+    const sId = req.body.sId;
+    const orderId = req.body.orderId;
+    const nextRowId = req.body.nextRowId;
+    const nextRowOrderId = req.body.nextRowOrderId;
+
+    console.log(orderId, nextRowOrderId)
+
+
+
+
+    let moveRequest = "UPDATE osd_products SET order_index=? WHERE product_id=?;"
+    connection.query(moveRequest, [orderId, nextRowId], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('set next product order index...', nextRowId,' with', orderId)
+
+        moveRequest = "UPDATE osd_products SET order_index=? WHERE product_id=?;"
+        connection.query(moveRequest, [nextRowOrderId, sId], (err, result) => {
+            if(err) {
+                console.log('error...', err);
+                res.status(400).send(err);
+                return false;
+            }
+            console.log('set current product order index...', sId,'with', nextRowOrderId)
+
+            const fetchProductsRequest = "SELECT * FROM osd_products WHERE category_id=? ORDER BY order_index;"
+            connection.query(fetchProductsRequest, [categorySelectId], (err, result) => {
+                if(err) {
+                    console.log('error...', err);
+                    res.status(400).send(err);
+                    return false;
+                }
+                console.log('fetching updated products...')
+                res.send(result)
+
+            })
+
+
+        })
+
+
+    })
 
 })
 
