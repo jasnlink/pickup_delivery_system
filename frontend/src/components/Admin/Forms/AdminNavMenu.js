@@ -119,6 +119,7 @@ function AdminNavMenu({ navDrawer, setNavDrawer, navSelect, setNavSelect, setAdm
 				<ListItemButton 
 					selected={navSelect.parent === 1} 
 					onClick={() => handleNavSelect(1,0)}
+					classes={{ selected: "nav-item-selected" }}
 				>
 					<ListItem sx={{ pl: 1 }}>
 						<ListItemText primary={<Typography variant="h6" style={{ fontWeight: '500' }}>Tableau de commandes</Typography>} />
@@ -130,6 +131,8 @@ function AdminNavMenu({ navDrawer, setNavDrawer, navSelect, setNavSelect, setAdm
 				<ListItemButton 
 					selected={navSelect.parent === 2} 
 					onClick={() => handleNavSelect(2,0,true)}
+					classes={{ selected: "nav-item-selected" }}
+
 				>
 					<ListItemText primary={<Typography variant="subtitle1" style={{ fontWeight: '500' }}>Menu</Typography>} />
 					{navSelect.parent === 2 && navSelect.open === 2 ? <ExpandLess /> : <ExpandMore />}
@@ -144,6 +147,7 @@ function AdminNavMenu({ navDrawer, setNavDrawer, navSelect, setNavSelect, setAdm
 								sx={{ pl: 4 }} 
 								selected={navSelect.parent === 2 && navSelect.child === 1}
 								onClick={() => handleNavSelect(2,1)}
+								classes={{ selected: "nav-item-selected" }}
 							>
 									<ListItemText primary="Produits" />
 							</ListItemButton>
@@ -151,6 +155,7 @@ function AdminNavMenu({ navDrawer, setNavDrawer, navSelect, setNavSelect, setAdm
 								sx={{ pl: 4 }} 
 								selected={navSelect.parent === 2 && navSelect.child === 2}
 								onClick={() => handleNavSelect(2,2)}
+								classes={{ selected: "nav-item-selected" }}
 							>
 								<ListItemText primary="Catégories" />
 							</ListItemButton>
@@ -158,20 +163,15 @@ function AdminNavMenu({ navDrawer, setNavDrawer, navSelect, setNavSelect, setAdm
 								sx={{ pl: 4 }} 
 								selected={navSelect.parent === 2 && navSelect.child === 3}
 								onClick={() => handleNavSelect(2,3)}
+								classes={{ selected: "nav-item-selected" }}
 							>
 								<ListItemText primary="Options de produits" />
 							</ListItemButton>
 							<ListItemButton 
 								sx={{ pl: 4 }} 
-								selected={navSelect.parent === 2 && navSelect.child === 4}
-								onClick={() => handleNavSelect(2,4)}
-							>
-								<ListItemText primary="Groupes d'options" />
-							</ListItemButton>
-							<ListItemButton 
-								sx={{ pl: 4 }} 
 								selected={navSelect.parent === 2 && navSelect.child === 5}
-								onClick={() => handleNavSelect(2,5)}
+								onClick={() => handleNavSelect(2,4)}
+								classes={{ selected: "nav-item-selected" }}
 							>
 								<ListItemText primary="Horaires" />
 							</ListItemButton>
@@ -181,6 +181,7 @@ function AdminNavMenu({ navDrawer, setNavDrawer, navSelect, setNavSelect, setAdm
 				<ListItemButton 
 					selected={navSelect.parent === 3} 
 					onClick={() => handleNavSelect(3,0)}
+					classes={{ selected: "nav-item-selected" }}
 				>
 					<ListItemText primary={<Typography variant="subtitle1" style={{ fontWeight: '500' }}>Rapports finances</Typography>} />
 				</ListItemButton>
@@ -188,6 +189,7 @@ function AdminNavMenu({ navDrawer, setNavDrawer, navSelect, setNavSelect, setAdm
 				<ListItemButton 
 					selected={navSelect.parent === 4} 
 					onClick={() => handleNavSelect(4,0,true)}
+					classes={{ selected: "nav-item-selected" }}
 				>
 					<ListItemText primary={<Typography variant="subtitle1" style={{ fontWeight: '500' }}>Emplacement</Typography>} />
 					{navSelect.parent === 4 && navSelect.open === 4 ? <ExpandLess /> : <ExpandMore />}
@@ -202,6 +204,7 @@ function AdminNavMenu({ navDrawer, setNavDrawer, navSelect, setNavSelect, setAdm
 								sx={{ pl: 4 }} 
 								selected={navSelect.parent === 4 && navSelect.child === 1}
 								onClick={() => handleNavSelect(4,1)}
+								classes={{ selected: "nav-item-selected" }}
 							>
 								<ListItemText primary="Adresse" />
 							</ListItemButton>
@@ -209,6 +212,7 @@ function AdminNavMenu({ navDrawer, setNavDrawer, navSelect, setNavSelect, setAdm
 								sx={{ pl: 4 }} 
 								selected={navSelect.parent === 4 && navSelect.child === 2}
 								onClick={() => handleNavSelect(4,2)}
+								classes={{ selected: "nav-item-selected" }}
 							>
 								<ListItemText primary="Zones de livraison" />
 							</ListItemButton>
@@ -216,6 +220,7 @@ function AdminNavMenu({ navDrawer, setNavDrawer, navSelect, setNavSelect, setAdm
 								sx={{ pl: 4 }} 
 								selected={navSelect.parent === 4 && navSelect.child === 3}
 								onClick={() => handleNavSelect(4,3)}
+								classes={{ selected: "nav-item-selected" }}
 							>
 								<ListItemText primary="Heures" />
 							</ListItemButton>
@@ -225,6 +230,7 @@ function AdminNavMenu({ navDrawer, setNavDrawer, navSelect, setNavSelect, setAdm
 				<ListItemButton 
 					selected={navSelect.parent === 5} 
 					onClick={() => handleNavSelect(5,0,true)}
+					classes={{ selected: "nav-item-selected" }}
 				>
 					<ListItemText primary={<Typography variant="subtitle1" style={{ fontWeight: '500' }}>Intégrations</Typography>} />
 					{navSelect.parent === 5 && navSelect.open === 5 ? <ExpandLess /> : <ExpandMore />}
@@ -239,6 +245,7 @@ function AdminNavMenu({ navDrawer, setNavDrawer, navSelect, setNavSelect, setAdm
 								sx={{ pl: 4 }} 
 								selected={navSelect.parent === 5 && navSelect.child === 1}
 								onClick={() => handleNavSelect(5,1)}
+								classes={{ selected: "nav-item-selected" }}
 							>
 								<ListItemText primary="Caisses POS" />
 							</ListItemButton>
@@ -246,6 +253,7 @@ function AdminNavMenu({ navDrawer, setNavDrawer, navSelect, setNavSelect, setAdm
 								sx={{ pl: 4 }} 
 								selected={navSelect.parent === 5 && navSelect.child === 2}
 								onClick={() => handleNavSelect(5,2)}
+								classes={{ selected: "nav-item-selected" }}
 							>
 								<ListItemText primary="Plateformes" />
 							</ListItemButton>
@@ -253,6 +261,7 @@ function AdminNavMenu({ navDrawer, setNavDrawer, navSelect, setNavSelect, setAdm
 								sx={{ pl: 4 }} 
 								selected={navSelect.parent === 5 && navSelect.child === 3}
 								onClick={() => handleNavSelect(5,3)}
+								classes={{ selected: "nav-item-selected" }}
 							>
 								<ListItemText primary="Paiements" />
 							</ListItemButton>

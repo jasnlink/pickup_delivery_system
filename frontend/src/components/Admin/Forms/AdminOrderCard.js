@@ -63,6 +63,7 @@ import ContactsIcon from '@mui/icons-material/Contacts';
 
 import AdminOrderDisplay from './AdminOrderDisplay'
 
+import '../styles/Admin.css';
 
 function AdminOrderCard({ order, index, orderSelect, handleOrderSelect }) {
 
@@ -87,12 +88,12 @@ function AdminOrderCard({ order, index, orderSelect, handleOrderSelect }) {
 
 	return (
 	<>
-		<Card key={index}>
+		<Card key={index} square>
 			<CardActionArea component="div" onClick={() => handleOrderSelect(order.order_id)} sx={{ p: '12px' }}>
 				<Grid container alignItems="center">
 					<Grid direction="column" container item xs={3}>
 						<Grid item>
-							{order.payment_status === 'COMPLETED' ? <Typography style={{ color: 'green' }} variant="h6">PAYÉ</Typography> : <Typography style={{ color: 'red' }} variant="h6">INPAYÉ</Typography>}
+							<Typography variant="h6">IN</Typography>
 						</Grid>
 						<Grid item>
 							<Typography variant="body1">
@@ -123,6 +124,7 @@ function AdminOrderCard({ order, index, orderSelect, handleOrderSelect }) {
 						<Button size="large"  
 								fullWidth
 								variant="contained" 
+								className="btn"
 								disableElevation
 								onMouseDown={event => event.stopPropagation()}
 								onTouchStart={(event) => event.stopPropagation()} 
@@ -140,6 +142,7 @@ function AdminOrderCard({ order, index, orderSelect, handleOrderSelect }) {
 						<Button size="large"  
 								fullWidth
 								variant="contained" 
+								className="btn"
 								disableElevation
 								onMouseDown={event => event.stopPropagation()}
 								onTouchStart={(event) => event.stopPropagation()} 
@@ -157,6 +160,7 @@ function AdminOrderCard({ order, index, orderSelect, handleOrderSelect }) {
 						<Button size="large"  
 								fullWidth
 								variant="contained" 
+								className="btn"
 								disableElevation
 								onMouseDown={event => event.stopPropagation()}
 								onTouchStart={(event) => event.stopPropagation()} 

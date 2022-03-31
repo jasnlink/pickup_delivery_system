@@ -67,6 +67,7 @@ import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import './styles/Admin.css';
 
 import AdminProductCard from './Forms/AdminProductCard'
+import AdminError from './Forms/AdminError'
 
 function AdminProductManager() {
 
@@ -181,9 +182,6 @@ function AdminProductManager() {
 		formData.append('editPrice', editPrice);
 
 		
-
-		console.log(selectedOptiongroups)
-
 		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/products/insert", formData, {
 			headers: {
 				'Content-Type': 'multipart/form-data'
@@ -236,6 +234,26 @@ function AdminProductManager() {
 
 	}
 
+
+	function handleEditDelete() {
+
+		setProductLoading(true);
+
+		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/products/delete", {
+
+			categorySelectId: categorySelectId,
+			editId: editId,
+			editImg: editImg,
+		})
+		.then((response) => {
+			handleEditClose();
+			setProducts(response.data);
+			setProductLoading(false);
+		})
+
+	}
+
+
 	function handleEditSubmit() {
 
 		setProductLoading(true);
@@ -262,11 +280,9 @@ function AdminProductManager() {
 		formData.append('editName', editName);
 		formData.append('editDesc', editDesc);
 		formData.append('editPrice', editPrice);
+		formData.append('editImg', editImg);
 
 		
-
-		console.log(selectedOptiongroups)
-
 		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/products/update", formData, {
 			headers: {
 				'Content-Type': 'multipart/form-data'
@@ -280,16 +296,70 @@ function AdminProductManager() {
 
 	}
 
-	function handleProductImgUpload(e) {
 
-		if(editImg) {
-			setEditImg('');
+	const [uploadSizeError, setUploadSizeError] = useState(false)
+	const [uploadTypeError, setUploadTypeError] = useState(false)
+
+
+	//handle file upload by checking file size and file extension before uploading
+	async function handleProductImgUpload(e) {
+
+
+		//file size max of 2MB
+		const file = e.target.files[0]
+
+		getFileExtension(file)
+		.then((result) => {
+
+			validateExtension(result)
+			.then((result) => {
+
+				if(file.size > (1024*1024*2)) {
+
+					setUploadSizeError(true);
+					return;
+
+				} else if(!result) {
+					
+					setUploadTypeError(true);
+					return;
+
+				} else {
+
+					//get image to upload
+					setEditImgFile(file);
+					//create temp url to preview image
+					setEditImgTemp(URL.createObjectURL(file));
+
+				}
+
+			})
+			
+		})
+
+	}
+
+	//helper function to extract file extension from file name
+	async function getFileExtension(file) {
+
+		let name = file.name
+		name = name.split('.').pop().toLowerCase()
+		return name
+
+	}
+
+	//validate file extension with array of valid extensions
+	async function validateExtension(extension) {
+
+		const valid = ['jpg', 'jpeg', 'png'];
+
+		const found = valid.find(el => el === extension)
+		if(found) {
+			return true
+		} else {
+			return false
 		}
 
-		//get image to upload
-		setEditImgFile(e.target.files[0]);
-		//create temp url to preview image
-		setEditImgTemp(URL.createObjectURL(e.target.files[0]));
 	}
 
 
@@ -362,7 +432,7 @@ function AdminProductManager() {
 
 		title: Yup.string().required(),
 		description: Yup.string().required(),
-		price: Yup.string().matches(/^\d+(\.(\d{1,2}))?$/).required(),
+		price: Yup.number().positive().required(),
 	})
 
 	useEffect(() => {
@@ -382,7 +452,7 @@ function AdminProductManager() {
 	}, [editName, editDesc, editPrice])
 
 
-	//move product up one index
+	//move product up or down one index
 	//sId: product id
 	//ordId: product order index
 	//mapId: current place in the products array, or the current spot it is being displayed
@@ -425,7 +495,18 @@ function AdminProductManager() {
 	return (
 	<>		
 
+		<AdminError
+			error={uploadSizeError}
+			setError={setUploadSizeError}
+			message="La taille de l'image est trop grande. Le maximum est de 2MB."
 
+		 />
+		 <AdminError
+			error={uploadTypeError}
+			setError={setUploadTypeError}
+			message="La type de l'image doit être JPG ou PNG."
+
+		 />
 		<Grid container>
 			<Grid item xs={2}>
 				<Paper sx={{ minHeight: '100vh' }} elevation={8} square>
@@ -442,7 +523,12 @@ function AdminProductManager() {
 						<>
 							{categories.map((category, index) => (
 
-								<ListItemButton key={category.category_id} selected={categorySelectId === category.category_id} onClick={() => handleCategorySelect(category.category_id)}>
+								<ListItemButton 
+									key={category.category_id} 
+									selected={categorySelectId === category.category_id} 
+									onClick={() => handleCategorySelect(category.category_id)}
+									classes={{ selected: "nav-item-selected" }}
+								>
 									<ListItemText primary={category.category_name} />
 								</ListItemButton>
 
@@ -522,6 +608,7 @@ function AdminProductManager() {
 												<Button
 													className="product-delete-btn"
 													disableElevation
+													onClick={handleEditDelete}
 												>
 													<DeleteForeverIcon sx={{ height: '28px', width: '28px' }} />
 												</Button>
@@ -578,7 +665,8 @@ function AdminProductManager() {
 											onChange={e => setEditPrice(e.target.value)}
 											fullWidth
 											inputProps={{
-												type: 'number'
+												type: 'number',
+												pattern: '/^\\d*(\\.\\d{0,2})?$/'
 											}}
 											InputProps={{
 												className: 'text-input',
@@ -606,7 +694,7 @@ function AdminProductManager() {
 											</Button>
 										</label>
 										{!productEditDrawerMode && !editImg && !editImgTemp ? <div style={{ height: '256px', width: '256px' }}></div> : ''}
-										<img src={editImg} className="product-edit-upload-img" hidden={!editImg}/>
+										<img src={editImg} className="product-edit-upload-img" hidden={editImgTemp}/>
 										<img src={editImgTemp} className="product-edit-upload-img" hidden={!editImgTemp}/>
 									</ListItem>
 
@@ -623,7 +711,11 @@ function AdminProductManager() {
 										>
 											{optiongroups.map((group, index) => (
 
-												<ToggleButton sx={{ borderRadius: 0 }} value={group.optgroup_id}>
+												<ToggleButton 
+													sx={{ borderRadius: 0 }} 
+													value={group.optgroup_id}
+													classes={{ selected: "nav-item-selected" }}
+												>
 													{group.optgroup_name}
 												</ToggleButton>
 

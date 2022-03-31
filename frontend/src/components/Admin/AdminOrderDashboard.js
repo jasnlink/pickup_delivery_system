@@ -137,16 +137,15 @@ function AdminOrderDashboard() {
 						<ToggleButtonGroup
 							orientation="vertical"
 							exclusive
-							sx={{height:'51vh'}}
-							color="primary"
+							sx={{height:'51vh', color: '#000000'}}
 						>
-							<ToggleButton sx={{height:'17vh', borderRadius: 0}} value="NEW" selected={orderView === "NEW"} onClick={() => setOrderView("NEW")}>
+							<ToggleButton sx={{height:'17vh', borderRadius: 0, color: "#000000"}} classes={{ selected: "status-view-selected" }} value="NEW" selected={orderView === "NEW"} onClick={() => setOrderView("NEW")}>
 								<SvgIcon component={NewIcon} sx={{ width: '32px', height: '32px' }} inheritViewBox />
 							</ToggleButton>
-							<ToggleButton sx={{height:'17vh', borderRadius: 0}} value="PROCESSING" selected={orderView === "PROCESSING"} onClick={() => setOrderView("PROCESSING")}>
+							<ToggleButton sx={{height:'17vh', borderRadius: 0, color: "#000000"}} classes={{ selected: "status-view-selected" }} value="PROCESSING" selected={orderView === "PROCESSING"} onClick={() => setOrderView("PROCESSING")}>
 								<SvgIcon component={ProcessingIcon} sx={{ width: '32px', height: '32px', paddingRight: '4px' }} inheritViewBox />
 							</ToggleButton>
-							<ToggleButton sx={{height:'17vh', borderRadius: 0}} value="READY" selected={orderView === "READY"} onClick={() => setOrderView("READY")}>
+							<ToggleButton sx={{height:'17vh', borderRadius: 0, color: "#000000"}} classes={{ selected: "status-view-selected" }} value="READY" selected={orderView === "READY"} onClick={() => setOrderView("READY")}>
 								<SvgIcon component={ReadyIcon} sx={{ width: '32px', height: '32px' }} inheritViewBox />
 							</ToggleButton>
 						</ToggleButtonGroup>

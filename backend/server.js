@@ -10,6 +10,7 @@ import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import esm from 'esm';
+import fs from 'fs';
 
 import { Server } from 'socket.io';
 import { createServer } from "http";
@@ -84,7 +85,7 @@ app.use(bodyParser.json({extended: true}));
 app.use(express.static(CDN_DIR));
 app.use(fileUpload({
     limits: {
-        fileSize: 1024 * 1024 * 10 // 10 MB
+        fileSize: 1024 * 1024 * 2 // 2 MB
     },
     abortOnLimit: true
  }));
@@ -523,7 +524,7 @@ app.post('/api/category/list/operation', (req, res) => {
     const time = req.body.time;
 
 
-    const request =   "SELECT osd_product_categories.category_id, category_name FROM osd_timegroups INNER JOIN osd_timegroup_days ON osd_timegroups.timegroup_id = osd_timegroup_days.timegroup_id INNER JOIN osd_timegroup_categories ON osd_timegroups.timegroup_id = osd_timegroup_categories.timegroup_id INNER JOIN osd_product_categories ON osd_timegroup_categories.category_id = osd_product_categories.category_id WHERE osd_timegroup_days.timegroup_day=? AND osd_product_categories.enabled=1 AND STR_TO_DATE(?, '%H:%i') BETWEEN osd_timegroups.timegroup_from AND osd_timegroups.timegroup_to;";
+    const request =   "SELECT osd_product_categories.category_id, category_name FROM osd_timegroups INNER JOIN osd_timegroup_days ON osd_timegroups.timegroup_id = osd_timegroup_days.timegroup_id INNER JOIN osd_timegroup_categories ON osd_timegroups.timegroup_id = osd_timegroup_categories.timegroup_id INNER JOIN osd_product_categories ON osd_timegroup_categories.category_id = osd_product_categories.category_id WHERE osd_timegroup_days.timegroup_day=? AND osd_product_categories.enabled=1 AND STR_TO_DATE(?, '%H:%i') BETWEEN osd_timegroups.timegroup_from AND osd_timegroups.timegroup_to ORDER BY osd_product_categories.order_index;";
     connection.query(request, [day, time], (err, result) => {
 
         if(err) {
@@ -1457,7 +1458,7 @@ app.post('/api/admin/order/status/next', (req, res) => {
 app.post('/api/admin/categories/fetch/all', (req, res) => {
 
 
-    const fetchCategoriesRequest = "SELECT * FROM osd_product_categories;";
+    const fetchCategoriesRequest = "SELECT * FROM osd_product_categories ORDER BY order_index;";
     connection.query(fetchCategoriesRequest, (err, result) => {
         if(err) {
             console.log('error...', err);
@@ -1473,6 +1474,157 @@ app.post('/api/admin/categories/fetch/all', (req, res) => {
 })
 
 
+//add a new category
+app.post('/api/admin/categories/insert', (req, res) => {
+
+
+    const editName = req.body.editName
+
+    const insertCategoryRequest = "INSERT INTO osd_product_categories (category_name) VALUES (?);"
+    connection.query(insertCategoryRequest, [editName], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('inserting category...', editName)
+
+
+        const fetchRequest = "SELECT * FROM osd_product_categories ORDER BY order_index;";
+        connection.query(fetchRequest, (err, result) => {
+            if(err) {
+                console.log('error...', err);
+                res.status(400).send(err);
+                return false;
+            }
+            console.log('fetching updated categories...');
+            res.send(result);
+
+        });
+
+    });
+
+});
+
+
+
+//update a category given a category id
+app.post('/api/admin/categories/update', (req, res) => {
+
+
+
+    const editId = req.body.editId
+    const editName = req.body.editName
+
+
+    const updateRequest = "UPDATE osd_product_categories SET category_name=? WHERE category_id=?;"
+    connection.query(updateRequest, [editName, editId], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('updating category...', editId)
+
+        const fetchRequest = "SELECT * FROM osd_product_categories ORDER BY order_index;";
+        connection.query(fetchRequest, (err, result) => {
+            if(err) {
+                console.log('error...', err);
+                res.status(400).send(err);
+                return false;
+            }
+            console.log('fetching updated categories...');
+            res.send(result);
+
+        });
+
+
+    });
+
+});
+
+
+
+//delete a category given a category id
+app.post('/api/admin/categories/delete', (req, res) => {
+
+    const editId = req.body.editId    
+
+    const deleteRequest = "DELETE FROM osd_product_categories WHERE category_id=?;"
+    connection.query(deleteRequest, [editId], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('deleting category...', editId)
+
+        const fetchRequest = "SELECT * FROM osd_product_categories ORDER BY order_index;";
+        connection.query(fetchRequest, (err, result) => {
+            if(err) {
+                console.log('error...', err);
+                res.status(400).send(err);
+                return false;
+            }
+            console.log('fetching updated categories...');
+            res.send(result);
+
+        });
+
+
+    });
+
+});
+
+
+//move category up or down one index
+app.post('/api/admin/categories/move', (req, res) => {
+
+
+    const sId = req.body.sId;
+    const orderId = req.body.orderId;
+    const nextRowId = req.body.nextRowId;
+    const nextRowOrderId = req.body.nextRowOrderId;
+
+
+    let moveRequest = "UPDATE osd_product_categories SET order_index=? WHERE category_id=?;"
+    connection.query(moveRequest, [orderId, nextRowId], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('set next category order index...', nextRowId,' with', orderId)
+
+        moveRequest = "UPDATE osd_product_categories SET order_index=? WHERE category_id=?;"
+        connection.query(moveRequest, [nextRowOrderId, sId], (err, result) => {
+            if(err) {
+                console.log('error...', err);
+                res.status(400).send(err);
+                return false;
+            }
+            console.log('set current category order index...', sId,'with', nextRowOrderId)
+
+            const fetchRequest = "SELECT * FROM osd_product_categories ORDER BY order_index;";
+            connection.query(fetchRequest, (err, result) => {
+                if(err) {
+                    console.log('error...', err);
+                    res.status(400).send(err);
+                    return false;
+                }
+                console.log('fetching updated categories...');
+                res.send(result);
+
+
+            });
+
+
+        })
+
+
+    })
+
+})
 
 
 /********************************************************************************************************
@@ -1486,7 +1638,166 @@ app.post('/api/admin/categories/fetch/all', (req, res) => {
 ********************************************************************************************************/
 
 
+
 //fetch all product options
+app.post('/api/admin/options/fetch/all', (req, res) => {
+
+
+    const fetchOptionsRequest = "SELECT * FROM osd_options;";
+    connection.query(fetchOptionsRequest, (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('fetching all options...')
+        res.send(result)
+
+    })
+
+
+})
+
+
+//fetch all product options belonging to a given option group id
+app.post('/api/admin/options/fetch/optiongroup', (req, res) => {
+
+    const sId = req.body.sId
+
+    const fetchOptionsRequest = "SELECT * FROM osd_options WHERE optgroup_id=?;";
+    connection.query(fetchOptionsRequest, [sId], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('fetching all options from option group...', sId)
+        res.send(result)
+
+    })
+
+
+})
+
+
+//update an option given a option id
+app.post('/api/admin/options/update', (req, res) => {
+
+
+    const editId = req.body.editId
+    const optionEditId = req.body.optionEditId
+    const optionEditName = req.body.optionEditName
+    const optionEditPrice = req.body.optionEditPrice
+
+
+    const updateRequest = "UPDATE osd_options SET option_name=?, option_price=? WHERE option_id=?;"
+    connection.query(updateRequest, [optionEditName, optionEditPrice, optionEditId], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('updating option...', optionEditId)
+
+        const fetchRequest = "SELECT * FROM osd_options WHERE optgroup_id=?;";
+        connection.query(fetchRequest, [editId], (err, result) => {
+            if(err) {
+                console.log('error...', err);
+                res.status(400).send(err);
+                return false;
+            }
+            console.log('fetching updated options from option group...', editId);
+            res.send(result);
+
+        });
+
+
+    });
+
+});
+
+
+//delete an option given a option id
+app.post('/api/admin/options/insert', (req, res) => {
+
+    const editId = req.body.editId
+    const optionEditName = req.body.optionEditName
+    const optionEditPrice = req.body.optionEditPrice
+
+    const insertRequest = "INSERT INTO osd_options (option_name, option_price, optgroup_id) VALUES(?, ?, ?);"
+    connection.query(insertRequest, [optionEditName, optionEditPrice, editId], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('inserting option...', optionEditName)
+
+        const fetchRequest = "SELECT * FROM osd_options WHERE optgroup_id=?;";
+        connection.query(fetchRequest, [editId], (err, result) => {
+            if(err) {
+                console.log('error...', err);
+                res.status(400).send(err);
+                return false;
+            }
+            console.log('fetching updated options from option group...', editId);
+            res.send(result);
+
+        });
+
+
+    });
+
+});
+
+
+//insert an option
+app.post('/api/admin/options/delete', (req, res) => {
+
+    const editId = req.body.editId 
+    const optionEditId = req.body.optionEditId
+   
+
+    const deleteRequest = "DELETE FROM osd_options WHERE option_id=?;"
+    connection.query(deleteRequest, [optionEditId], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('deleting option...', optionEditId)
+
+        const fetchRequest = "SELECT * FROM osd_options WHERE optgroup_id=?;";
+        connection.query(fetchRequest, [editId], (err, result) => {
+            if(err) {
+                console.log('error...', err);
+                res.status(400).send(err);
+                return false;
+            }
+            console.log('fetching updated options from option group...', editId);
+            res.send(result);
+
+        });
+
+
+    });
+
+});
+
+/********************************************************************************************************
+ * 
+ * 
+ * 
+ * HANDLING PRODUCT OPTION GROUPS
+ * 
+ * 
+ * 
+********************************************************************************************************/
+
+
+
+
+//fetch all product option groups
 app.post('/api/admin/optiongroups/fetch/all', (req, res) => {
 
 
@@ -1505,6 +1816,115 @@ app.post('/api/admin/optiongroups/fetch/all', (req, res) => {
 
 })
 
+//insert an option group
+app.post('/api/admin/optiongroups/insert', (req, res) => {
+
+    const editName = req.body.editName
+    const editRequired = req.body.editRequired
+    const editMaxChoices = req.body.editMaxChoices
+
+    const insertOptiongroupRequest = "INSERT INTO osd_optgroups (optgroup_name, required, max_choices) VALUES (?, ?, ?);";
+    connection.query(insertOptiongroupRequest, [editName, editRequired, editMaxChoices], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('inserting optiongroup...')
+
+        const fetchOptionsgroupsRequest = "SELECT * FROM osd_optgroups;";
+        connection.query(fetchOptionsgroupsRequest, (err, result) => {
+            if(err) {
+                console.log('error...', err);
+                res.status(400).send(err);
+                return false;
+            }
+            console.log('fetching all optiongroups...')
+            res.send(result)
+
+        })
+
+
+    })
+
+
+})
+
+
+//update an option group given a option group id
+app.post('/api/admin/optiongroups/update', (req, res) => {
+
+
+    const editId = req.body.editId
+    const editName = req.body.editName
+    const editRequired = req.body.editRequired
+    const editMaxChoices = req.body.editMaxChoices
+    const isIncluded = req.body.isIncluded
+
+
+    const updateRequest = "UPDATE osd_optgroups SET optgroup_name=?, required=?, max_choices=? WHERE optgroup_id=?;"
+    connection.query(updateRequest, [editName, editRequired, editMaxChoices, editId], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('updating option group...', editId)
+
+
+        if(isIncluded) {
+
+
+            const updateOptionsRequest = "UPDATE osd_options SET option_price=0 WHERE optgroup_id=?;"
+            connection.query(updateOptionsRequest, [editId], (err, result) => {
+                if(err) {
+                    console.log('error...', err);
+                    res.status(400).send(err);
+                    return false;
+                }
+                console.log('updating associated option prices...', editId)
+
+
+                const fetchRequest = "SELECT * FROM osd_optgroups;";
+                connection.query(fetchRequest, [editId], (err, result) => {
+                    if(err) {
+                        console.log('error...', err);
+                        res.status(400).send(err);
+                        return false;
+                    }
+                    console.log('fetching updated option groups...');
+                    res.send(result);
+
+                });
+
+                
+            })
+
+
+        } else {
+
+
+
+            const fetchRequest = "SELECT * FROM osd_optgroups;";
+            connection.query(fetchRequest, [editId], (err, result) => {
+                if(err) {
+                    console.log('error...', err);
+                    res.status(400).send(err);
+                    return false;
+                }
+                console.log('fetching updated option groups...');
+                res.send(result);
+
+            });
+
+
+        }
+
+        
+
+    });
+
+});
 
 
 /********************************************************************************************************
@@ -1548,7 +1968,10 @@ app.post('/api/admin/products/insert', (req, res) => {
 
     const editName = req.body.editName
     const editDesc = req.body.editDesc
-    const editPrice = req.body.editPrice
+
+    let editPrice = req.body.editPrice
+    editPrice = Math.round(editPrice*100)/100
+
     let optiongroups = req.body.optiongroups
 
     const file = req.files.file;
@@ -1658,6 +2081,7 @@ app.post('/api/admin/products/insert', (req, res) => {
 })
 
 
+
 //update a product given a product id
 app.post('/api/admin/products/update', (req, res) => {
 
@@ -1667,7 +2091,13 @@ app.post('/api/admin/products/update', (req, res) => {
     const editId = req.body.editId
     const editName = req.body.editName
     const editDesc = req.body.editDesc
-    const editPrice = req.body.editPrice
+    
+    let editPrice = req.body.editPrice
+    editPrice = Math.round(editPrice*100)/100
+
+    //current image file of product, need to delete it from server if
+    //we uploaded another file to replace it
+    let editImg = req.body.editImg
     let optiongroups = req.body.optiongroups
 
 
@@ -1695,6 +2125,20 @@ app.post('/api/admin/products/update', (req, res) => {
             console.log("uploading file..."+file.name) 
 
         })
+
+
+        //delete old image file
+        editImg = editImg.replace(SITE, '')
+        editImg = CDN_DIR+editImg
+
+
+        fs.unlink(editImg, (err) => {
+            if(err) {
+                console.log('error...', err);
+            } else {
+                console.log('deleting associated image file...', editImg)
+            }
+        });
         
 
 
@@ -1888,7 +2332,71 @@ app.post('/api/admin/products/update', (req, res) => {
 })
 
 
-//update a product given a product id
+
+//delete a product given a product id
+app.post('/api/admin/products/delete', async (req, res) => {
+
+    const categorySelectId = req.body.categorySelectId
+    const editId = req.body.editId    
+
+
+    let editImg = req.body.editImg;
+    editImg = editImg.replace(SITE, '')
+    editImg = CDN_DIR+editImg
+
+
+    fs.unlink(editImg, (err) => {
+        if(err) {
+            console.log('error...', err);
+        } else {
+            console.log('deleting associated image file...', editImg)
+        }
+    });
+
+
+    const deleteRequest = "DELETE FROM osd_products WHERE product_id=?;"
+    connection.query(deleteRequest, [editId], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('deleting product...', editId)
+
+
+
+        const deleteRequest1 = "DELETE FROM osd_optgroup_products WHERE product_id=?;"
+        connection.query(deleteRequest1, [editId], (err, result) => {
+            if(err) {
+                console.log('error...', err);
+                res.status(400).send(err);
+                return false;
+            }
+
+            console.log('deleting associated optiongroups to product...', editId)
+
+
+            const fetchRequest = "SELECT * FROM osd_products WHERE category_id=? ORDER BY order_index;";
+            connection.query(fetchRequest, [categorySelectId], (err, result) => {
+                if(err) {
+                    console.log('error...', err);
+                    res.status(400).send(err);
+                    return false;
+                }
+                console.log('fetching updated products...');
+                res.send(result);
+
+            });
+
+
+        })
+
+    });
+
+});
+
+
+//move product up or down one index
 app.post('/api/admin/products/move', (req, res) => {
 
 
@@ -1897,10 +2405,6 @@ app.post('/api/admin/products/move', (req, res) => {
     const orderId = req.body.orderId;
     const nextRowId = req.body.nextRowId;
     const nextRowOrderId = req.body.nextRowOrderId;
-
-    console.log(orderId, nextRowOrderId)
-
-
 
 
     let moveRequest = "UPDATE osd_products SET order_index=? WHERE product_id=?;"
@@ -2026,3 +2530,13 @@ app.get('/api/test/io', (req, res) => {
 
 
 
+
+app.get('/api/test/img', (req, res) => {
+
+    let img = "https://staging.2kfusion.com/assets/1648600005046.JPG"
+    img = img.replace(SITE, '')
+    img = CDN_DIR+img
+    console.log(img)
+
+
+})

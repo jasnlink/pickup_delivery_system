@@ -19,6 +19,7 @@
 	border-radius: 0 !important;
 }
 
+
 .btn {
 	background-color: #000000 !important;
 	color: #ffffff !important;
@@ -30,6 +31,27 @@
 	background: #00000042 !important;
 }
 
+
+.error-dialog {
+
+	border-radius: 0 !important;
+
+}
+
+
+.nav-item-selected {
+
+	background-color: #3c3c3c !important;
+    color: #f3f3f3 !important;
+
+}
+
+.status-view-selected {
+
+	background-color: #3c3c3c !important;
+    color: #f3f3f3 !important;
+
+}
 
 .product-edit-upload-btn {
 	position: absolute !important;
@@ -78,4 +100,40 @@
 .product-move-btn:disabled {
 	color: #00000042 !important;
 	
+}
+
+
+.category-edit-drawer {
+	min-height: 100vh !important;
+	max-height: 100vh !important;
+	max-width: 600px;
+	margin: auto;
+	padding-bottom: 64px;
+	z-index: 0;
+}
+
+.optiongroup-edit-drawer {
+	min-height: 100vh !important;
+	max-height: 100vh !important;
+	max-width: 600px;
+	margin: auto;
+	padding-bottom: 64px;
+	z-index: 0;
+}
+
+
+.option-edit-drawer {
+	max-width: 520px;
+	margin: auto;
+	z-index: 0;
+}
+
+.option-edit-close-btn {
+	position: fixed !important;
+	color: #ffffff !important;
+	background-color: #000000 !important;
+	margin-top: 12px !important;
+	margin-left: 6px !important;
+	z-index: 100000;
+	padding: 2px !important;
 }
