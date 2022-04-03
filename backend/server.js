@@ -1897,7 +1897,7 @@ app.post('/api/admin/optiongroups/update', (req, res) => {
 
                 });
 
-                
+
             })
 
 
@@ -1974,27 +1974,36 @@ app.post('/api/admin/products/insert', (req, res) => {
 
     let optiongroups = req.body.optiongroups
 
-    const file = req.files.file;
+    var fileUrl;
 
-    //set upload path
-    const uploadPath = CDN_DIR+'/assets/';
-    const timestamp = Date.now();
-    const fileExtension = (file.name).split('.').pop()
-    const fileName = timestamp+'.'+fileExtension;
-    const filePath = uploadPath+fileName;
 
-    const fileUrl = SITE+'/assets/'+fileName;
+    //if we uploaded a new image file
+    if(req.files) {
 
-    //move file to directory
-    file.mv(filePath, err => {
+        const file = req.files.file;
 
-        if(err) {
-            console.error(err);
-            res.status(400).send(err);
-        }
-        console.log("uploading file..."+file.name) 
+        //set upload path
+        const uploadPath = CDN_DIR+'/assets/';
+        const timestamp = Date.now();
+        const fileExtension = (file.name).split('.').pop()
+        const fileName = timestamp+'.'+fileExtension;
+        const filePath = uploadPath+fileName;
 
-    })
+        fileUrl = SITE+'/assets/'+fileName;
+
+        //move file to directory
+        file.mv(filePath, err => {
+
+            if(err) {
+                console.error(err);
+                res.status(400).send(err);
+            }
+            console.log("uploading file..."+file.name) 
+
+        })
+    } else {
+        fileUrl = "";
+    }
     
 
 
@@ -2444,6 +2453,41 @@ app.post('/api/admin/products/move', (req, res) => {
     })
 
 })
+
+
+
+
+/********************************************************************************************************
+ * 
+ * 
+ * 
+ * HANDLING TIMEGROUPS
+ * 
+ * 
+ * 
+********************************************************************************************************/
+
+
+
+//fetch all products in given category
+app.post('/api/admin/timegroups/fetch/all', (req, res) => {
+
+
+    const fetchTimegroupsRequest = "SELECT * FROM osd_timegroups;";
+    connection.query(fetchTimegroupsRequest, (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('fetching all timegroups...')
+        res.send(result)
+
+    })
+
+
+})
+
 
 
 /********************************************************************************************************

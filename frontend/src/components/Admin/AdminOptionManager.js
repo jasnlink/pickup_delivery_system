@@ -622,7 +622,7 @@ function AdminOptionManager() {
 													<FormGroup>
 
 														<FormControlLabel 
-															label="Choix requis" 
+															label="Obligatoire" 
 															labelPlacement="start"
 															control={
 																<Switch 

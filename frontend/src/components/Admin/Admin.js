@@ -72,6 +72,7 @@ import AdminOrderDashboard from './AdminOrderDashboard'
 import AdminProductManager from './AdminProductManager'
 import AdminCategoryManager from './AdminCategoryManager'
 import AdminOptionManager from './AdminOptionManager'
+import AdminTimeManager from './AdminTimeManager'
 
 import AdminNavMenu from './Forms/AdminNavMenu'
 
@@ -146,6 +147,20 @@ function Admin({ setStep }) {
 					setAdminView={view => setAdminView(view)}
 				 />
 					<AdminOptionManager />
+				</>
+
+		)
+		case '24': 
+			return (
+				<>
+				<AdminNavMenu
+					navDrawer={navDrawer}
+					setNavDrawer={drawer => setNavDrawer(drawer)}
+					navSelect={navSelect}
+					setNavSelect={select => setNavSelect(select)}
+					setAdminView={view => setAdminView(view)}
+				 />
+					<AdminTimeManager />
 				</>
 
 		)

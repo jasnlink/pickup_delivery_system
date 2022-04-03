@@ -137,3 +137,64 @@
 	z-index: 100000;
 	padding: 2px !important;
 }
+
+.timegroup-display-time {
+
+	padding: 24px !important;
+	border-radius: 0 !important;
+
+}
+
+.timegroup-days {
+	border-radius: 0 !important;
+	width: 80px;
+	height: 52px;
+}
+
+
+.MuiSlider-mark {
+	height: 22px !important;
+	width: 1px !important;
+	background-color: #8d8d8d !important;
+}
+
+.MuiSlider-mark[data-index="0"],
+.MuiSlider-mark[data-index="8"], 
+.MuiSlider-mark[data-index="16"],
+.MuiSlider-mark[data-index="24"],
+.MuiSlider-mark[data-index="32"],
+.MuiSlider-mark[data-index="40"],
+.MuiSlider-mark[data-index="48"],
+.MuiSlider-mark[data-index="56"],
+.MuiSlider-mark[data-index="64"],
+.MuiSlider-mark[data-index="72"],
+.MuiSlider-mark[data-index="80"],
+.MuiSlider-mark[data-index="88"],
+.MuiSlider-mark[data-index="96"] {
+	height: 52px !important;
+	width: 1px !important;
+	background-color: #8d8d8d !important;
+}
+
+
+.MuiSlider-markLabel {
+	padding-top: 28px;
+}
+
+.MuiSlider-thumb {
+  color: #000000;
+  border-radius: 0 !important;
+  width: 8px !important;
+  height: 40px !important;
+}
+.MuiSlider-rail {
+  color: #999999;
+}
+.MuiSlider-track {
+  color: #666666;
+}
+.Mui-active {
+	background-color: #000000 !important;
+	box-shadow: 0px 0px 0px 8px rgb(56 56 56 / 16%) !important;
+
+}

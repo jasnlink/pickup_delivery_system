@@ -694,7 +694,7 @@ function AdminProductManager() {
 											</Button>
 										</label>
 										{!productEditDrawerMode && !editImg && !editImgTemp ? <div style={{ height: '256px', width: '256px' }}></div> : ''}
-										<img src={editImg} className="product-edit-upload-img" hidden={editImgTemp}/>
+										<img src={editImg} className="product-edit-upload-img" hidden={editImgTemp || !editImg}/>
 										<img src={editImgTemp} className="product-edit-upload-img" hidden={!editImgTemp}/>
 									</ListItem>
 
