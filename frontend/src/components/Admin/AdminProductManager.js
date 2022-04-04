@@ -67,6 +67,7 @@ import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import './styles/Admin.css';
 
 import AdminProductCard from './Forms/AdminProductCard'
+import AdminToggleCard from './Forms/AdminToggleCard'
 import AdminError from './Forms/AdminError'
 
 function AdminProductManager() {
@@ -405,22 +406,21 @@ function AdminProductManager() {
 	       	console.log("error ", err)});
 	}
 
-	function handleSelectOptgroups(value) {
-		//turn string into int
-		value = parseInt(value);
-		//get temp array of current selected
-		let tempGroups = [...selectedOptiongroups]
-		//try to find the selected element to see if its already been selected
-		let found = tempGroups.find((el) => el === value)
+	function handleSelectOptgroups(sId) {
 
-		//not found so not selected before, so we add it as a selection
-		if(!found) {
-			tempGroups.push(value)
-			setSelectedOptiongroups(tempGroups)
-		} else {
+
+		//get temp array of current selected
+		let tempSelect = [...selectedOptiongroups]
+		//try to find the selected element to see if its already been selected
+		let found = tempSelect.find(el => el === sId)
 		//found so already selected, so we unselect it now, we filter out the value
-			tempGroups = tempGroups.filter((el) => el !== value)
-			setSelectedOptiongroups(tempGroups)
+		if(found) {
+			tempSelect = tempSelect.filter(el => el !== found)
+			setSelectedOptiongroups(tempSelect)
+		} else {
+		//not found so not selected before, so we add it as a selection
+			tempSelect.push(sId)
+			setSelectedOptiongroups(tempSelect)
 		}
 
 		
@@ -700,30 +700,29 @@ function AdminProductManager() {
 
 									<ListItem>
 										<Typography variant="h5">
-											Groupes d'options
+											Sélection de groupes d'options
 										</Typography>
 									</ListItem>
 									<ListItem>
-										<ToggleButtonGroup
-											value={selectedOptiongroups}
-											onChange={(e) => {handleSelectOptgroups(e.target.value)}}
-
-										>
+										<Grid container spacing={1}>
 											{optiongroups.map((group, index) => (
 
-												<ToggleButton 
-													sx={{ borderRadius: 0 }} 
-													value={group.optgroup_id}
-													classes={{ selected: "nav-item-selected" }}
-												>
-													{group.optgroup_name}
-												</ToggleButton>
+												<Grid item>
+													<AdminToggleCard 
+														item={group}
+														idParam="optgroup_id"
+														nameParam="optgroup_name"
+														selectItems={selectedOptiongroups}
+														index={index}
+														handleSelect={(sId) => handleSelectOptgroups(sId)}
+													/>
+												</Grid>
 
 											))}
-										</ToggleButtonGroup>
+										</Grid>
 									</ListItem>
 
-									<ListItem sx={{ pt: '24px' }}>
+									<ListItem sx={{ pt: '48px' }}>
 										<Button
 											disabled={!editProductValid}
 											fullWidth

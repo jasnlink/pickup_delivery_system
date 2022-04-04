@@ -2469,7 +2469,7 @@ app.post('/api/admin/products/move', (req, res) => {
 
 
 
-//fetch all products in given category
+//fetch all timegroups
 app.post('/api/admin/timegroups/fetch/all', (req, res) => {
 
 
@@ -2488,6 +2488,286 @@ app.post('/api/admin/timegroups/fetch/all', (req, res) => {
 
 })
 
+
+//fetch timegroup days given a timegroup id
+app.post('/api/admin/timegroups/fetch/days', (req, res) => {
+
+    const timegroupId = req.body.timegroupId;
+
+    const fetchTimegroupRequest = "SELECT * FROM osd_timegroup_days WHERE timegroup_id=?;";
+    connection.query(fetchTimegroupRequest, [timegroupId], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('fetching all timegroup days from timegroup...', timegroupId)
+        res.send(result)
+
+
+    })
+
+})
+
+
+//fetch timegroup categories given a timegroup id
+app.post('/api/admin/timegroups/fetch/categories', (req, res) => {
+
+    const timegroupId = req.body.timegroupId;
+
+    const fetchTimegroupRequest = "SELECT * FROM osd_timegroup_categories WHERE timegroup_id=?;";
+    connection.query(fetchTimegroupRequest, [timegroupId], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('fetching all timegroup categories from timegroup...', timegroupId)
+        res.send(result)
+
+
+    })
+
+})
+
+
+//update timegroup given a timegroup id
+app.post('/api/admin/timegroups/update', (req, res) => {
+
+
+    const editId = req.body.editId
+    const editName = req.body.editName
+    const selectDays = req.body.selectDays
+    const editFrom = req.body.editFrom
+    const editTo = req.body.editTo
+    const selectCategories = req.body.selectCategories
+
+
+    let updateRequest = "UPDATE osd_timegroups SET timegroup_name=?, timegroup_from=STR_TO_DATE(?, '%H:%i'), timegroup_to=STR_TO_DATE(?, '%H:%i') WHERE timegroup_id=?;"
+    connection.query(updateRequest, [editName, editFrom, editTo, editId], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('updating timgroup...', editId)
+
+
+        let deleteDaysRequest = "DELETE FROM osd_timegroup_days WHERE timegroup_id=?"
+        connection.query(deleteDaysRequest, [editId], (err, result) => {
+            if(err) {
+                console.log('error...', err);
+                res.status(400).send(err);
+                return false;
+            }
+            console.log('deleting timgroup days...', editId)
+
+
+            let deleteCategoriesRequest = "DELETE FROM osd_timegroup_categories WHERE timegroup_id=?"
+            connection.query(deleteCategoriesRequest, [editId], (err, result) => {
+                if(err) {
+                    console.log('error...', err);
+                    res.status(400).send(err);
+                    return false;
+                }
+                console.log('deleting timgroup categories...', editId)
+
+
+
+                //build the insert request
+                //by looping through timegroup days
+                let insertDaysRequest = "INSERT INTO osd_timegroup_days (timegroup_id, timegroup_day) VALUES "
+                let promise = Promise.all(selectDays.map((day, index) => {
+
+                    if(index+1 === selectDays.length) {
+                        return insertDaysRequest += "("+editId+","+day+");" 
+                    }
+                    return insertDaysRequest += "("+editId+","+day+")," 
+                    
+
+                })).then((results) => {
+
+                    //then we insert the newly selected optiongroups
+                    connection.query(insertDaysRequest, (err, result) => {
+                        if(err) {
+                            console.log('error...', err);
+                            res.status(400).send(err);
+                            return false;
+                        }
+                        console.log('inserting new selected timegroup days...')
+
+
+                        //build the insert request
+                        //by looping through timegroup categories
+                        let insertCategoriesRequest = "INSERT INTO osd_timegroup_categories (timegroup_id, category_id) VALUES "
+                        let promise1 = Promise.all(selectCategories.map((category, index) => {
+
+                            if(index+1 === selectCategories.length) {
+                                return insertCategoriesRequest += "("+editId+","+category+");" 
+                            }
+                            return insertCategoriesRequest += "("+editId+","+category+")," 
+                            
+
+                        })).then((results) => {
+
+                            //then we insert the newly selected optiongroups
+                            connection.query(insertCategoriesRequest, (err, result) => {
+                                if(err) {
+                                    console.log('error...', err);
+                                    res.status(400).send(err);
+                                    return false;
+                                }
+                                console.log('inserting new selected timegroup categories...')
+                                res.send({status:1})
+
+
+                            })
+                        })//then promise
+
+                    })
+                })//then promise
+
+            })
+
+        })
+
+
+    })
+
+})
+
+
+
+
+//insert a new timegroup
+app.post('/api/admin/timegroups/insert', (req, res) => {
+
+
+    const editName = req.body.editName
+    const selectDays = req.body.selectDays
+    const editFrom = req.body.editFrom
+    const editTo = req.body.editTo
+    const selectCategories = req.body.selectCategories
+
+
+    let insertRequest = "INSERT INTO osd_timegroups (timegroup_name, timegroup_from, timegroup_to) VALUES (?, STR_TO_DATE(?, '%H:%i'), STR_TO_DATE(?, '%H:%i'));"
+    connection.query(insertRequest, [editName, editFrom, editTo], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('inserting new timgroup...', editName)
+
+        //use newly inserted product id for next request
+        const lastInsertID = result.insertId;
+
+
+        //build the insert request
+        //by looping through timegroup days
+        let insertDaysRequest = "INSERT INTO osd_timegroup_days (timegroup_id, timegroup_day) VALUES "
+        let promise = Promise.all(selectDays.map((day, index) => {
+
+            if(index+1 === selectDays.length) {
+                return insertDaysRequest += "("+lastInsertID+","+day+");" 
+            }
+            return insertDaysRequest += "("+lastInsertID+","+day+")," 
+            
+
+        })).then((results) => {
+
+            //then we insert the newly selected optiongroups
+            connection.query(insertDaysRequest, (err, result) => {
+                if(err) {
+                    console.log('error...', err);
+                    res.status(400).send(err);
+                    return false;
+                }
+                console.log('inserting new selected timegroup days...')
+
+
+                //build the insert request
+                //by looping through timegroup categories
+                let insertCategoriesRequest = "INSERT INTO osd_timegroup_categories (timegroup_id, category_id) VALUES "
+                let promise1 = Promise.all(selectCategories.map((category, index) => {
+
+                    if(index+1 === selectCategories.length) {
+                        return insertCategoriesRequest += "("+lastInsertID+","+category+");" 
+                    }
+                    return insertCategoriesRequest += "("+lastInsertID+","+category+")," 
+                    
+
+                })).then((results) => {
+
+                    //then we insert the newly selected optiongroups
+                    connection.query(insertCategoriesRequest, (err, result) => {
+                        if(err) {
+                            console.log('error...', err);
+                            res.status(400).send(err);
+                            return false;
+                        }
+                        console.log('inserting new selected timegroup categories...')
+                        res.send({status:1})
+
+
+                    })
+                })//then promise
+
+            })
+        })//then promise
+
+
+    })
+
+})
+
+
+
+
+//delete timegroup given a timegroup id
+app.post('/api/admin/timegroups/delete', (req, res) => {
+
+    const editId = req.body.editId
+
+    let deleteRequest = "DELETE FROM osd_timegroups WHERE timegroup_id=?"
+    connection.query(deleteRequest, [editId], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('deleting timgroup...', editId)
+
+
+        let deleteDaysRequest = "DELETE FROM osd_timegroup_days WHERE timegroup_id=?"
+        connection.query(deleteDaysRequest, [editId], (err, result) => {
+            if(err) {
+                console.log('error...', err);
+                res.status(400).send(err);
+                return false;
+            }
+            console.log('deleting timgroup days...', editId)
+
+
+            let deleteCategoriesRequest = "DELETE FROM osd_timegroup_categories WHERE timegroup_id=?"
+            connection.query(deleteCategoriesRequest, [editId], (err, result) => {
+                if(err) {
+                    console.log('error...', err);
+                    res.status(400).send(err);
+                    return false;
+                }
+                console.log('deleting timgroup categories...', editId)
+                res.send({status:1})
+
+
+            })
+
+
+        })
+
+    })
+
+})
 
 
 /********************************************************************************************************

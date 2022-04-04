@@ -169,7 +169,7 @@ function AdminNavMenu({ navDrawer, setNavDrawer, navSelect, setNavSelect, setAdm
 							</ListItemButton>
 							<ListItemButton 
 								sx={{ pl: 4 }} 
-								selected={navSelect.parent === 2 && navSelect.child === 5}
+								selected={navSelect.parent === 2 && navSelect.child === 4}
 								onClick={() => handleNavSelect(2,4)}
 								classes={{ selected: "nav-item-selected" }}
 							>

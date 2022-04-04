@@ -147,8 +147,23 @@
 
 .timegroup-days {
 	border-radius: 0 !important;
-	width: 80px;
+	width: 104px;
 	height: 52px;
+}
+
+
+.timegroup-edit-drawer {
+	min-height: 100vh !important;
+	max-height: 100vh !important;
+	max-width: 852px;
+	padding-bottom: 40px;
+	margin: auto;
+	z-index: 0;
+}
+
+.timegroup-categories {
+	border-radius: 0 !important;
+	padding: 6px 18px !important;
 }
 
 
@@ -193,8 +208,8 @@
 .MuiSlider-track {
   color: #666666;
 }
-.Mui-active {
+
+.Mui-active, .MuiSlider-thumb:hover {
 	background-color: #000000 !important;
 	box-shadow: 0px 0px 0px 8px rgb(56 56 56 / 16%) !important;
-
 }
