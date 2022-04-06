@@ -1,26 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 
-function AdminRenderMap() { 
+function AdminRenderMap({
+  center,
+  zoom,
+}: {
+  center: google.maps.LatLngLiteral;
+  zoom: number;
+}) {
 	
 
-	const ref = useRef(null)
-	const [map, setMap] = useState()
-
+	const ref = useRef();
+	
 	useEffect(() => {
-
-		if (ref.current && !map) {
-			setMap(new window.google.maps.Map(ref.current, {}));
-		}
-
-	}, [ref, map])
+    new window.google.maps.Map(ref.current, {
+      center,
+      zoom,
+    });
+  });
 
 
 
 	return (
 	<>
 		
-		<div ref={ref} />
+		<div ref={ref} id="map" />
 		
 	</>
 	)

@@ -76,9 +76,6 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 
 	const [loading, setLoading] = useState(false)
 
-
-	console.log(storeLng)
-
 	return (
 	<>
 
