@@ -208,7 +208,12 @@ function Core() {
 								setStep={step => setStep(step)}
 								setOrderType={type => setOrderType(type)}
 							/>} />
-						<Route exact path="admin" element={<Admin setStep={step => setStep(step)} />} />
+						<Route exact path="admin" element={<Admin 
+																setStep={step => setStep(step)} 
+																storeLat={storeLat}
+																storeLng={storeLng}
+
+															/>} />
 					</Routes>
 				</Router>
 	      )
@@ -377,12 +382,8 @@ function Core() {
 	    return (
 				<Admin
 					setStep={step => setStep(step)}
-				/>
-	      )
-	    case 1011:
-	    return (
-				<AdminProductManager
-					setStep={step => setStep(step)}
+					storeLat={storeLat}
+					storeLng={storeLng}
 				/>
 	      )
 

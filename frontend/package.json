@@ -8,6 +8,7 @@
     "@emotion/react": "^11.8.2",
     "@emotion/styled": "^11.8.1",
     "@fontsource/roboto": "^4.5.3",
+    "@googlemaps/react-wrapper": "^1.1.29",
     "@mui/icons-material": "^5.5.0",
     "@mui/lab": "^5.0.0-alpha.72",
     "@mui/material": "^5.5.0",

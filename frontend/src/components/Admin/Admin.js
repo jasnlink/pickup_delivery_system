@@ -79,7 +79,7 @@ import AdminNavMenu from './Forms/AdminNavMenu'
 
 
 
-function Admin({ setStep }) {
+function Admin({ setStep, storeLat, storeLng }) {
 
 	
 	const [navDrawer, setNavDrawer] = useState(false);
@@ -98,13 +98,13 @@ function Admin({ setStep }) {
 		case '10':
 			return (
 				<>	
-				<AdminNavMenu
-					navDrawer={navDrawer}
-					setNavDrawer={drawer => setNavDrawer(drawer)}
-					navSelect={navSelect}
-					setNavSelect={select => setNavSelect(select)}
-					setAdminView={view => setAdminView(view)}
-				 />
+					<AdminNavMenu
+						navDrawer={navDrawer}
+						setNavDrawer={drawer => setNavDrawer(drawer)}
+						navSelect={navSelect}
+						setNavSelect={select => setNavSelect(select)}
+						setAdminView={view => setAdminView(view)}
+					 />
 					<AdminOrderDashboard />
 				</>
 
@@ -112,13 +112,13 @@ function Admin({ setStep }) {
 		case '21': 
 			return (
 				<>
-				<AdminNavMenu
-					navDrawer={navDrawer}
-					setNavDrawer={drawer => setNavDrawer(drawer)}
-					navSelect={navSelect}
-					setNavSelect={select => setNavSelect(select)}
-					setAdminView={view => setAdminView(view)}
-				 />
+					<AdminNavMenu
+						navDrawer={navDrawer}
+						setNavDrawer={drawer => setNavDrawer(drawer)}
+						navSelect={navSelect}
+						setNavSelect={select => setNavSelect(select)}
+						setAdminView={view => setAdminView(view)}
+					 />
 					<AdminProductManager />
 				</>
 
@@ -126,13 +126,13 @@ function Admin({ setStep }) {
 		case '22': 
 			return (
 				<>
-				<AdminNavMenu
-					navDrawer={navDrawer}
-					setNavDrawer={drawer => setNavDrawer(drawer)}
-					navSelect={navSelect}
-					setNavSelect={select => setNavSelect(select)}
-					setAdminView={view => setAdminView(view)}
-				 />
+					<AdminNavMenu
+						navDrawer={navDrawer}
+						setNavDrawer={drawer => setNavDrawer(drawer)}
+						navSelect={navSelect}
+						setNavSelect={select => setNavSelect(select)}
+						setAdminView={view => setAdminView(view)}
+					 />
 					<AdminCategoryManager />
 				</>
 
@@ -140,13 +140,13 @@ function Admin({ setStep }) {
 		case '23': 
 			return (
 				<>
-				<AdminNavMenu
-					navDrawer={navDrawer}
-					setNavDrawer={drawer => setNavDrawer(drawer)}
-					navSelect={navSelect}
-					setNavSelect={select => setNavSelect(select)}
-					setAdminView={view => setAdminView(view)}
-				 />
+					<AdminNavMenu
+						navDrawer={navDrawer}
+						setNavDrawer={drawer => setNavDrawer(drawer)}
+						navSelect={navSelect}
+						setNavSelect={select => setNavSelect(select)}
+						setAdminView={view => setAdminView(view)}
+					 />
 					<AdminOptionManager />
 				</>
 
@@ -154,13 +154,13 @@ function Admin({ setStep }) {
 		case '24': 
 			return (
 				<>
-				<AdminNavMenu
-					navDrawer={navDrawer}
-					setNavDrawer={drawer => setNavDrawer(drawer)}
-					navSelect={navSelect}
-					setNavSelect={select => setNavSelect(select)}
-					setAdminView={view => setAdminView(view)}
-				 />
+					<AdminNavMenu
+						navDrawer={navDrawer}
+						setNavDrawer={drawer => setNavDrawer(drawer)}
+						navSelect={navSelect}
+						setNavSelect={select => setNavSelect(select)}
+						setAdminView={view => setAdminView(view)}
+					 />
 					<AdminTimeManager />
 				</>
 
@@ -168,27 +168,30 @@ function Admin({ setStep }) {
 		case '42': 
 			return (
 				<>
-				<AdminNavMenu
-					navDrawer={navDrawer}
-					setNavDrawer={drawer => setNavDrawer(drawer)}
-					navSelect={navSelect}
-					setNavSelect={select => setNavSelect(select)}
-					setAdminView={view => setAdminView(view)}
-				 />
-					<AdminDeliveryZoneManager />
+					<AdminNavMenu
+						navDrawer={navDrawer}
+						setNavDrawer={drawer => setNavDrawer(drawer)}
+						navSelect={navSelect}
+						setNavSelect={select => setNavSelect(select)}
+						setAdminView={view => setAdminView(view)}
+					 />
+					<AdminDeliveryZoneManager
+						storeLat={storeLat}
+						storeLng={storeLng}
+					 />
 				</>
 
 		)
 		default:
 			return (
 				<>	
-				<AdminNavMenu
-					navDrawer={navDrawer}
-					setNavDrawer={drawer => setNavDrawer(drawer)}
-					navSelect={navSelect}
-					setNavSelect={select => setNavSelect(select)}
-					setAdminView={view => setAdminView(view)}
-				 />
+					<AdminNavMenu
+						navDrawer={navDrawer}
+						setNavDrawer={drawer => setNavDrawer(drawer)}
+						navSelect={navSelect}
+						setNavSelect={select => setNavSelect(select)}
+						setAdminView={view => setAdminView(view)}
+					 />
 					<AdminOrderDashboard />
 				</>
 

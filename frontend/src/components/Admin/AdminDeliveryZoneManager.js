@@ -3,6 +3,8 @@ import Axios from 'axios';
 import { DateTime, Interval } from "luxon";
 import * as Yup from "yup";
 import io from 'socket.io-client';
+import { Wrapper, Status } from "@googlemaps/react-wrapper";
+
 
 import { 	
 	Typography,
@@ -67,11 +69,15 @@ import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 
 import './styles/Admin.css';
 
+import AdminRenderMap from './Forms/AdminRenderMap';
 
-function AdminDeliveryZoneManager() {
+
+function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 
 	const [loading, setLoading] = useState(false)
 
+
+	console.log(storeLng)
 
 	return (
 	<>
@@ -104,7 +110,9 @@ function AdminDeliveryZoneManager() {
 
 						<Divider color="black" sx={{ mt: '8px' }} />
 
-						
+						<Wrapper apiKey={process.env.REACT_APP_GOOGLE_API_KEY}>
+							<AdminRenderMap />
+						</Wrapper>
 
 					</Container>
 				</>
