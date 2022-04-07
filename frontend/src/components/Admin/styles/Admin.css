@@ -19,6 +19,10 @@
 	border-radius: 0 !important;
 }
 
+.zones-input {
+	border-radius: 0 !important;
+	padding: 0 !important;
+}
 
 .btn {
 	background-color: #000000 !important;
@@ -167,49 +171,113 @@
 }
 
 
-.MuiSlider-mark {
-	height: 22px !important;
+/******************
+ * 
+ * Time slider styles
+ * 
+*******************/
+
+.timeslider-mark {
+	height: 16px !important;
 	width: 1px !important;
 	background-color: #8d8d8d !important;
 }
 
-.MuiSlider-mark[data-index="0"],
-.MuiSlider-mark[data-index="8"], 
-.MuiSlider-mark[data-index="16"],
-.MuiSlider-mark[data-index="24"],
-.MuiSlider-mark[data-index="32"],
-.MuiSlider-mark[data-index="40"],
-.MuiSlider-mark[data-index="48"],
-.MuiSlider-mark[data-index="56"],
-.MuiSlider-mark[data-index="64"],
-.MuiSlider-mark[data-index="72"],
-.MuiSlider-mark[data-index="80"],
-.MuiSlider-mark[data-index="88"],
-.MuiSlider-mark[data-index="96"] {
+.timeslider-mark[data-index="0"],
+.timeslider-mark[data-index="8"], 
+.timeslider-mark[data-index="16"],
+.timeslider-mark[data-index="24"],
+.timeslider-mark[data-index="32"],
+.timeslider-mark[data-index="40"],
+.timeslider-mark[data-index="48"],
+.timeslider-mark[data-index="56"],
+.timeslider-mark[data-index="64"],
+.timeslider-mark[data-index="72"],
+.timeslider-mark[data-index="80"],
+.timeslider-mark[data-index="88"],
+.timeslider-mark[data-index="96"] {
 	height: 52px !important;
 	width: 1px !important;
 	background-color: #8d8d8d !important;
 }
 
 
-.MuiSlider-markLabel {
+.timeslider-markLabel {
 	padding-top: 28px;
 }
 
-.MuiSlider-thumb {
+.timeslider-thumb {
   color: #000000;
   border-radius: 0 !important;
   width: 8px !important;
   height: 40px !important;
 }
-.MuiSlider-rail {
+.timeslider-rail {
   color: #999999;
 }
-.MuiSlider-track {
+.timeslider-track {
   color: #666666;
 }
 
-.Mui-active, .MuiSlider-thumb:hover {
+.timeslider-active, .timeslider-thumb:hover {
+	background-color: #000000 !important;
+	box-shadow: 0px 0px 0px 8px rgb(56 56 56 / 16%) !important;
+}
+
+
+/******************
+ * 
+ * Zone slider styles
+ * 
+*******************/
+
+.zoneslider-root {
+	padding-top: 8px !important;
+}
+
+.zoneslider-mark {
+	height: 4px !important;
+	width: 1px !important;
+	background-color: #8d8d8d !important;
+}
+
+.zoneslider-mark[data-index="3"],
+.zoneslider-mark[data-index="7"],
+.zoneslider-mark[data-index="11"],
+.zoneslider-mark[data-index="15"],
+.zoneslider-mark[data-index="19"],
+.zoneslider-mark[data-index="23"],
+.zoneslider-mark[data-index="27"],
+.zoneslider-mark[data-index="31"],
+.zoneslider-mark[data-index="35"],
+.zoneslider-mark[data-index="39"],
+.zoneslider-mark[data-index="43"],
+.zoneslider-mark[data-index="47"] {
+	height: 16px !important;
+	width: 1px !important;
+	background-color: #8d8d8d !important;
+}
+
+
+.zoneslider-markLabel {
+	padding-top: 0px;
+	margin-top: -8px;
+}
+
+.zoneslider-thumb {
+  color: #000000;
+  border-radius: 0 !important;
+  width: 8px !important;
+  height: 20px !important;
+}
+.zoneslider-rail {
+  color: #999999;
+}
+.zoneslider-track {
+  color: #666666;
+}
+
+.zoneslider-active, .zoneslider-thumb:hover {
 	background-color: #000000 !important;
 	box-shadow: 0px 0px 0px 8px rgb(56 56 56 / 16%) !important;
 }

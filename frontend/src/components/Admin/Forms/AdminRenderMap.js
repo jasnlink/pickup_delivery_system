@@ -11,14 +11,14 @@ function AdminRenderMap(props) {
   	<Map 
         google={props.google}
         style={{width: '100%', height: '100%'}}
-        containerStyle={{position: 'relative', width: '100%', height: '80vh'}}
+        containerStyle={{position: 'relative', width: '100%', height: '84vh'}}
         initialCenter={{
           lat: props.storeLat,
           lng: props.storeLng
         }}
         zoom={14}
         scrollWheel={false}
-        draggable={true}
+        draggable={false}
         keyboardShortcuts={false}
         disableDoubleClickZoom
         zoomControl={true}

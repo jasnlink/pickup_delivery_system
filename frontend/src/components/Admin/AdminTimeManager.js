@@ -637,6 +637,15 @@ function AdminTimeManager() {
 												max={marks.length-1}
 												marks={marks}
 												step={null}
+												classes={{
+													mark: 'timeslider-mark',
+													markLabel: 'timeslider-markLabel',
+													thumb: 'timeslider-thumb',
+													rail: 'timeslider-rail',
+													track: 'timeslider-track',
+													active: 'timeslider-active',
+													
+												}}
 												value={editTimeSlider}
 												onChange={handleSliderChange}
 												valueLabelDisplay="off"

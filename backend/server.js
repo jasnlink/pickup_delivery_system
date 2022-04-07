@@ -2770,6 +2770,43 @@ app.post('/api/admin/timegroups/delete', (req, res) => {
 })
 
 
+
+/********************************************************************************************************
+ * 
+ * 
+ * 
+ * HANDLING DELIVERY ZONES
+ * 
+ * 
+ * 
+********************************************************************************************************/
+
+
+
+//fetch all delivery zones
+app.post('/api/admin/deliveryzones/fetch/all', (req, res) => {
+
+
+    const fetchZonesRequest = "SELECT * FROM osd_delivery_zones;";
+    connection.query(fetchZonesRequest, (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('fetching all delivery zones...')
+        res.send(result)
+
+    })
+
+
+})
+
+
+
+
+
+
 /********************************************************************************************************
  ********************************************************************************************************
  ********************************************************************************************************

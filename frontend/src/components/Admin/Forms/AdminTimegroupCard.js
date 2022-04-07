@@ -225,6 +225,15 @@ function AdminTimegroupCard({ timegroups, timegroup, index, marks, handleEdit })
 						max={marks.length-1}
 						marks={marks}
 						step={null}
+						classes={{
+							mark: 'timeslider-mark',
+							markLabel: 'timeslider-markLabel',
+							thumb: 'timeslider-thumb',
+							rail: 'timeslider-rail',
+							track: 'timeslider-track',
+							active: 'timeslider-active',
+							
+						}}
 						value={sliderValue}
 						valueLabelDisplay="off"
 						disabled
