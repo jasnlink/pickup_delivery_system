@@ -3,7 +3,6 @@ import Axios from 'axios';
 import { DateTime, Interval } from "luxon";
 import * as Yup from "yup";
 import io from 'socket.io-client';
-import { Wrapper, Status } from "@googlemaps/react-wrapper";
 
 
 import { 	
@@ -88,7 +87,7 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 				)}
 				{!loading && (
 				<>
-					<Container maxWidth="md" sx={{ pt: 10 }}>
+					<Container maxWidth="md" sx={{ pt: 10, maxWidth: '100vw' }}>
 						<Grid container justifyContent="space-between" alignItems="center">
 							<Grid item xs={8}>
 								<Typography variant="h4">
@@ -107,9 +106,7 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 
 						<Divider color="black" sx={{ mt: '8px' }} />
 
-						<Wrapper apiKey={process.env.REACT_APP_GOOGLE_API_KEY}>
-							<AdminRenderMap />
-						</Wrapper>
+						<AdminRenderMap storeLat={storeLat} storeLng={storeLng} />
 
 					</Container>
 				</>
