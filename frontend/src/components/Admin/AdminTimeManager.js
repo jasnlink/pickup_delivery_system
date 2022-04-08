@@ -434,7 +434,7 @@ function AdminTimeManager() {
 			setTimegroupValid(false)
 		})
 
-	}, [editName, selectDays, selectCategories])
+	}, [editName, selectDays, selectCategories, editTimeSlider])
 
 
 

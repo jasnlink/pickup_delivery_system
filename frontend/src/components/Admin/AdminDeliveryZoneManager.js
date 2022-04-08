@@ -98,8 +98,8 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 
 	}, [])
 
-	const [editPrice, setEditPrice] = useState(0)
-	const [editMinimum, setEditMinimum] = useState(0)
+	const [editPrice, setEditPrice] = useState('')
+	const [editMinimum, setEditMinimum] = useState('')
 	const [sliderValue, setSliderValue] = useState(0)
 
 	
@@ -127,15 +127,14 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 	}
 
 	function handleSliderChange(event, newValue) {
-
 		setSliderValue(newValue);
 	};
 
 	async function buildMarks() {
 		let result = []
 
-		for(let m = 1; m <= 50; m++) {
-			if(m % 4 === 0) {
+		for(let m = 0; m <= 50; m++) {
+			if(m % 4 === 0 && m !== 0) {
 				result.push({
 					value: m,
 					label: m/2,
@@ -153,7 +152,7 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 
 	function handleZoneSave() {
 
-		const range = ((marks[sliderValue].value-1)/2)
+		const range = ((marks[sliderValue].value)/2)
 
 		setLoading(true)
 
@@ -179,13 +178,26 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 
 		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/deliveryzones/insert")
 		.then((response) => {
-			setZones(response.data)
-			setLoading(false)
+
+			setZones(response.data.result)
+			getAddSelect(response.data.lastInsertID, response.data.result)
+			.then((result) => {
+				handleZoneSelect(result.delivery_zone_id, result.delivery_zone_range, result.delivery_zone_price, result.delivery_zone_order_min)
+				setLoading(false)
+			})
+			
 			
 		})
 		.catch((err) => {
 	       	console.log("error ", err)});
 
+	}
+
+	async function getAddSelect(sId, data) {
+
+		const cursor = data.find((el) => el.delivery_zone_id === sId)
+
+		return cursor;
 	}
 
 	function handleZoneDelete() {
@@ -210,11 +222,34 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 
 		setSliderValue(0)
 		setZoneSelectId(0)
-		setEditPrice(0)
-		setEditMinimum(0)
+		setEditPrice('')
+		setEditMinimum('')
 
 
 	}
+
+	//delivery zone edit input validation
+	const [zoneValid, setZoneValid] = useState(false)
+	const zoneSchema = Yup.object().shape({
+
+		price: Yup.number().min(0).required(),
+		minimum: Yup.number().min(0).required(),
+	})
+
+	useEffect(() => {
+
+		zoneSchema.validate({
+			price: editPrice,
+			minimum: editMinimum,
+		})
+		.then((response) => {
+			setZoneValid(true)
+		})
+		.catch((err) => {
+			setZoneValid(false)
+		})
+
+	}, [editPrice, editMinimum, sliderValue])
 
 	return (
 	<>
@@ -235,16 +270,19 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 								<ListItem>
 									
 									<Grid container justifyContent="space-between" alignItems="center">
-										<Grid item xs={6}>
+										<Grid item xs={9}>
 											<ListItemText primary={<Typography variant="h6" style={{ fontWeight: '500' }}>Zones</Typography>} />
 										</Grid>
-										<Grid item>
+										<Grid item xs={3}>
 											<Button
 												className="zone-add-btn"
+												classes={{
+													root: 'zone-add-btn-root'
+												}}
 												disableElevation
 												onClick={handleZoneAdd}
 											>
-												<AddCircleIcon />
+												<AddCircleIcon style={{ height: '18px', width: '18px' }} />
 											</Button>
 										</Grid>
 									</Grid>
@@ -258,7 +296,7 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 											onClick={() => handleZoneSelect(zone.delivery_zone_id, zone.delivery_zone_range, zone.delivery_zone_price, zone.delivery_zone_order_min)}
 											classes={{ selected: "nav-item-selected" }}
 										>
-											<ListItemText primary={"Zone - "+(zone.delivery_zone_range)+" KM"} />
+											<ListItemText primary={(zone.delivery_zone_range)+" KM"} />
 										</ListItemButton>
 
 									))}
@@ -267,7 +305,7 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 					</Grid>
 
 					<Grid item xs={10} style={{ maxHeight: '100vh', overflow: 'auto', backgroundColor: '#d9d9d994' }}>
-						<Container maxWidth="md" sx={{ pt: 2, maxWidth: '100vw' }}>
+						<Container sx={{ pt: 2, maxWidth: '100vw' }}>
 
 							<Typography variant="h4">
 								Zones de livraison
@@ -276,123 +314,133 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 
 							<Divider color="black" sx={{ mt: '8px', mb: '16px' }} />
 
-							
-
 							<div style={{ position: 'relative' }}>
-							<AdminRenderMap storeLat={storeLat} storeLng={storeLng} range={((marks[sliderValue]['value']-1)/2)} />
 
-								<div style={{ position: 'absolute', top: 0, left: 0 }}>
-									<Button
-										className="zone-delete-btn"
-										disableElevation
-										onClick={handleZoneDelete}
-									>
-										<DeleteForeverIcon style={{ height: '20px', width: '20px' }} />
-									</Button>
-								</div>
+								<AdminRenderMap storeLat={storeLat} storeLng={storeLng} range={((marks[sliderValue]['value'])/2)} />
+								<Fade in={zoneSelectId !== 0}>
+									<Paper sx={{ position: 'absolute', width: '6%', zIndex: '10', bottom: 0, mb: '12px', ml: '12px', p: '8px' }} elevation={1} square>
+										<Stack spacing={2}>
+											<Button
+												className="zone-save-btn"
+												classes={{
+													root: 'zone-btn-root'
+												}}
+												disableElevation
+												disabled={zoneSelectId === 0 || !zoneValid}
+												onClick={handleZoneSave}
+											>
+												<SaveIcon style={{ height: '20px', width: '20px' }} />
+											</Button>
+											<Button
+												className="zone-delete-btn"
+												classes={{
+													root: 'zone-btn-root'
+												}}
+												disableElevation
+												disabled={zoneSelectId === 0}
+												onClick={handleZoneDelete}
+											>
+												<DeleteForeverIcon style={{ height: '20px', width: '20px' }} />
+											</Button>
+										</Stack>
+									</Paper>
+								</Fade>
+								<Fade in={zoneSelectId !== 0}>
+									<Paper sx={{ position: 'absolute', width: '76%', zIndex: '10', bottom: 0, right: 0, mb: '12px', mr: '10%', p: '8px' }} elevation={1} square>
+										<List style={{ pt: 0, pb: 0 }}>
+											<ListItem sx={{ pt: 0, pb: 0, zIndex: 10 }}>
+												<Grid container alignItems="center" justifyContent="space-between">
 
-								<Paper sx={{ position: 'absolute', width: '80%', zIndex: '10', bottom: 0, mb: '12px', ml: '12px', p: '8px' }} elevation={1} square>
-									<List style={{ pt: 0, pb: 0 }}>
-										<ListItem sx={{ pt: 0, pb: 0 }}>
-											<Grid container alignItems="center" justifyContent="space-between">
-
-												<Grid container item xs={5} alignItems="center">
-													<Grid item>
-														<Typography variant="h6" sx={{ pt: 0, pb: 0, pr: '8px' }}>
-															Distance
-														</Typography>
+													<Grid container item xs={5} alignItems="flex-end">
+														<Grid item>
+															<Typography variant="h6" sx={{ pt: 0, pb: 0, pr: '8px' }}>
+																Distance
+															</Typography>
+														</Grid>
+														<Grid item>
+															<Typography variant="subtitle1" sx={{ pt: 0, pb: 0, pr: '8px' }}>
+																{zoneSelectId === 0 ? "" : (sliderValue/2).toFixed(1)+" KM"}
+															</Typography>
+														</Grid>
 													</Grid>
-													<Grid item>
-														<Typography variant="subtitle1" sx={{ pt: 0, pb: 0, pr: '8px' }}>
-															{(sliderValue/2).toFixed(1)} KM
-														</Typography>
+
+													<Grid container item xs={3} alignItems="flex-end">
+														<Grid item>
+															<Typography variant="h6" sx={{ pt: 0, pb: 0, pr: '8px' }}>
+																Frais
+															</Typography>
+														</Grid>
+														<Grid item xs={4}>
+															<TextField
+																disabled={zoneSelectId === 0}
+																variant="standard"
+																value={editPrice}
+																onChange={(e) => setEditPrice(e.target.value)}
+																inputProps={{
+																	type: 'number',
+																}}
+																InputProps={{
+																	className: 'zones-input',
+																}}
+
+															 />
+														</Grid>
 													</Grid>
+
+													<Grid container item xs={4} alignItems="center">
+														<Grid item>
+															<Typography variant="h6" sx={{ pt: 0, pb: 0, pr: '8px' }}>
+																Total min.
+															</Typography>
+														</Grid>
+														<Grid item xs={4}>
+															<TextField
+																disabled={zoneSelectId === 0}
+																variant="standard"
+																value={editMinimum}
+																onChange={(e) => setEditMinimum(e.target.value)}
+																inputProps={{
+																	type: 'number',
+																}}
+																InputProps={{
+																	className: 'zones-input',
+																}}
+
+															 />
+														</Grid>
+													</Grid>
+
 												</Grid>
+											</ListItem>
+											<ListItem sx={{ pt: '4px', pb: 0 }}>
 
-												<Grid container item xs={3} alignItems="center">
-													<Grid item>
-														<Typography variant="h6" sx={{ pt: 0, pb: 0, pr: '8px' }}>
-															Prix
-														</Typography>
-													</Grid>
-													<Grid item xs={4}>
-														<TextField
-															variant="standard"
-															value={editPrice}
-															onChange={(e) => setEditPrice(e.target.value)}
-															inputProps={{
-																type: 'number',
-															}}
-															InputProps={{
-																className: 'zones-input',
-															}}
+												<Slider
+													sx={{ height: '10px', borderRadius: 0, mt: '4px', mb: '4px' }}
+													min={1}
+													max={marks.length-1}
+													marks={marks}
+													step={1}
+													classes={{
+														root: 'zoneslider-root',
+														mark: 'zoneslider-mark',
+														markLabel: 'zoneslider-markLabel',
+														thumb: 'zoneslider-thumb',
+														rail: 'zoneslider-rail',
+														track: 'zoneslider-track',
+														active: 'zoneslider-active',
+													}}
+													track={true}
+													value={sliderValue}
+													onChange={handleSliderChange}
+													valueLabelDisplay="off"
+													disabled={zoneSelectId === 0}
+												/>
 
-														 />
-													</Grid>
-												</Grid>
-
-												<Grid container item xs={4} alignItems="center">
-													<Grid item>
-														<Typography variant="h6" sx={{ pt: 0, pb: 0, pr: '8px' }}>
-															Minimum
-														</Typography>
-													</Grid>
-													<Grid item xs={4}>
-														<TextField
-															variant="standard"
-															value={editMinimum}
-															onChange={(e) => setEditMinimum(e.target.value)}
-															inputProps={{
-																type: 'number',
-															}}
-															InputProps={{
-																className: 'zones-input',
-															}}
-
-														 />
-													</Grid>
-												</Grid>
-
-											</Grid>
-										</ListItem>
-										<ListItem sx={{ pt: '4px', pb: 0 }}>
-											<Grid container alignItems="center" spacing={6} justifyContent="space-between">
-												<Grid item xs={10}>
-													<Slider
-														sx={{ height: '10px', borderRadius: 0, mt: '4px', mb: '4px' }}
-														min={1}
-														max={50}
-														marks={marks}
-														step={1}
-														classes={{
-															root: 'zoneslider-root',
-															mark: 'zoneslider-mark',
-															markLabel: 'zoneslider-markLabel',
-															thumb: 'zoneslider-thumb',
-															rail: 'zoneslider-rail',
-															track: 'zoneslider-track',
-															active: 'zoneslider-active',
-														}}
-														track={true}
-														value={sliderValue}
-														onChange={handleSliderChange}
-														valueLabelDisplay="off"
-													/>
-												</Grid>
-												<Grid item xs={2}>
-													<Button
-														className="zone-save-btn"
-														disableElevation
-														onClick={handleZoneSave}
-													>
-														<SaveIcon style={{ height: '20px', width: '20px' }} />
-													</Button>
-												</Grid>
-											</Grid>
-										</ListItem>
-									</List>
-									
-								</Paper>
+											</ListItem>
+										</List>
+										
+									</Paper>
+								</Fade>
 							</div>
 							
 

@@ -1,7 +1,7 @@
 body {
-	background-image: url("public/home_slider.jpg");
+	background-image: url("public/bg5.jpg");
 	background-size: cover;
-	font-family: 'Fredoka', sans-serif;
+	font-family: 'Open Sans', sans-serif;
 	font-size: 24px;
 }
 
@@ -42,12 +42,13 @@ th {
 	-webkit-text-fill-color: transparent; 
 	-moz-background-clip: text;
 	-moz-text-fill-color: transparent;
+
+	float: left;
+	width: 100%;
 }
 
 .main-container {
-	background: #ffffff52;
-	backdrop-filter: blur( 4px );
-	-webkit-backdrop-filter: blur( 4px );
+
 }
 
 .sub-container {
@@ -67,7 +68,7 @@ th {
 }
 
 .hero-container {
-	margin-bottom: 80px;
+	margin-bottom: 120px;
 	height: 46vh;
 }
 
@@ -91,9 +92,10 @@ th {
 	padding: 20px 48px;
 	border-radius: 54px;
 	font-size: 20px;
-	background: linear-gradient(15deg, #f01d1d, #ea1a1a, #e51717, #df1413, #da1010, #d40d0c, #ce0808, #c90405);
+	background: #000000;
 	color: #ffffff;
 	border: none;
+	font-weight: 600;
 }
 
 .hero-heading-button:hover {
@@ -129,24 +131,20 @@ th {
 }
 
 .hero-dish-topl > img {
-	border-radius: 16px;
 	box-shadow: 0 10px 10px rgb(0 0 0 / 20%);
 }
 
 .hero-dish-topr > img {
-	border-radius: 16px;
 	box-shadow: 0 10px 10px rgb(0 0 0 / 20%);
 
 }
 
 .hero-dish-bot >img {
-	border-radius: 16px;
 	box-shadow: 0 10px 10px rgb(0 0 0 / 20%);
 }
 
 .hero-card {
 	box-shadow: 0 10px 10px rgb(0 0 0 / 20%);
-    border-radius: 16px;
     padding: 40px;
     background-color: #ffffff52;
     margin-bottom: 64px;

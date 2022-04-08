@@ -37,9 +37,6 @@ function AdminRenderMap(props) {
 	          lat: props.storeLat,
 	          lng: props.storeLng
 	        }}
-	        onMouseover={() => console.log('mouseover')}
-	        onClick={() => console.log('click')}
-	        onMouseout={() => console.log('mouseout')}
 	        strokeColor='transparent'
 	        strokeOpacity={0}
 	        strokeWeight={5}

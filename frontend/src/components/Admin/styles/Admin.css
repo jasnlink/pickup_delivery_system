@@ -38,26 +38,39 @@
 .zone-add-btn {
 	background-color: #000000 !important;
 	color: #ffffff !important;
-	padding: 6px 6px !important;
+	
 	border-radius: 0 !important;
 }
 
+.zone-add-btn-root {
+	min-width: 32px !important;
+	padding: 6px 8px !important;
+}
+
 .zone-delete-btn {
-	background-color: #000000 !important;
+	background-color: #d32f2f !important;
 	color: #ffffff !important;
-	padding: 8px 0px !important;
+	padding: 4px 0px !important;
 	border-radius: 0 !important;
+}
+
+.zone-delete-btn:disabled {
+	background: #00000042 !important;
 }
 
 .zone-save-btn {
 	background-color: #000000 !important;
 	color: #ffffff !important;
-	padding: 8px 0px !important;
+	padding: 16px 0px !important;
 	border-radius: 0 !important;
 }
 
 .zone-save-btn:disabled {
 	background: #00000042 !important;
+}
+
+.zone-btn-root {
+	min-width: 100% !important;
 }
 
 
@@ -107,7 +120,7 @@
 }
 
 .product-delete-btn {
-	background-color: #000000 !important;
+	background-color: #d32f2f !important;
 	color: #ffffff !important;
 	padding: 6px 24px !important;
 	border-radius: 0 !important;
@@ -266,23 +279,33 @@
 	background-color: #8d8d8d !important;
 }
 
-.zoneslider-mark[data-index="3"],
-.zoneslider-mark[data-index="7"],
-.zoneslider-mark[data-index="11"],
-.zoneslider-mark[data-index="15"],
-.zoneslider-mark[data-index="19"],
-.zoneslider-mark[data-index="23"],
-.zoneslider-mark[data-index="27"],
-.zoneslider-mark[data-index="31"],
-.zoneslider-mark[data-index="35"],
-.zoneslider-mark[data-index="39"],
-.zoneslider-mark[data-index="43"],
-.zoneslider-mark[data-index="47"] {
+.zoneslider-mark[data-index="4"],
+.zoneslider-mark[data-index="8"],
+.zoneslider-mark[data-index="12"],
+.zoneslider-mark[data-index="16"],
+.zoneslider-mark[data-index="20"],
+.zoneslider-mark[data-index="24"],
+.zoneslider-mark[data-index="28"],
+.zoneslider-mark[data-index="32"],
+.zoneslider-mark[data-index="36"],
+.zoneslider-mark[data-index="40"],
+.zoneslider-mark[data-index="44"],
+.zoneslider-mark[data-index="48"] {
 	height: 16px !important;
 	width: 1px !important;
 	background-color: #8d8d8d !important;
 }
 
+.zoneslider-mark[data-index="1"],
+.zoneslider-mark[data-index="50"] {
+	height: 10px !important;
+	width: 1px !important;
+	background-color: #8d8d8d !important;
+}
+
+.zoneslider-mark[data-index="0"] {
+	visibility: hidden;
+}
 
 .zoneslider-markLabel {
 	padding-top: 0px;

@@ -1906,7 +1906,7 @@ app.post('/api/admin/optiongroups/update', (req, res) => {
 
 
             const fetchRequest = "SELECT * FROM osd_optgroups;";
-            connection.query(fetchRequest, [editId], (err, result) => {
+            connection.query(fetchRequest, (err, result) => {
                 if(err) {
                     console.log('error...', err);
                     res.status(400).send(err);
@@ -1925,6 +1925,66 @@ app.post('/api/admin/optiongroups/update', (req, res) => {
     });
 
 });
+
+
+//delete an option group given a option group id
+app.post('/api/admin/optiongroups/delete', (req, res) => {
+
+
+    const editId = req.body.editId
+
+    const deleteRequest = "DELETE FROM osd_optgroups WHERE optgroup_id=?;"
+    connection.query(deleteRequest, [editId], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('deleting option group...', editId)
+
+
+
+        const deleteRequest1 = "DELETE FROM osd_options WHERE optgroup_id=?;"
+        connection.query(deleteRequest1, [editId], (err, result) => {
+            if(err) {
+                console.log('error...', err);
+                res.status(400).send(err);
+                return false;
+            }
+            console.log('deleting associated options...', editId)
+
+
+
+            const deleteRequest2 = "DELETE FROM osd_optgroup_products WHERE optgroup_id=?;"
+            connection.query(deleteRequest2, [editId], (err, result) => {
+                if(err) {
+                    console.log('error...', err);
+                    res.status(400).send(err);
+                    return false;
+                }
+                console.log('deleting associated option group products...', editId)
+
+
+                const fetchRequest = "SELECT * FROM osd_optgroups;";
+                connection.query(fetchRequest, (err, result) => {
+                    if(err) {
+                        console.log('error...', err);
+                        res.status(400).send(err);
+                        return false;
+                    }
+                    console.log('fetching updated option groups...');
+                    res.send(result);
+
+                });
+
+            });
+
+        });
+
+    });
+
+});
+
 
 
 /********************************************************************************************************
@@ -2107,6 +2167,7 @@ app.post('/api/admin/products/update', (req, res) => {
     //current image file of product, need to delete it from server if
     //we uploaded another file to replace it
     let editImg = req.body.editImg
+
     let optiongroups = req.body.optiongroups
 
 
@@ -2160,34 +2221,35 @@ app.post('/api/admin/products/update', (req, res) => {
             }
             console.log('updating product...', editId)
 
+            //first delete existing option groups
+            const deleteRequest = "DELETE FROM osd_optgroup_products WHERE product_id=?"
+            connection.query(deleteRequest, [editId], (err, result) => {
+                if(err) {
+                    console.log('error...', err);
+                    res.status(400).send(err);
+                    return false;
+                }
+                console.log('deleting all optiongroups from product...', editId)
 
-            //if we got option groups
-            if(optiongroups) {
 
-                //decode the stringified array
-                optiongroups = JSON.parse(optiongroups)
+                //if we got option groups
+                if(JSON.parse(optiongroups).length) {
 
-                //build the insert request
-                //by looping through option groups
-                let insertRequest = "INSERT INTO osd_optgroup_products (optgroup_id, product_id) VALUES "
-                let promise = Promise.all(optiongroups.map((group, index) => {
+                    //decode the stringified array
+                    optiongroups = JSON.parse(optiongroups)
+                    //build the insert request
+                    //by looping through option groups
+                    let insertRequest = "INSERT INTO osd_optgroup_products (optgroup_id, product_id) VALUES "
+                    let promise = Promise.all(optiongroups.map((group, index) => {
 
-                    if(index+1 === optiongroups.length) {
-                        return insertRequest += "("+group+","+editId+");" 
-                    }
-                    return insertRequest += "("+group+","+editId+")," 
-                    
-
-                })).then((results) => {
-                    //first delete existing option groups
-                    const deleteRequest = "DELETE FROM osd_optgroup_products WHERE product_id=?"
-                    connection.query(deleteRequest, [editId], (err, result) => {
-                        if(err) {
-                            console.log('error...', err);
-                            res.status(400).send(err);
-                            return false;
+                        if(index+1 === optiongroups.length) {
+                            return insertRequest += "("+group+","+editId+");" 
                         }
-                        console.log('deleting all optiongroups from product...', editId)
+                        return insertRequest += "("+group+","+editId+")," 
+                        
+
+                    })).then((results) => {
+                        
 
                         //then we insert the newly selected optiongroups
                         connection.query(insertRequest, (err, result) => {
@@ -2213,32 +2275,29 @@ app.post('/api/admin/products/update', (req, res) => {
 
                         })
 
-
                     })
-
-                })
-            //no option groups
-            } else {
+                //no option groups to add
+                } else {
 
 
-                //no option groups to insert, so we just fetch the updated product list
-                const fetchQuery = "SELECT * FROM osd_products WHERE category_id=? ORDER BY order_index;";
-                connection.query(fetchQuery, [categorySelectId], (err, result) => {
-                    if(err) {
-                        console.log('error...', err);
-                        res.status(400).send(err);
-                        return false;
-                    }
-                    console.log('fetching updated products from cateogry...', categorySelectId);
-                    res.send(result);
+                    //no option groups to insert, so we just fetch the updated product list
+                    const fetchQuery = "SELECT * FROM osd_products WHERE category_id=? ORDER BY order_index;";
+                    connection.query(fetchQuery, [categorySelectId], (err, result) => {
+                        if(err) {
+                            console.log('error...', err);
+                            res.status(400).send(err);
+                            return false;
+                        }
+                        console.log('fetching updated products from cateogry...', categorySelectId);
+                        res.send(result);
 
-                });
+                    });
 
+                }
 
-            }
+            })
 
-
-        })
+    })
 
     //if we didnt upload an image file
     } else {
@@ -2253,33 +2312,37 @@ app.post('/api/admin/products/update', (req, res) => {
             }
             console.log('updating product...', editId);
 
-            //if we got option groups
-            if(optiongroups) {
 
-                //decode the stringified array
-                optiongroups = JSON.parse(optiongroups)
+            //first delete existing option groups
+            const deleteRequest = "DELETE FROM osd_optgroup_products WHERE product_id=?"
+            connection.query(deleteRequest, [editId], (err, result) => {
+                if(err) {
+                    console.log('error...', err);
+                    res.status(400).send(err);
+                    return false;
+                }
+                console.log('deleting all optiongroups from product...', editId)
 
-                //build the insert request
-                //by looping through option groups
-                let insertRequest = "INSERT INTO osd_optgroup_products (optgroup_id, product_id) VALUES "
-                let promise = Promise.all(optiongroups.map((group, index) => {
 
-                    if(index+1 === optiongroups.length) {
-                        return insertRequest += "("+group+","+editId+");" 
-                    }
-                    return insertRequest += "("+group+","+editId+")," 
-                    
+                //if we got option groups
+                if(JSON.parse(optiongroups).length) {
 
-                })).then((results) => {
-                    //first delete existing option groups
-                    const deleteRequest = "DELETE FROM osd_optgroup_products WHERE product_id=?"
-                    connection.query(deleteRequest, [editId], (err, result) => {
-                        if(err) {
-                            console.log('error...', err);
-                            res.status(400).send(err);
-                            return false;
+                    //decode the stringified array
+                    optiongroups = JSON.parse(optiongroups)
+
+                    //build the insert request
+                    //by looping through option groups
+                    let insertRequest = "INSERT INTO osd_optgroup_products (optgroup_id, product_id) VALUES "
+                    let promise = Promise.all(optiongroups.map((group, index) => {
+
+                        if(index+1 === optiongroups.length) {
+                            return insertRequest += "("+group+","+editId+");" 
                         }
-                        console.log('deleting all optiongroups from product...', editId)
+                        return insertRequest += "("+group+","+editId+")," 
+                        
+
+                    })).then((results) => {
+                        
 
                         //then we insert the newly selected optiongroups
                         connection.query(insertRequest, (err, result) => {
@@ -2305,38 +2368,32 @@ app.post('/api/admin/products/update', (req, res) => {
 
                         })
 
-
                     })
-
-                })
-            //no option groups
-            } else {
+                //no option groups
+                } else {
 
 
-                //no option groups to insert, so we just fetch the updated product list
-                const fetchQuery = "SELECT * FROM osd_products WHERE category_id=? ORDER BY order_index;";
-                connection.query(fetchQuery, [categorySelectId], (err, result) => {
-                    if(err) {
-                        console.log('error...', err);
-                        res.status(400).send(err);
-                        return false;
-                    }
-                    console.log('fetching updated products from cateogry...', categorySelectId);
-                    res.send(result);
+                    //no option groups to insert, so we just fetch the updated product list
+                    const fetchQuery = "SELECT * FROM osd_products WHERE category_id=? ORDER BY order_index;";
+                    connection.query(fetchQuery, [categorySelectId], (err, result) => {
+                        if(err) {
+                            console.log('error...', err);
+                            res.status(400).send(err);
+                            return false;
+                        }
+                        console.log('fetching updated products from cateogry...', categorySelectId);
+                        res.send(result);
 
-                });
-
-
-            }
+                    });
 
 
+                }
+
+            });
 
         })
 
     }
-    
-    
-
 
 })
 
@@ -2853,6 +2910,8 @@ app.post('/api/admin/deliveryzones/insert', (req, res) => {
             }
         console.log('inserting new delivery zone...')
 
+        //use newly inserted product id for next request
+        const lastInsertID = result.insertId;
 
         const fetchZonesRequest = "SELECT * FROM osd_delivery_zones ORDER BY delivery_zone_range;";
         connection.query(fetchZonesRequest, (err, result) => {
@@ -2862,7 +2921,7 @@ app.post('/api/admin/deliveryzones/insert', (req, res) => {
                 return false;
             }
             console.log('fetching all delivery zones...')
-            res.send(result)
+            res.send({lastInsertID: lastInsertID, result: result})
 
         })
 

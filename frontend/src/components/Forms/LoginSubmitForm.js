@@ -73,7 +73,10 @@ function LoginSubmitForm({ email, setEmail, setHash }) {
 		<ListItem style={{display:'flex', justifyContent:'center'}}>
 			<FormControl variant="standard" fullWidth>
 				<Input
-					inputProps={{ style: { textAlign:'center' } }}
+					inputProps={{ 
+						style: { textAlign:'center' },
+						type: 'email'
+					}}
 					placeholder="courriel@exemple.ca"							
 					autoFocus
 					value={email}

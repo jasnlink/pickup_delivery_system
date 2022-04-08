@@ -267,21 +267,15 @@ function AdminProductManager() {
 			formData.append('file', editImgFile);
 		}
 
-		//shallow compare to see if we changed selected optiongroups
-		//only if they aren't the same then we add to form data to be sent over
-		if(JSON.stringify(selectedOptiongroups) !== JSON.stringify(editOptiongroups)) {
-
-			formData.append('optiongroups', JSON.stringify(selectedOptiongroups));
-
-		}
 		
-
 		formData.append('categorySelectId', categorySelectId)
 		formData.append('editId', editId);
 		formData.append('editName', editName);
 		formData.append('editDesc', editDesc);
 		formData.append('editPrice', editPrice);
 		formData.append('editImg', editImg);
+
+		formData.append('optiongroups', JSON.stringify(selectedOptiongroups));
 
 		
 		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/products/update", formData, {
@@ -431,8 +425,8 @@ function AdminProductManager() {
 	const productSchema = Yup.object().shape({
 
 		title: Yup.string().required(),
-		description: Yup.string().required(),
-		price: Yup.number().positive().required(),
+		description: Yup.string(),
+		price: Yup.number().min(0).required(),
 	})
 
 	useEffect(() => {
@@ -666,7 +660,6 @@ function AdminProductManager() {
 											fullWidth
 											inputProps={{
 												type: 'number',
-												pattern: '/^\\d*(\\.\\d{0,2})?$/'
 											}}
 											InputProps={{
 												className: 'text-input',
