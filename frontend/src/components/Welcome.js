@@ -29,7 +29,7 @@ function Welcome({ setStep, setOrderType }) {
 		<Container maxWidth='sm'>
 			<List sx={{ mt: '24px' }}>
 				<ListItem disablePadding style={{display:'flex', justifyContent:'center'}}>
-					<img src="./logo-black-transparent.png" className="welcome-logo" />
+					<img src={process.env.REACT_APP_PUBLIC_URL+"/app/logo-black-transparent.png"} className="welcome-logo" />
 				</ListItem>
 				<ListItem disablePadding style={{display:'flex', justifyContent:'center'}}>
 					<ListItemText primary={<Typography variant="h2">Bienvenue</Typography>} style={{display:'flex', justifyContent:'center'}} />

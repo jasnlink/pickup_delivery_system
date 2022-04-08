@@ -1,6 +1,7 @@
 body {
-	background-image: url("public/bg5.jpg");
+	background-image: url("public/bg6.jpg");
 	background-size: cover;
+	background-position: right;
 	font-family: 'Open Sans', sans-serif;
 	font-size: 24px;
 }
@@ -48,7 +49,6 @@ th {
 }
 
 .main-container {
-
 }
 
 .sub-container {
@@ -68,8 +68,8 @@ th {
 }
 
 .hero-container {
-	margin-bottom: 120px;
-	height: 46vh;
+	height: auto;
+	margin-bottom: 64px;
 }
 
 .hero-heading {
@@ -82,9 +82,13 @@ th {
 	margin-bottom: 28px;
 }
 
+.hero-text {
+	margin-top: 48px;
+	margin-bottom: 12px;
+}
+
 .hero-heading-button-container {
 	width: 350px;
-	margin-top: 48px;
 }
 
 .hero-heading-button {
@@ -110,45 +114,11 @@ th {
 	border: none;
 }
 
-
-.hero-dish-topl {
-	height: 100%;
-	margin-top: 86px;
-    margin-left: -61px;
-    margin-right: -20px;
-}
-
-.hero-dish-topr {
-	height: 100%;
-    margin-top: 10px;
-    margin-left: 2px;
-    margin-right: -28px;
-}
-
-.hero-dish-bot {
-	height: 100%;
-	margin-left: 68px;
-}
-
-.hero-dish-topl > img {
-	box-shadow: 0 10px 10px rgb(0 0 0 / 20%);
-}
-
-.hero-dish-topr > img {
-	box-shadow: 0 10px 10px rgb(0 0 0 / 20%);
-
-}
-
-.hero-dish-bot >img {
-	box-shadow: 0 10px 10px rgb(0 0 0 / 20%);
-}
-
 .hero-card {
 	box-shadow: 0 10px 10px rgb(0 0 0 / 20%);
     padding: 40px;
-    background-color: #ffffff52;
+    background-color: #ffffff;
     margin-bottom: 64px;
-    backdrop-filter: blur(64px);
 }
 
 .hero-card-phone {
@@ -168,23 +138,6 @@ th {
 	.hero-container {
 		height: auto;
 	}
-	.hero-dish-topl {
-	    height: 100%;
-	    margin-top: 16px;
-	    margin-left: -81px;
-	    margin-right: -29px;
-	    margin-bottom: -4px;
-	}
-	.hero-dish-topr {
-	    height: 100%;
-	    margin-top: -14px;
-	    margin-left: -14px;
-	    margin-right: -49px;
-	}
-	.hero-dish-bot {
-	    margin-left: 0px;
-    	margin-top: -12px;
-	}
 
 }
 
@@ -195,6 +148,7 @@ th {
 
 	body {
 		font-size: 18px;
+		background-position: center;
 	}
 
 
@@ -219,30 +173,15 @@ th {
 	.hero-card { 
 		padding: 24px;
 	}
-	.hero-dish-topl {
-		height: 100%;
-		margin-top: 128px;
-	    margin-left: -13px;
-	    margin-right: -108px;
-	}
-
-	.hero-dish-topr {
-		height: 100%;
-	    margin-top: -2px;
-	    margin-left: -30px;
-	    margin-right: -62px;
-	}
-
-	.hero-dish-bot {
-		height: 100%;
-		margin-left: 24px;
-	}
 
 }
 
 /* Small devices (landscape phones, 576px and up) */
 @media (min-width: 576px) and (max-width: 767.98px) {
 
+	body {
+		background-position: center;
+	}
 	.hero-container {
 		height: auto;
 	}	
@@ -254,6 +193,7 @@ th {
 
 	body {
 		font-size: 22px;
+		background-position: center;
 	}
 	th {
 		text-align: right;
@@ -273,6 +213,9 @@ th {
 		margin-left: auto !important;
 		margin-right: auto !important;
 	}
+	.hero-heading-button {
+		padding: 20px 42px;
+	}
 	.hero-card { 
 		padding: 48px 8px;
 		margin-left: 1px;
@@ -280,7 +223,11 @@ th {
 		text-align: center;
 	}
 	.hero-card-phone {
+		font-size: 42px;
 		padding-bottom: 8px;
+	}
+	.hero-card-address, .hero-card-address2 {
+		font-size: 24px;
 	}
 	.hero-card-table {
 		margin-top: 10px;

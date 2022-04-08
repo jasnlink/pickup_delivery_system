@@ -369,7 +369,7 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime, userAut
 				{categories.map((category, cIndex) => (
 					<>
 					<ListItem disablePadding key={cIndex} sx={{ mt: '24px' }}>
-						<ListItemText primary={<Typography variant="h4" className="category-title">{category.category_name}</Typography>} />
+						<ListItemText primary={<Typography variant="h3" sx={{ fontWeight: '500' }} className="category-title">{category.category_name}</Typography>} />
 					</ListItem>
 					{products.map((product, pIndex) => (
 						<>
