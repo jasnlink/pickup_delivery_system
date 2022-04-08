@@ -65,6 +65,7 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import SaveIcon from '@mui/icons-material/Save';
 
 import './styles/Admin.css';
 
@@ -73,7 +74,7 @@ import AdminRenderMap from './Forms/AdminRenderMap';
 
 function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 
-	const [loading, setLoading] = useState(false)
+	const [loading, setLoading] = useState(true)
 	const [zones, setZones] = useState([])
 
 	const [zoneSelectId, setZoneSelectId] = useState(0)
@@ -150,7 +151,42 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 		return result;
 	}
 
+	function handleZoneSave() {
 
+		const range = ((marks[sliderValue].value-1)/2)
+
+		setLoading(true)
+
+		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/deliveryzones/update", {
+			zoneSelectId: zoneSelectId,
+			editPrice: editPrice,
+			editMinimum: editMinimum,
+			editRange: range,
+		})
+		.then((response) => {
+			setZones(response.data)
+			setLoading(false)
+			
+		})
+		.catch((err) => {
+	       	console.log("error ", err)});
+
+	}
+
+	function handleZoneAdd() {
+
+		setLoading(true)
+
+		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/deliveryzones/insert")
+		.then((response) => {
+			setZones(response.data)
+			setLoading(false)
+			
+		})
+		.catch((err) => {
+	       	console.log("error ", err)});
+
+	}
 
 
 	return (
@@ -170,7 +206,22 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 						<Paper sx={{ minHeight: '100vh' }} elevation={8} square>
 							<List sx={{ pt: '8vh' }}>
 								<ListItem>
-									<ListItemText primary={<Typography variant="h6" style={{ fontWeight: '500' }}>Zones</Typography>} />
+									
+									<Grid container justifyContent="space-between" alignItems="center">
+										<Grid item xs={6}>
+											<ListItemText primary={<Typography variant="h6" style={{ fontWeight: '500' }}>Zones</Typography>} />
+										</Grid>
+										<Grid item>
+											<Button
+												className="zone-add-btn"
+												disableElevation
+												onClick={handleZoneAdd}
+											>
+												<AddCircleIcon />
+											</Button>
+										</Grid>
+									</Grid>
+
 								</ListItem>
 									{zones.map((zone, index) => (
 
@@ -180,7 +231,7 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 											onClick={() => handleZoneSelect(zone.delivery_zone_id, zone.delivery_zone_range, zone.delivery_zone_price, zone.delivery_zone_order_min)}
 											classes={{ selected: "nav-item-selected" }}
 										>
-											<ListItemText primary={zone.delivery_zone_name} />
+											<ListItemText primary={"Zone - "+(zone.delivery_zone_range)+" KM"} />
 										</ListItemButton>
 
 									))}
@@ -190,27 +241,17 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 
 					<Grid item xs={10} style={{ maxHeight: '100vh', overflow: 'auto', backgroundColor: '#d9d9d994' }}>
 						<Container maxWidth="md" sx={{ pt: 2, maxWidth: '100vw' }}>
-							<Grid container justifyContent="space-between" alignItems="center">
-								<Grid item xs={8}>
-									<Typography variant="h4">
-										Zones de livraison
-									</Typography>
-								</Grid>
-								<Grid item>
-									<Button
-										className="product-add-btn"
-										disableElevation
-									>
-										<AddCircleIcon />
-									</Button>
-								</Grid>
-							</Grid>
+
+							<Typography variant="h4">
+								Zones de livraison
+							</Typography>
+								
 
 							<Divider color="black" sx={{ mt: '8px', mb: '16px' }} />
 
-							<AdminRenderMap storeLat={storeLat} storeLng={storeLng} />
+							<AdminRenderMap storeLat={storeLat} storeLng={storeLng} range={((marks[sliderValue]['value']-1)/2)} />
 							<div style={{ position: 'relative' }}>
-								<Paper sx={{ position: 'absolute', height: '102px', width: '80%', zIndex: '10', bottom: 0, mb: '12px', ml: '12px' }} elevation={1} square>
+								<Paper sx={{ position: 'absolute', width: '80%', zIndex: '10', bottom: 0, mb: '12px', ml: '12px', p: '8px' }} elevation={1} square>
 									<List style={{ pt: 0, pb: 0 }}>
 										<ListItem sx={{ pt: 0, pb: 0 }}>
 											<Grid container alignItems="center" justifyContent="space-between">
@@ -252,7 +293,7 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 
 												<Grid container item xs={4} alignItems="center">
 													<Grid item>
-														<Typography variant="h6" sx={{ pt: 0, pb: 0, pr: '8px' }} onClick={() => console.log(sliderValue)}>
+														<Typography variant="h6" sx={{ pt: 0, pb: 0, pr: '8px' }}>
 															Minimum
 														</Typography>
 													</Grid>
@@ -274,28 +315,41 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 
 											</Grid>
 										</ListItem>
-										<ListItem sx={{ pt: 0, pb: 0 }}>
-											<Slider
-												sx={{ height: '10px', borderRadius: 0, mt: '4px', mb: '4px' }}
-												min={1}
-												max={50}
-												marks={marks}
-												step={1}
-												classes={{
-													root: 'zoneslider-root',
-													mark: 'zoneslider-mark',
-													markLabel: 'zoneslider-markLabel',
-													thumb: 'zoneslider-thumb',
-													rail: 'zoneslider-rail',
-													track: 'zoneslider-track',
-													active: 'zoneslider-active',
-													
-												}}
-												track={true}
-												value={sliderValue}
-												onChange={handleSliderChange}
-												valueLabelDisplay="off"
-											/>
+										<ListItem sx={{ pt: '4px', pb: 0 }}>
+											<Grid container alignItems="center" spacing={2} justifyContent="space-between">
+												<Grid item xs={10}>
+													<Slider
+														sx={{ height: '10px', borderRadius: 0, mt: '4px', mb: '4px' }}
+														min={1}
+														max={50}
+														marks={marks}
+														step={1}
+														classes={{
+															root: 'zoneslider-root',
+															mark: 'zoneslider-mark',
+															markLabel: 'zoneslider-markLabel',
+															thumb: 'zoneslider-thumb',
+															rail: 'zoneslider-rail',
+															track: 'zoneslider-track',
+															active: 'zoneslider-active',
+															
+														}}
+														track={true}
+														value={sliderValue}
+														onChange={handleSliderChange}
+														valueLabelDisplay="off"
+													/>
+												</Grid>
+												<Grid item xs={2}>
+													<Button
+														className="zone-save-btn"
+														disableElevation
+														onClick={handleZoneSave}
+													>
+														<SaveIcon style={{ height: '20px', width: '20px' }} />
+													</Button>
+												</Grid>
+											</Grid>
 										</ListItem>
 									</List>
 									

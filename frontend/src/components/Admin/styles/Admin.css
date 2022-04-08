@@ -35,6 +35,24 @@
 	background: #00000042 !important;
 }
 
+.zone-add-btn {
+	background-color: #000000 !important;
+	color: #ffffff !important;
+	padding: 6px 6px !important;
+	border-radius: 0 !important;
+}
+
+.zone-save-btn {
+	background-color: #000000 !important;
+	color: #ffffff !important;
+	padding: 8px 0px !important;
+	border-radius: 0 !important;
+}
+
+.zone-save-btn:disabled {
+	background: #00000042 !important;
+}
+
 
 .error-dialog {
 

@@ -2787,7 +2787,7 @@ app.post('/api/admin/timegroups/delete', (req, res) => {
 app.post('/api/admin/deliveryzones/fetch/all', (req, res) => {
 
 
-    const fetchZonesRequest = "SELECT * FROM osd_delivery_zones;";
+    const fetchZonesRequest = "SELECT * FROM osd_delivery_zones ORDER BY delivery_zone_range;";
     connection.query(fetchZonesRequest, (err, result) => {
         if(err) {
             console.log('error...', err);
@@ -2803,7 +2803,72 @@ app.post('/api/admin/deliveryzones/fetch/all', (req, res) => {
 })
 
 
+//update a delivery zone given a zone id
+app.post('/api/admin/deliveryzones/update', (req, res) => {
 
+    const zoneSelectId = req.body.zoneSelectId;
+    const editPrice = req.body.editPrice;
+    const editMinimum = req.body.editMinimum;
+    const editRange = req.body.editRange;
+
+
+    const updateZonesRequest = "UPDATE osd_delivery_zones SET delivery_zone_range=?, delivery_zone_price=?, delivery_zone_order_min=? WHERE delivery_zone_id=?;";
+    connection.query(updateZonesRequest, [editRange, editPrice, editMinimum, zoneSelectId], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('updating delivery zone...', zoneSelectId)
+
+
+        const fetchZonesRequest = "SELECT * FROM osd_delivery_zones ORDER BY delivery_zone_range;";
+        connection.query(fetchZonesRequest, (err, result) => {
+            if(err) {
+                console.log('error...', err);
+                res.status(400).send(err);
+                return false;
+            }
+            console.log('fetching all delivery zones...')
+            res.send(result)
+
+        })
+
+
+    })
+
+
+})
+
+
+//insert new delivery zone
+app.post('/api/admin/deliveryzones/insert', (req, res) => {
+
+    const insertZonesRequest = "INSERT INTO osd_delivery_zones (delivery_zone_range, delivery_zone_price, delivery_zone_order_min) VALUES (?, ?, ?);"
+    connection.query(insertZonesRequest, [0.5,0,0], (err, result) => {
+        if(err) {
+                console.log('error...', err);
+                res.status(400).send(err);
+                return false;
+            }
+        console.log('inserting new delivery zone...')
+
+
+        const fetchZonesRequest = "SELECT * FROM osd_delivery_zones ORDER BY delivery_zone_range;";
+        connection.query(fetchZonesRequest, (err, result) => {
+            if(err) {
+                console.log('error...', err);
+                res.status(400).send(err);
+                return false;
+            }
+            console.log('fetching all delivery zones...')
+            res.send(result)
+
+        })
+
+    })
+
+})
 
 
 

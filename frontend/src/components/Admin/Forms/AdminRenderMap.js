@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {Map, InfoWindow, Marker, GoogleApiWrapper} from 'google-maps-react';
+import {Map, InfoWindow, Marker, Circle, GoogleApiWrapper} from 'google-maps-react';
 import { Typography } from '@mui/material';
 
 
@@ -31,7 +31,21 @@ function AdminRenderMap(props) {
     >
 
     	<Marker />
-        
+        <Circle
+	        radius={(props.range*1000)}
+	        center={{
+	          lat: props.storeLat,
+	          lng: props.storeLng
+	        }}
+	        onMouseover={() => console.log('mouseover')}
+	        onClick={() => console.log('click')}
+	        onMouseout={() => console.log('mouseout')}
+	        strokeColor='transparent'
+	        strokeOpacity={0}
+	        strokeWeight={5}
+	        fillColor='#FF0000'
+	        fillOpacity={0.2}
+	      />
     </Map>
   </>
   )
