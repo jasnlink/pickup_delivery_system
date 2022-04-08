@@ -188,6 +188,33 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 
 	}
 
+	function handleZoneDelete() {
+
+		setLoading(true)
+
+		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/deliveryzones/delete", {
+			zoneSelectId: zoneSelectId,
+		})
+		.then((response) => {
+			setZones(response.data)
+			handleZoneUnselect()
+			setLoading(false)
+			
+		})
+		.catch((err) => {
+	       	console.log("error ", err)});
+
+	}
+
+	function handleZoneUnselect() {
+
+		setSliderValue(0)
+		setZoneSelectId(0)
+		setEditPrice(0)
+		setEditMinimum(0)
+
+
+	}
 
 	return (
 	<>
@@ -249,8 +276,21 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 
 							<Divider color="black" sx={{ mt: '8px', mb: '16px' }} />
 
-							<AdminRenderMap storeLat={storeLat} storeLng={storeLng} range={((marks[sliderValue]['value']-1)/2)} />
+							
+
 							<div style={{ position: 'relative' }}>
+							<AdminRenderMap storeLat={storeLat} storeLng={storeLng} range={((marks[sliderValue]['value']-1)/2)} />
+
+								<div style={{ position: 'absolute', top: 0, left: 0 }}>
+									<Button
+										className="zone-delete-btn"
+										disableElevation
+										onClick={handleZoneDelete}
+									>
+										<DeleteForeverIcon style={{ height: '20px', width: '20px' }} />
+									</Button>
+								</div>
+
 								<Paper sx={{ position: 'absolute', width: '80%', zIndex: '10', bottom: 0, mb: '12px', ml: '12px', p: '8px' }} elevation={1} square>
 									<List style={{ pt: 0, pb: 0 }}>
 										<ListItem sx={{ pt: 0, pb: 0 }}>
@@ -316,7 +356,7 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 											</Grid>
 										</ListItem>
 										<ListItem sx={{ pt: '4px', pb: 0 }}>
-											<Grid container alignItems="center" spacing={2} justifyContent="space-between">
+											<Grid container alignItems="center" spacing={6} justifyContent="space-between">
 												<Grid item xs={10}>
 													<Slider
 														sx={{ height: '10px', borderRadius: 0, mt: '4px', mb: '4px' }}
@@ -332,7 +372,6 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 															rail: 'zoneslider-rail',
 															track: 'zoneslider-track',
 															active: 'zoneslider-active',
-															
 														}}
 														track={true}
 														value={sliderValue}

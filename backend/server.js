@@ -2872,6 +2872,42 @@ app.post('/api/admin/deliveryzones/insert', (req, res) => {
 
 
 
+//delete a delivery zone given a delivery zone id
+app.post('/api/admin/deliveryzones/delete', (req, res) => {
+
+    const zoneSelectId = req.body.zoneSelectId;
+
+    const deleteZoneRequest = "DELETE FROM osd_delivery_zones WHERE delivery_zone_id=?;";
+    connection.query(deleteZoneRequest, [zoneSelectId], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('deleting delivery zone...', zoneSelectId)
+
+
+        const fetchZonesRequest = "SELECT * FROM osd_delivery_zones ORDER BY delivery_zone_range;";
+        connection.query(fetchZonesRequest, (err, result) => {
+            if(err) {
+                console.log('error...', err);
+                res.status(400).send(err);
+                return false;
+            }
+            console.log('fetching all delivery zones...')
+            res.send(result)
+
+        })
+
+
+    })
+
+
+})
+
+
+
+
 /********************************************************************************************************
  ********************************************************************************************************
  ********************************************************************************************************

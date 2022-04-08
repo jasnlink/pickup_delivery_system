@@ -42,6 +42,13 @@
 	border-radius: 0 !important;
 }
 
+.zone-delete-btn {
+	background-color: #000000 !important;
+	color: #ffffff !important;
+	padding: 8px 0px !important;
+	border-radius: 0 !important;
+}
+
 .zone-save-btn {
 	background-color: #000000 !important;
 	color: #ffffff !important;
