@@ -146,7 +146,7 @@ function CartDrawer({ cart, setCart, handleCheckout, productDrawer }) {
                     </Grid>
                     
                 </ListItem>
-                <ListItem>
+                <ListItem sx={{ pb: '16px' }}>
                     <Button onClick={() => handleCheckout()} variant="contained" color="primary" size="large" fullWidth disabled={cart.length===0}>
                         Passer au paiement
                     </Button>

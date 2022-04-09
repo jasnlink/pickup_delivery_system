@@ -423,8 +423,11 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime, userAut
 					<IconButton className="product-drawer-close-btn" size="medium" onClick={closeProductDrawer}>
 						<CloseIcon  />
 					</IconButton>
-					<img src={selectProductImg} className="product-drawer-media" />
+					<div className="product-drawer-media-container">
+						<img src={selectProductImg} className="product-drawer-media" />
+					</div>
 					<Container>
+					
 						<List>
 							<ListItem disablePadding>
 								<Typography variant="h4" className="product-drawer-title">

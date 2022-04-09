@@ -42,13 +42,20 @@ body {
 .product-drawer {
 	min-height: 85% !important;
 	max-height: 85% !important;
+	width:100% !important;
 	max-width: 600px;
 	margin: auto;
 	padding-bottom: 64px;
 	z-index: 0;
 }
+
+.product-drawer-media-container {
+	 position: static !important;
+	 width: inherit !important;
+}
 .product-drawer-media {
-	min-width: 100%;
+	min-width: 100% !important;
+	max-width: 100% !important;
 	height: auto;
 	object-fit: cover;
 }

@@ -8,7 +8,7 @@ body {
 
 
 h1 { 
-	font-family: 'Nunito', sans-serif;
+	font-family: 'Mako', sans-serif;
 	font-weight: bold;
 	font-size: 42px;
 }
@@ -60,7 +60,7 @@ th {
 	height: 38px;
 	margin-left: auto;
 	margin-right: auto;
-	font-size: 24px;
+	font-size: 18px;
 	display: inline-block;
 }
 .footer-svg {
@@ -83,18 +83,17 @@ th {
 }
 
 .hero-text {
-	margin-top: 48px;
+	margin-top: 56px;
 	margin-bottom: 12px;
 }
 
 .hero-heading-button-container {
-	width: 350px;
 }
 
 .hero-heading-button {
 	max-width: 100%;
-	padding: 20px 48px;
-	border-radius: 54px;
+	padding: 20px 64px;
+	border-radius: 0;
 	font-size: 20px;
 	background: #000000;
 	color: #ffffff;
@@ -214,7 +213,7 @@ th {
 		margin-right: auto !important;
 	}
 	.hero-heading-button {
-		padding: 20px 42px;
+		padding: 22px 48px;
 	}
 	.hero-card { 
 		padding: 48px 8px;

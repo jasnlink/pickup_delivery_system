@@ -335,7 +335,7 @@ function PaymentDrawer({
                 Payer Maintenant
             </Button>
         </ListItem>
-        <ListItem>
+        <ListItem sx={{ pb: '16px' }}>
             <Button onClick={handleOpenMethodForm} disabled={!cart.length || parseFloat(cartMinimum) > parseFloat(cartSubtotal)} variant="outlined" color="primary" size="large" fullWidth>
                 Paiement à la porte
             </Button>
