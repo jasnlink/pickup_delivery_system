@@ -163,11 +163,13 @@ function LoginVerifyForm({
 			<ListItemText primary={<Typography variant="h4" align="center">Un code de vérification à été envoyé à votre courriel, entrez le ici.</Typography>} style={{display:'flex', justifyContent:'center'}} />
 		</ListItem>
 		<ListItem style={{display:'flex', justifyContent:'center'}}>
-			<FormControl variant="standard" fullWidth>
+			<FormControl variant="standard" style={{ borderRadius: 0 }} fullWidth>
 				<TextField
-					inputProps={{ style: { textAlign:'center' }, maxLength: 6, type: 'number' }}
+					inputProps={{ style: { textAlign:'center', borderRadius: 0 }, maxLength: 6 }}
+					InputProps={{ style: { borderRadius: 0 } }}
 					placeholder=""							
 					value={otp}
+					sx={{ borderRadius: 0 }}
 					onChange={(e) => setOtp(e.target.value)}
 					onKeyUp={(e) => {if(e.keyCode === 13 && isOtp) {handleVerify()}}}
 					required

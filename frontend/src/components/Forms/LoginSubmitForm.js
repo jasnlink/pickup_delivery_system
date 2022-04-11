@@ -72,11 +72,11 @@ function LoginSubmitForm({ email, setEmail, setHash }) {
 			<ListItemText primary={<Typography variant="h3" align="center">Entrez votre <span style={{fontWeight: '600'}}>courriel</span></Typography>} style={{display:'flex', justifyContent:'center'}} />
 		</ListItem>
 		<ListItem style={{display:'flex', justifyContent:'center'}}>
-			<FormControl variant="standard" fullWidth>
+			<FormControl variant="standard" sx={{ borderRadius: 0 }} fullWidth>
 				<Input
 					inputProps={{ 
-						style: { textAlign:'center' },
-						type: 'email'
+						style: { textAlign:'center', borderRadius: 0 },
+						type: 'email',
 					}}
 					placeholder="courriel@exemple.ca"							
 					value={email}

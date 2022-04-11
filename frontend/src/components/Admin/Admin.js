@@ -67,7 +67,7 @@ import { ReactComponent as NewIcon } from './assets/noun-add-order-662273.svg';
 import { ReactComponent as ProcessingIcon } from './assets/noun-cooking-376836.svg';
 import { ReactComponent as ReadyIcon } from './assets/noun-shopping-bag-3897262.svg';
 
-
+import AdminLogin from './AdminLogin'
 import AdminOrderDashboard from './AdminOrderDashboard'
 import AdminProductManager from './AdminProductManager'
 import AdminCategoryManager from './AdminCategoryManager'
@@ -91,10 +91,18 @@ function Admin({ setStep, storeLat, storeLng }) {
 
 
 
-	const [adminView, setAdminView] = useState('10');
+	const [adminView, setAdminView] = useState('1');
 	switch(adminView) {
 
 
+
+		case '1':
+			return (
+				<>	
+					<AdminLogin />
+				</>
+
+		)
 		case '10':
 			return (
 				<>	

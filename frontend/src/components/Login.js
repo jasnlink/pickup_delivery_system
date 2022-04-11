@@ -113,7 +113,7 @@ function Login({
 			</Snackbar>
 			<List sx={{ mt: '12px' }}>
 				<ListItem sx={{ pb: '12px' }}>
-					<Button onClick={() => setStep(1)} size="small" color="inherit" startIcon={<ArrowBackIcon />}>
+					<Button onClick={() => setStep(1)} size="small" color="inherit" className="btn-std"  startIcon={<ArrowBackIcon />}>
 						Retour
 					</Button>
 				</ListItem>
