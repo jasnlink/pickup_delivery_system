@@ -478,7 +478,7 @@ function AdminOptionManager() {
 								<CloseIcon  />
 							</ButtonBase>
 
-							<Container>
+							<Container sx={{ pt: '12vh' }}>
 								<List sx={{ mt: '28px' }}>
 
 									<ListItem>

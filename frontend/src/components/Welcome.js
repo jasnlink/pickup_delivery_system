@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Axios from 'axios';
 
-import './styles/Welcome.css';
-
 import { 	
 	Typography,
 	Container,
@@ -15,18 +13,22 @@ import {
 	AppBar,
 	Box,
 	Toolbar,
-	IconButton 
+	IconButton,
+	SvgIcon
  } from '@mui/material';
 
 
 import MenuIcon from '@mui/icons-material/Menu';
 
+import { ReactComponent as FooterIcon } from './assets/logo-top-brand-black.svg';
+
+import './styles/Menu.css'
 
 function Welcome({ setStep, setOrderType }) {
 
 	return (<>
 		
-		<Container maxWidth='sm'>
+		<Container maxWidth='sm' className="container">
 			<List sx={{ mt: '24px' }}>
 				<ListItem disablePadding style={{display:'flex', justifyContent:'center'}}>
 					<img src={process.env.REACT_APP_PUBLIC_URL+"/app/logo-black-transparent.png"} className="welcome-logo" />
@@ -45,9 +47,13 @@ function Welcome({ setStep, setOrderType }) {
 						<ListItemText primary={<Typography variant="h3">Livraison</Typography>} style={{display:'flex', justifyContent:'center'}} />
 					</ListItemButton>
 				</ListItem>
+				<ListItem sx={{mt:'20vh', display: 'flex', justifyContent: 'center'}}>
+					<Typography style={{display:'flex', justifyContent:'center'}} variant="subtitle1">
+						Solution par <a style={{color:'#000000'}} href="https://msmtech.ca"><SvgIcon component={FooterIcon} sx={{ ml: '6px', width: 'auto', height: '28px' }} inheritViewBox /></a>
+					</Typography>
+				</ListItem>
 			</List>
 		</Container>
-
 		</>)
 
 

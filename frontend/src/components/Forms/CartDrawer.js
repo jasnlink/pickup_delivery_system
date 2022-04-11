@@ -103,7 +103,13 @@ function CartDrawer({ cart, setCart, handleCheckout, productDrawer }) {
 		{!!cart.length && [ !cartDrawer && [ !productDrawer && (
 			<AppBar position="fixed" className="cart-btn-container">
 				<Toolbar>
-					<Button onClick={() => setCartDrawer(true)} variant="contained" color="primary" size="large" className="cart-btn" fullWidth>
+					<Button 
+						onClick={() => setCartDrawer(true)} 
+						variant="contained" 
+						color="primary" 
+						size="large" 
+						className="cart-btn" 
+						fullWidth>
 						Votre commande ᛫ ({cartCount})
 					</Button>
 				</Toolbar>
@@ -147,7 +153,15 @@ function CartDrawer({ cart, setCart, handleCheckout, productDrawer }) {
                     
                 </ListItem>
                 <ListItem sx={{ pb: '16px' }}>
-                    <Button onClick={() => handleCheckout()} variant="contained" color="primary" size="large" fullWidth disabled={cart.length===0}>
+                    <Button 
+                    	onClick={() => handleCheckout()} 
+                    	variant="contained" 
+                    	color="primary" 
+                    	size="large"
+                    	className="btn" 
+                    	fullWidth 
+                    	disabled={cart.length===0}
+                    >
                         Passer au paiement
                     </Button>
                 </ListItem>

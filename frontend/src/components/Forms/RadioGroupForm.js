@@ -29,7 +29,8 @@ import {
 	Checkbox,
 	FormGroup,
 	Radio,
-	RadioGroup
+	RadioGroup,
+	FormControlLabel
  } from '@mui/material';
 
 import { LoadingButton } from '@mui/lab';
@@ -38,6 +39,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import CloseIcon from '@mui/icons-material/Close';
 
+import '../styles/Menu.css'
 
 function RadioGroupForm({ productOptgroups, productOptions, handleAddProductOption, handleRemoveProductOption, setRadioFilled }) {
 	
@@ -144,7 +146,7 @@ function RadioGroupForm({ productOptgroups, productOptions, handleAddProductOpti
 
 			{productOptgroups.map((group, index) => (
 				<>
-					{group.max_choices === 1 && (
+					{group.max_choices === 1 && [ !!group.required && (
 					<>
 
 					<ListItem key={index} disablePadding sx={{ mt: '16px' }}>
@@ -165,7 +167,12 @@ function RadioGroupForm({ productOptgroups, productOptions, handleAddProductOpti
 									<Grid container alignItems="center" direction="row">
 										<Grid item xs={1}>
 											<Radio 
-												sx={{ m: 0, p: 0 }} 
+												classes={{
+													root: 'radio-root',
+													checked: 'radio-checked',
+													disabled: 'radio-disabled'
+												}}
+												sx={{ m: 0, p: 0, }} 
 												checked={radioState[option.optgroup_id] === option.option_id} 
 												onChange={() => handleRadio(option.optgroup_id, group.optgroup_name, group.max_choices, option.option_id, option.option_name, option.option_price)} 
 											/>
@@ -186,7 +193,7 @@ function RadioGroupForm({ productOptgroups, productOptions, handleAddProductOpti
 						</>
 					))}
 				</>
-				)}
+				)]}
 				</>
 
 				

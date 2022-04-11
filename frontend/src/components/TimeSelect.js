@@ -28,6 +28,8 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 import TimeSelectForm from './Forms/TimeSelectForm'
 
+import './styles/Menu.css'
+
 function TimeSelect({ orderType, setStep, storeTimeHours, setOrderDate, setOrderTime, userAuth, setUserVerified }) {
 
 	//check if user is authenticated
@@ -66,7 +68,13 @@ function TimeSelect({ orderType, setStep, storeTimeHours, setOrderDate, setOrder
 		<Container maxWidth='sm'>
 			<List sx={{ mt: '12px' }}>
 				<ListItem sx={{ pb: '12px' }}>
-					<Button onClick={() => orderType==="Emporter" ? setStep(1) : setStep(12)} size="small" color="inherit" startIcon={<ArrowBackIcon />}>
+					<Button 
+						onClick={() => orderType==="Emporter" ? setStep(1) : setStep(12)} 
+						size="small" 
+						color="inherit" 
+						startIcon={<ArrowBackIcon />}
+						className="btn-std"
+					>
 						Retour
 					</Button>
 				</ListItem>

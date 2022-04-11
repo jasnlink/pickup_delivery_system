@@ -15,6 +15,7 @@ import { LoadingButton } from '@mui/lab';
 
 import { ReactComponent as MainIcon } from './assets/noun-radar-4583961.svg';
 
+import '../styles/Menu.css'
 
 function LoginVerifyForm({ 
 	email, 
@@ -164,9 +165,8 @@ function LoginVerifyForm({
 		<ListItem style={{display:'flex', justifyContent:'center'}}>
 			<FormControl variant="standard" fullWidth>
 				<TextField
-					inputProps={{ style: { textAlign:'center' }, maxLength: 6 }}
+					inputProps={{ style: { textAlign:'center' }, maxLength: 6, type: 'number' }}
 					placeholder=""							
-					autoFocus
 					value={otp}
 					onChange={(e) => setOtp(e.target.value)}
 					onKeyUp={(e) => {if(e.keyCode === 13 && isOtp) {handleVerify()}}}
@@ -180,11 +180,12 @@ function LoginVerifyForm({
 				variant="contained" 
 				size="large" 
 				fullWidth 
+				className="btn"
 				disabled={!isOtp} 
 				loading={verifyLoading} 
 				onClick={() => handleVerify()}
 			>
-				Confirmer
+				{verifyLoading? '...' : 'Confirmer'}
 			</LoadingButton>
 		</ListItem>
 		</>

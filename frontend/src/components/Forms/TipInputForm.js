@@ -45,6 +45,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import KeyboardReturnIcon from '@mui/icons-material/KeyboardReturn';
 
+import '../styles/Menu.css'
 
 function TipInputForm({ cartSubtotal, cartTip, setCartTip, cartTotal, setCartTotal }) {
 
@@ -103,16 +104,32 @@ function TipInputForm({ cartSubtotal, cartTip, setCartTip, cartTotal, setCartTot
         </ListItem>
         <ListItem style={{display:'flex', justifyContent:'center', paddingBottom: '12px'}}>
         	<ToggleButtonGroup color="primary" value={selectTipValue} exclusive onChange={(e) => handleSelectTip(e)}>
-        		<ToggleButton value="10">
+        		<ToggleButton 
+        			value="10"
+        			classes={{ selected: "item-selected" }}
+					className="toggle-btn"
+        		>
         			10%
         		</ToggleButton>
-        		<ToggleButton value="15">
+        		<ToggleButton 
+        			value="15"
+        			classes={{ selected: "item-selected" }}
+					className="toggle-btn"
+        		>
         			15%
         		</ToggleButton>
-        		<ToggleButton value="20">
+        		<ToggleButton 
+        			value="20"
+        			classes={{ selected: "item-selected" }}
+					className="toggle-btn"
+        		>
         			20%
         		</ToggleButton>
-        		<ToggleButton value="other">
+        		<ToggleButton 
+        			value="other"
+        			classes={{ selected: "item-selected" }}
+					className="toggle-btn"
+        		>
         			Autre
         		</ToggleButton>
         	</ToggleButtonGroup>
@@ -124,7 +141,7 @@ function TipInputForm({ cartSubtotal, cartTip, setCartTip, cartTotal, setCartTot
             		<OutlinedInput
             			onChange={(e) => setInputTipValue(e.target.value)}
             			value={inputTipValue}
-            			sx={{ paddingRight: 0 }}
+            			sx={{ paddingRight: 0, borderRadius: 0 }}
             			size="small"
             			id="filled-adornment-amount"
             			label="Montant"
@@ -132,7 +149,17 @@ function TipInputForm({ cartSubtotal, cartTip, setCartTip, cartTotal, setCartTot
             			endAdornment={
 			              <InputAdornment position="end">
 			              	<Divider sx={{ height: 38, m: 0 }} orientation="vertical" />
-			              	<ButtonBase disabled={!inputTipValue.length} onClick={handleInputTipSubmit} sx={{ height: 38, padding: '12px 0', width: '48px', backgroundColor: '#1976d2', color: '#ffffff', outline: '1px solid #1976d2 !important', borderTopRightRadius: '4px', borderBottomRightRadius: '4px' }}>
+			              	<ButtonBase disabled={!inputTipValue.length} onClick={handleInputTipSubmit} sx={{ 
+			              																						height: 38, 
+			              																						padding: '12px 0', 
+			              																						width: '48px', 
+			              																						backgroundColor: '#000000', 
+			              																						color: '#ffffff', 
+			              																						outline: '1px solid #000000 !important', 
+			              																						borderTopRightRadius: 0, 
+			              																						borderBottomRightRadius: 0,
+			              																						zIndex: 10000
+			              																					}}>
 			              		<KeyboardReturnIcon color="inherit" fontSize="medium" />
 			              	</ButtonBase>
 			                

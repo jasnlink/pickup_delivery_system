@@ -615,9 +615,8 @@ app.post('/api/product/list/optiongroups', (req, res) => {
             return;
         }
 
-        
         res.send(result)
-        console.log('fetching product option groups...');
+        console.log('fetching product option groups...', id);
 
     })
 

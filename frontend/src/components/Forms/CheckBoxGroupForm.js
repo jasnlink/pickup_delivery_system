@@ -49,7 +49,6 @@ function CheckBoxGroupForm({ productOptgroups, productOptions, handleAddProductO
 	const [checkCurrentFillCount, setCheckCurrentFillCount] = useState(0)
 
 	useEffect(() => {
-
 		buildCheckBoxState()
 		.then((result) => {
 			setIsChecked(result)
@@ -71,8 +70,8 @@ function CheckBoxGroupForm({ productOptgroups, productOptions, handleAddProductO
 		//find all product group options that have more than 1 max choice
 		//set all checkboxes to unchecked and not disabled
 		for(let group of productOptgroups) {
-			if(group.max_choices > 1) {
-				if(group.required) {
+			if(group.max_choices >= 1) {
+				if(group.required && group.max_choices > 1) {
 					reqCount++;
 				}
 				//loop through each checkbox and initialise as not checked and not disabled
@@ -204,7 +203,7 @@ function CheckBoxGroupForm({ productOptgroups, productOptions, handleAddProductO
 
 			{productOptgroups.map((group, index) => (
 				<>
-					{group.max_choices > 1 && (
+					{((group.max_choices > 1) || (group.max_choices === 1 && group.required === 0)) && (
 					<>
 
 					<ListItem key={index} disablePadding sx={{ mt: '16px' }}>
@@ -214,7 +213,7 @@ function CheckBoxGroupForm({ productOptgroups, productOptions, handleAddProductO
 					</ListItem>
 					<ListItem key={index} disablePadding sx={{ mb: '12px' }}>
 						<Typography variant="subtitle2" className="">
-							Faites {group.required ? '' : 'jusqu\'à'} {group.max_choices} choix {group.required ? '*obligatoire' : ''}
+							{group.required ? 'Faites' : ''} {group.max_choices} choix {group.required ? '*obligatoire' : 'maximum'}
 						</Typography>
 					</ListItem>
 					
@@ -225,6 +224,11 @@ function CheckBoxGroupForm({ productOptgroups, productOptions, handleAddProductO
 									<Grid container alignItems="center" direction="row">
 										<Grid item xs={1}>
 											<Checkbox 
+												classes={{
+													root: 'checkbox-root',
+													checked: 'checkbox-checked',
+													disabled: 'checkbox-disabled'
+												}}
 												sx={{ m: 0, p: 0 }} 
 												checked={isChecked[option.optgroup_id][option.option_id]['checked']} 
 												onChange={() => handleChecked(option.optgroup_id, group.optgroup_name, group.max_choices, option.option_id, option.option_name, option.option_price, group.required)} 

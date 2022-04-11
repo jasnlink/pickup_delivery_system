@@ -331,12 +331,28 @@ function PaymentDrawer({
 	return (
 		<>
 		<ListItem>
-            <Button onClick={handleOpenPayNow} disabled={!cart.length || parseFloat(cartMinimum) > parseFloat(cartSubtotal)} variant="contained" color="primary" size="large" fullWidth>
+            <Button 
+            	onClick={handleOpenPayNow} 
+            	disabled={!cart.length || parseFloat(cartMinimum) > parseFloat(cartSubtotal)} 
+            	variant="contained" 
+            	color="primary" 
+            	size="large" 
+            	fullWidth
+            	className="btn"
+            >
                 Payer Maintenant
             </Button>
         </ListItem>
         <ListItem sx={{ pb: '16px' }}>
-            <Button onClick={handleOpenMethodForm} disabled={!cart.length || parseFloat(cartMinimum) > parseFloat(cartSubtotal)} variant="outlined" color="primary" size="large" fullWidth>
+            <Button 
+            	onClick={handleOpenMethodForm} 
+            	disabled={!cart.length || parseFloat(cartMinimum) > parseFloat(cartSubtotal)} 
+            	variant="outlined" 
+            	color="primary" 
+            	size="large" 
+            	fullWidth
+            	className="btn-outlined"
+            >
                 Paiement à la porte
             </Button>
         </ListItem>
@@ -380,13 +396,25 @@ function PaymentDrawer({
 							value={inputMethod}
 							onChange={(e) => setInputMethod(e.target.value)}
 						>
-							<ToggleButton value="CREDIT">
+							<ToggleButton 
+								value="CREDIT"
+								classes={{ selected: "item-selected" }}
+								className="toggle-btn"
+							>
 								Carte de crédit
 							</ToggleButton>
-							<ToggleButton value="DEBIT">
+							<ToggleButton 
+								value="DEBIT"
+								classes={{ selected: "item-selected" }}
+								className="toggle-btn"
+							>
 								Débit
 							</ToggleButton>
-							<ToggleButton value="CASH">
+							<ToggleButton 
+								value="CASH"
+								classes={{ selected: "item-selected" }}
+								className="toggle-btn"
+							>
 								Comptant
 							</ToggleButton>
 						</ToggleButtonGroup>
@@ -398,8 +426,10 @@ function PaymentDrawer({
 							variant="contained" 
 							size="large" 
 							loading={orderLoading}
-							fullWidth>
-							Placer la commande
+							className="btn"
+							fullWidth
+						>
+							{orderLoading ? "..." : "Placer la commande"}
 						</LoadingButton>
 					</ListItem>
 				</>
@@ -433,7 +463,8 @@ function PaymentDrawer({
 							startIcon={<CreditCardIcon />} 
 							fullWidth 
 							onClick={() => setCreditForm(true)}
-							disableElevation>
+							disableElevation
+						>
 								Carte de crédit
 						</Button>
 					</ListItem>
@@ -478,7 +509,12 @@ function PaymentDrawer({
 				{!!creditForm && (
 				<>
 					<ListItem sx={{ pb: '4px' }}>
-						<Button size="small" onClick={handleCloseCreditForm} startIcon={<ArrowBackIcon />}>
+						<Button 
+							size="small" 
+							onClick={handleCloseCreditForm} 
+							startIcon={<ArrowBackIcon />}
+							className="btn-std"
+						>
 							Retour
 						</Button>
 					</ListItem>
@@ -486,7 +522,7 @@ function PaymentDrawer({
 						<FormControl variant="outlined" fullWidth>
 		            		<InputLabel htmlFor="outlined-firstname">Nom sur la carte</InputLabel>
 		            		<OutlinedInput
-		            			sx={{ paddingRight: 0 }}
+		            			sx={{ paddingRight: 0, borderRadius: 0 }}
 		            			size="medium"
 		            			id="outlined-card-name"
 		            			label="Nom sur la carte"
@@ -503,7 +539,7 @@ function PaymentDrawer({
 								mask={isAmex ? "9999  999999  99999" : "9999  9999  9999  9999"}
 								maskChar="*"
 								placeholder="Numéro de carte"
-								sx={{ paddingRight: 0 }}
+								sx={{ paddingRight: 0, borderRadius: 0 }}
 		            			size="medium"
 		            			id="outlined-card-number"
 		            			label="Numéro de carte"
@@ -521,7 +557,7 @@ function PaymentDrawer({
 		            		<InputLabel htmlFor="outlined-expiration">Expiration MM/AA</InputLabel>
 		            		<InputMask 
 								mask="99/99" 
-								sx={{ paddingRight: 0 }}
+								sx={{ paddingRight: 0, borderRadius: 0 }}
 		            			size="medium"
 		            			id="outlined-expiration"
 		            			label="Expiration MM/AA"
@@ -540,7 +576,7 @@ function PaymentDrawer({
 		            		<InputMask 
 								mask={isAmex ? "9999" : "999"}
 								maskChar="*"
-								sx={{ paddingRight: 0 }}
+								sx={{ paddingRight: 0, borderRadius: 0 }}
 		            			size="medium"
 		            			id="outlined-cvv-code"
 		            			label="CVV"
@@ -573,7 +609,13 @@ function PaymentDrawer({
 						</Grid>
 					</ListItem>
 					<ListItem sx={{ pt: '12px', pb: '12px' }}>
-						<Button disabled={!cardValidated} variant="contained" size="large" fullWidth>
+						<Button 
+							disabled={!cardValidated} 
+							variant="contained" 
+							size="large" 
+							fullWidth
+							className="btn"
+						>
 							Placer la commande
 						</Button>
 					</ListItem>

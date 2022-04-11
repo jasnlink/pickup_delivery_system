@@ -105,34 +105,34 @@ function OrderStatus({
 						<Stepper activeStep={0} orientation="vertical">
 							<Step>
 								<StepLabel>
-									Commande placée
-									<Typography variant="body2">Estimée pour {orderTime}</Typography>
+									<Typography variant="subtitle1">Commande placée</Typography>
+									<Typography variant="h5">Estimée pour {orderTime}</Typography>
 									{DateTime.now().setZone('America/Toronto').toFormat('yyyy-MM-dd') === orderDate ? "" :<Typography variant="body2">{orderDate}</Typography>}
 								</StepLabel>
 							</Step>
 							<Step>
 								<StepLabel>
-									En préparation
+									<Typography variant="subtitle1">En préparation</Typography>
 								</StepLabel>
 							</Step>
 							<Step>
 								<StepLabel>
-									{orderType === "Livraison" ? "En cours de livraison" : "Prêt pour emporter"}
+									<Typography variant="subtitle1">{orderType === "Livraison" ? "En cours de livraison" : "Prêt pour emporter"}</Typography>
 								</StepLabel>
 							</Step>
 							<Step>
 								<StepLabel>
 								{orderType === "Livraison" && (
 								<>
-									<Typography variant="subtitle2">{userAddress}</Typography>
-									<Typography variant="subtitle2">{userCity}, {userDistrict} {userPostalCode}</Typography>
+									<Typography variant="subtitle1">{userAddress}</Typography>
+									<Typography variant="subtitle1">{userCity}, {userDistrict} {userPostalCode}</Typography>
 								</>
 								)}
 								{orderType === "Emporter" && (
 								<>
-									<Typography variant="subtitle2">{storeName}</Typography>
-									<Typography variant="body2">{storeAddress}</Typography>
-									<Typography variant="body2">{storeCity}, {storeDistrict} {storePostalCode}</Typography>
+									<Typography variant="h6">{storeName}</Typography>
+									<Typography variant="subtitle1">{storeAddress}</Typography>
+									<Typography variant="subtitle1">{storeCity}, {storeDistrict} {storePostalCode}</Typography>
 								</>
 								)}
 									

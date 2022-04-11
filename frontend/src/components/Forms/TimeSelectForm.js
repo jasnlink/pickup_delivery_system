@@ -21,6 +21,7 @@ import { LoadingButton } from '@mui/lab';
 
 import { ReactComponent as MainIcon } from './assets/noun-food-tray-3895876.svg';
 
+import '../styles/Menu.css';
 
 function TimeSelectForm({ setStep, storeTimeHours, setOrderDate, setOrderTime }) {
 
@@ -359,8 +360,9 @@ function TimeSelectForm({ setStep, storeTimeHours, setOrderDate, setOrderTime })
 							  	fullWidth
 							  	disabled={dataLoading}
 							  	loading={submitLoading}
+							  	className="btn"
 						>
-							  	Continuer
+							  	{submitLoading ? "..." : "Continuer"}
 						</LoadingButton>
 					</ListItem>
 					</>

@@ -318,7 +318,11 @@ function Checkout({
 		)}
 		{!loading && (
 		<>
-			<Button onClick={() => setStep(14)} className="checkout-back-btn" size="small" startIcon={<ArrowBackIcon />}>
+			<Button 
+				onClick={() => setStep(14)} 
+				className="checkout-back-btn" 
+				size="small" startIcon={<ArrowBackIcon />}
+			>
 				Retour
 			</Button>
 			<Container maxWidth="sm" disableGutters>

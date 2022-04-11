@@ -531,7 +531,7 @@ function AdminTimeManager() {
 								</Fade>
 							)}
 							{!editLoading && (
-								<Container sx={{ pt: '100px' }}>
+								<Container sx={{ pt: '12vh' }}>
 									<List>
 										<ListItem>
 											<Grid container justifyContent="space-between" alignItems="center">

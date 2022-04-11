@@ -228,7 +228,13 @@ function AddressSearch({ setStep, storeLat, storeLng, deliveryZones, userId, set
 						<Typography align="center" variant="h4">Cet adresse est hors de notre zone de livraison.</Typography>
 					</DialogContent>
 					<DialogActions style={{display:'flex', justifyContent:'center', paddingTop: 8}}>
-						<Button variant="contained" size="large" fullWidth onClick={() => setError(false)}>
+						<Button 
+							variant="contained" 
+							size="large" 
+							fullWidth 
+							onClick={() => setError(false)}
+							className="btn"
+						>
 							OK
 						</Button>
 					</DialogActions>
@@ -236,7 +242,13 @@ function AddressSearch({ setStep, storeLat, storeLng, deliveryZones, userId, set
 			</Dialog>
 			<List sx={{ mt: '12px' }}>
 				<ListItem sx={{ pb: '12px' }}>
-					<Button onClick={() => userId ? setStep(21) : setStep(1)} size="small" color="inherit" startIcon={<ArrowBackIcon />}>
+					<Button 
+						onClick={() => userId ? setStep(21) : setStep(1)} 
+						size="small" 
+						color="inherit" 
+						startIcon={<ArrowBackIcon />}
+						className="btn-std"
+					>
 						Retour
 					</Button>
 				</ListItem>
@@ -257,7 +269,17 @@ function AddressSearch({ setStep, storeLat, storeLng, deliveryZones, userId, set
 					</FormControl>
 				</ListItem>
 				<ListItem style={{marginTop: 48, display:'flex', justifyContent:'center'}}>
-					<LoadingButton variant="contained" size="large" fullWidth loading={submitLoading} disabled={!isAddress} onClick={handleSubmit}>Continuer</LoadingButton>
+					<LoadingButton 
+						variant="contained" 
+						size="large" 
+						fullWidth 
+						loading={submitLoading} 
+						disabled={!isAddress} 
+						onClick={handleSubmit}
+						className="btn"
+					>
+						{submitLoading ? "..." : "Continuer"}
+					</LoadingButton>
 				</ListItem>
 			</List>
 		</Container>

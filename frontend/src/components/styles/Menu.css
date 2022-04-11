@@ -2,6 +2,10 @@ body {
 	margin: 0;
 }
 
+.welcome-logo {
+	height: 120px;
+}
+
 .category-title {
 	padding-right: 6%;
 	overflow: hidden;
@@ -66,12 +70,22 @@ body {
 .product-drawer-desc {
 
 }
+
 .product-drawer-qty-icon {
 	font-size: 36px !important;
+	color: #000000 !important;
+}
+
+.product-drawer-qty-icon:disabled {
+	color: #00000042 !important;
 }
 
 .product-drawer-add-cart-btn {
 	max-width: 100%;
+	background-color: #000000 !important;
+	color: #ffffff !important;
+	padding: 12px 24px !important;
+	border-radius: 0 !important;
 }
 
 .product-drawer-add-cart-container {
@@ -114,6 +128,10 @@ body {
 
 .cart-btn {
 	max-width: 100%;
+	background-color: #000000 !important;
+	color: #ffffff !important;
+	padding: 12px 24px !important;
+	border-radius: 0 !important;
 }
 
 .cart-drawer {
@@ -124,6 +142,12 @@ body {
 
 .cart-drawer-close-btn {
 	z-index: 100000;
+}
+
+.information-drawer {
+	max-height: 85% !important;
+	max-width: 600px;
+	margin: auto;
 }
 
 .payment-drawer {
@@ -137,7 +161,11 @@ body {
 }
 
 .credit-btn {
-	height: 50px;
+	height: 56px;
+	background-color: #000000 !important;
+	color: #ffffff !important;
+	padding: 12px 24px !important;
+	border-radius: 0 !important;
 }
 
 .paypal-btn {
@@ -151,4 +179,52 @@ body {
 	margin-top: -32px !important;
 	margin-left: 16px !important;
 	z-index: 100000;
+	color: #000000 !important;
+	border-radius: 0 !important;
+}
+
+.btn {
+	background-color: #000000 !important;
+	color: #ffffff !important;
+	padding: 12px 24px !important;
+	border-radius: 0 !important;
+}
+.btn-outlined {
+	color: #000000 !important;
+	padding: 10px 24px !important;
+	border-radius: 0 !important;
+	border: #000000 solid 1px !important;
+}
+.btn-std {
+	color: #000000 !important;
+	background-color: #f5f5f590 !important;
+	border-radius: 0 !important;
+}
+
+.product-drawer-add-cart-btn:disabled, .btn:disabled {
+	background: #00000042 !important;
+}
+
+.toggle-btn {
+	border-radius: 0 !important;
+}
+
+.item-selected {
+	background-color: #3c3c3c !important;
+  	color: #f3f3f3 !important;
+}
+
+.text-input {
+	border-radius: 0 !important;
+}
+
+.radio-root, .checkbox-root {
+	color: #00000099 !important;
+}
+.radio-checked, .checkbox-checked {
+	color: #000000 !important;
+}
+
+.radio-disabled, .checkbox-disabled {
+	color: #00000042 !important;
 }

@@ -15,6 +15,7 @@ import { LoadingButton } from '@mui/lab';
 
 import { ReactComponent as MainIcon } from './assets/noun-online-shopping-3895961.svg';
 
+import '../styles/Menu.css'
 
 function LoginSubmitForm({ email, setEmail, setHash }) {
 
@@ -78,7 +79,6 @@ function LoginSubmitForm({ email, setEmail, setHash }) {
 						type: 'email'
 					}}
 					placeholder="courriel@exemple.ca"							
-					autoFocus
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
 					required
@@ -91,11 +91,12 @@ function LoginSubmitForm({ email, setEmail, setHash }) {
 				variant="contained" 
 				size="large" 
 				fullWidth 
+				className="btn"
 				disabled={!isEmail} 
 				loading={submitLoading} 
 				onClick={() => handleSubmit()}
 			>
-				Continuer
+				{submitLoading ? '...' : 'Continuer'}
 			</LoadingButton>
 		</ListItem>
 		</>

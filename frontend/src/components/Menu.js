@@ -153,7 +153,7 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime, userAut
 
 	//handle product selection
 	async function handleProductSelect(id, name, price, desc, img) {
-		try {
+
 			setProductLoading(true)
 			setProductDrawer(true)
 			setSelectProductId(id);
@@ -162,24 +162,38 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime, userAut
 			setSelectProductDesc(desc);
 			setSelectProductImg(img);
 			setSelectProductQty(1);
-			await getProductOptiongroups(id);
-			
-		} finally {
-			setTimeout(() => {
-				setProductLoading(false)
-			}, 450)
-		}
+
+			getProductOptiongroups(id)
+			.then((result) => {
+				
+				if(result) {
+					setProductOptgroups(result)
+
+					getProductOptions(result)
+					.then((result) => {
+						setProductOptions(result)
+						setProductLoading(false)
+					})
+				}
+				else {
+					setProductLoading(false)
+				}
+				
+
+			})	
+
 	}
 	//helper function to fetch product option groups given a product id
 	async function getProductOptiongroups(id) {
 		//get option groups
-		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/product/list/optiongroups", {
+		return Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/product/list/optiongroups", {
 			id: id,
 		})
 		.then((response) => {
 			if(response.data.length) {
-				setProductOptgroups(response.data)
-				getProductOptions(response.data)
+				return response.data;				
+			} else {
+				return null;
 			}
 		})
 		.catch((err) => {
@@ -187,17 +201,17 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime, userAut
 	}
 	//helper function to fetch product options given product option groups data
 	async function getProductOptions(data) {
-		getIdArray(data, 'optgroup_id')
-			.then((result) => {
-				Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/product/list/options", {
-					optiongroups: result,
-				})
-				.then((response) => {
-					setProductOptions(response.data)
-				})
-				.catch((err) => {
-	       			console.log("error ", err)});
+		return getIdArray(data, 'optgroup_id')
+		.then((result) => {
+			return Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/product/list/options", {
+				optiongroups: result,
 			})
+			.then((response) => {
+				return response.data
+			})
+			.catch((err) => {
+       			console.log("error ", err)});
+		})
 
 	}
 
@@ -429,12 +443,12 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime, userAut
 					<Container>
 					
 						<List>
-							<ListItem disablePadding>
+							<ListItem disablePadding onClick={() => console.log('radioFilled',radioFilled)}>
 								<Typography variant="h4" className="product-drawer-title">
 									{selectProductName}
 								</Typography>
 							</ListItem>
-							<ListItem disablePadding sx={{ mt: '8px', mb: '24px' }}>
+							<ListItem disablePadding sx={{ mt: '8px', mb: '24px' }} onClick={() => console.log('checkFilled',checkFilled)}>
 								<Typography variant="body2" className="product-drawer-desc">
 									{selectProductDesc}
 								</Typography>
@@ -484,7 +498,14 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime, userAut
 					</Container>
 					<AppBar position="fixed" className="product-drawer-add-cart-container">
 						<Toolbar>
-							<LoadingButton onClick={handleAddToCart} variant="contained" color="primary" size="large" className="product-drawer-add-cart-btn" disabled={!radioFilled || !checkFilled} fullWidth>
+							<LoadingButton 
+								onClick={handleAddToCart} 
+								variant="contained" 
+								color="primary" 
+								size="large" 
+								className="product-drawer-add-cart-btn" 
+								disabled={!radioFilled || !checkFilled} 
+								fullWidth>
 								Ajouter à la commande ᛫ {selectSubtotal}$
 							</LoadingButton>
 						</Toolbar>
