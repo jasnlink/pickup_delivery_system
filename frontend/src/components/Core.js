@@ -3,6 +3,7 @@ import Axios from 'axios';
 import { BrowserRouter as Router, Route, Routes, useParams } from "react-router-dom";
 import { DateTime } from "luxon";
 
+import Preface from './Preface'
 import Welcome from './Welcome';
 import TimeSelect from './TimeSelect';
 import Account from './Account';
@@ -18,7 +19,7 @@ import AdminProductManager from './Admin/AdminProductManager'
 function Core() {
 
 	//Application step var
-	const [step, setStep] = useState(1);
+	const [step, setStep] = useState(0);
 	//order cart
 	const [cart, setCart] = useState([]);
 
@@ -199,14 +200,14 @@ function Core() {
 
 
 	switch(step) {
-	  case 1:
+
+	  case 0:
 	    return (
 	    		<Router basename="/app">
 					<Routes>
 						<Route exact path="/" element={ 
-							<Welcome
+							<Preface
 								setStep={step => setStep(step)}
-								setOrderType={type => setOrderType(type)}
 							/>} />
 						<Route exact path="admin" element={<Admin 
 																setStep={step => setStep(step)} 
@@ -216,6 +217,14 @@ function Core() {
 															/>} />
 					</Routes>
 				</Router>
+	      )
+	  case 1:
+	    return (
+	    		
+				<Welcome
+					setStep={step => setStep(step)}
+					setOrderType={type => setOrderType(type)}
+				/>
 	      )
 	   case 11:
 	    return (
