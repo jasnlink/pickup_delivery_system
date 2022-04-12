@@ -11,6 +11,7 @@ import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import esm from 'esm';
 import fs from 'fs';
+import bcrypt from 'bcryptjs';
 
 import { Server } from 'socket.io';
 import { createServer } from "http";
@@ -2984,6 +2985,62 @@ app.post('/api/admin/login', (req, res) => {
 
     const username = req.body.username
     const password = req.body.password
+
+    //first find if username exists
+    const fetchUserRequest = "SELECT * FROM osd_staff WHERE staff_username=?;";
+    connection.query(fetchUserRequest, [username], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('login attempt, finding user in database...', username)
+
+        //user exists, start comparing password
+        if(result.length) {
+            bcrypt.compare(password, result[0].staff_password)
+            .then((match) => {
+
+                //login successful, issue new JWT token
+                if(match) {
+
+                    console.log('login success, issuing token...')
+                    const token = jwt.sign({userId: result[0].staff_id, JWT_ACCESS_SECRET_KEY})
+                    res.json({status:1, token})
+                    return;
+
+                } else {
+
+                    console.log('login failed, password invalid...')
+                    res.json({status:0, reason:'password'})
+                    return;
+
+                }
+
+            })
+            .catch((err) => {
+                console.log('error...', err);
+                res.status(400).send(err);
+                return false;
+            })
+
+
+        } else if(result.length === 0) {
+
+            console.log('login failed, username not found...')
+            res.json({status:0, reason:'username'})
+            return;
+
+        } else {
+
+            console.log('login failed, multiple users found...')
+            res.json({status:0, reason:'error'})
+            return;
+
+        }
+
+
+    })
 
 })
 
