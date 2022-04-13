@@ -3005,7 +3005,8 @@ app.post('/api/admin/login', (req, res) => {
                 if(match) {
 
                     console.log('login success, issuing token...')
-                    const token = jwt.sign({userId: result[0].staff_id, JWT_ACCESS_SECRET_KEY})
+                    const token = jwt.sign({staffId: result[0].staff_id}, JWT_ACCESS_SECRET_KEY, {expiresIn: '30d'});
+
                     res.json({status:1, token})
                     return;
 

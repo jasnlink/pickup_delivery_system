@@ -81,27 +81,25 @@ function AdminLogin() {
 			if(response.data.status === 0 && response.data.reason === 'username') {
 			//username not found
 				setLoginError(true);
-				setLoginLoading(false)
 
 			}
 			if(response.data.status === 0 && response.data.reason === 'password') {
 			//password not found
 				setLoginError(true);
-				setLoginLoading(false)
 
 			}
 			if(response.data.status === 0 && response.data.reason === 'error') {
 			//error
 				setError(true);
-				setLoginLoading(false)
 
 			}
 			if(response.data.status === 1) {
 			//login successful
 				console.log('success')
-				setLoginLoading(false)
 
 			}
+			
+			setLoginLoading(false)
 
 		})
 		.catch((err) => {
