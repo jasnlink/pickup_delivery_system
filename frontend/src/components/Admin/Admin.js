@@ -93,11 +93,13 @@ function Admin({ setStep, storeLat, storeLng }) {
 
 	const [adminView, setAdminView] = useState('10');
 
+	//admin username and admin JWT token
 	const [adminToken, setAdminToken] = useState('')
 	const [adminUsername, setAdminUsername] = useState('')
 
 	useEffect(() => {
 
+		//access local storage to get admin token and admin username
 		if(localStorage.getItem('adminAccessToken')) {
 
 			setAdminToken(localStorage.getItem('adminAccessToken'))
@@ -105,10 +107,11 @@ function Admin({ setStep, storeLat, storeLng }) {
 
 		}
 
+
 	}, [])
 
 	
-
+	//check if admin token and admin username exist
 	if(adminToken && adminUsername) {
 
 		//temp holding of current view to go back to it
