@@ -32,7 +32,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 import AdminError from './Forms/AdminError'
 
-function AdminLogin() {
+function AdminLogin({ adminToken, setAdminToken, adminUsername, setAdminUsername }) {
 
 
 	const [loginLoading, setLoginLoading] = useState(false)
@@ -95,7 +95,14 @@ function AdminLogin() {
 			}
 			if(response.data.status === 1) {
 			//login successful
-				console.log('success')
+
+				//set token and username
+				setAdminToken(response.data.token)
+				setAdminUsername(inputUser)
+
+				//save access token to localstorage, so we can reaccess it anytime
+				localStorage.setItem('adminAccessUsername', inputUser)
+				localStorage.setItem('adminAccessToken', response.data.token)
 
 			}
 			
@@ -122,7 +129,7 @@ function AdminLogin() {
 			message="Une erreur s'est produite, réessayez une autre fois."
 
 		 />
-		<Container style={{ backgroundColor: '#d9d9d994', minHeight: '100vh' }}>
+		<Container maxWidth={false} style={{ backgroundColor: '#d9d9d994', minHeight: '100vh' }}>
 			<Container maxWidth="sm" sx={{ pt: '14vh' }}>
 					<Paper square>
 						<List>
@@ -144,6 +151,7 @@ function AdminLogin() {
 			            			value={inputUser}
 			            			sx={{ borderRadius: 0 }}
 			            			onChange={(e) => setInputUser(e.target.value)}
+			            			onKeyUp={(e) => {if(e.keyCode === 13 && loginValid) {handleLoginSubmit()}}}
 			            			fullWidth
 			            		/>
 							</ListItem>
@@ -161,6 +169,7 @@ function AdminLogin() {
 			            			value={inputPass}
 			            			sx={{ borderRadius: 0 }}
 			            			onChange={(e) => setInputPass(e.target.value)}
+			            			onKeyUp={(e) => {if(e.keyCode === 13 && loginValid) {handleLoginSubmit()}}}
 			            			fullWidth
 			            		/>
 							</ListItem>
@@ -169,7 +178,7 @@ function AdminLogin() {
 									variant="contained" 
 									loading={loginLoading} 
 									onClick={handleLoginSubmit}
-									disabled={!loginValid} 
+									disabled={!loginValid}
 									size="large" 
 									fullWidth 
 									className="btn"

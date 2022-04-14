@@ -91,18 +91,74 @@ function Admin({ setStep, storeLat, storeLng }) {
 
 
 
-	const [adminView, setAdminView] = useState('1');
-	switch(adminView) {
+	const [adminView, setAdminView] = useState('10');
 
+	const [adminToken, setAdminToken] = useState('')
+	const [adminUsername, setAdminUsername] = useState('')
 
+	useEffect(() => {
 
-		case '1':
-			return (
+		if(localStorage.getItem('adminAccessToken')) {
+
+			setAdminToken(localStorage.getItem('adminAccessToken'))
+			setAdminUsername(localStorage.getItem('adminAccessUsername'))
+
+		}
+
+	}, [])
+
+	
+
+	if(adminToken && adminUsername) {
+
+		//temp holding of current view to go back to it
+		const currentView = adminView;
+
+		Axios.post(process.env.REACT_APP_PUBLIC_URL+'/api/admin/auth', {
+
+			accessToken: adminToken,
+			accessUsername: adminUsername
+
+		})
+		.then((response) => {
+			if(response.data.status === 1) {
+				setAdminView(currentView)
+				return;
+			} else {
+				return (
 				<>	
-					<AdminLogin />
+					<AdminLogin
+						adminToken={adminToken}
+						setAdminToken={token => setAdminToken(token)}
+						adminUsername={adminUsername}
+						setAdminUsername={username => setAdminUsername(username)}
+					/>
 				</>
 
 		)
+			}
+		})
+		.catch((err) => {
+	       	console.log("error ", err)});
+
+	} else {
+		return (
+				<>	
+					<AdminLogin
+						adminToken={adminToken}
+						setAdminToken={token => setAdminToken(token)}
+						adminUsername={adminUsername}
+						setAdminUsername={username => setAdminUsername(username)}
+					/>
+				</>
+
+		)
+	}
+
+
+	switch(adminView) {
+
+
 		case '10':
 			return (
 				<>	

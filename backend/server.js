@@ -3005,7 +3005,7 @@ app.post('/api/admin/login', (req, res) => {
                 if(match) {
 
                     console.log('login success, issuing token...')
-                    const token = jwt.sign({staffId: result[0].staff_id}, JWT_ACCESS_SECRET_KEY, {expiresIn: '30d'});
+                    const token = jwt.sign({accessUsername: result[0].staff_username}, JWT_ACCESS_SECRET_KEY, {expiresIn: '30d'});
 
                     res.json({status:1, token})
                     return;
@@ -3045,6 +3045,42 @@ app.post('/api/admin/login', (req, res) => {
 
 })
 
+
+//authenticate admin user given a JWT token
+app.post('/api/admin/auth', (req, res) => {
+
+
+    const accessToken = req.body.accessToken
+    const accessUsername = req.body.accessUsername
+
+    console.log('checking admin user auth...', accessUsername);
+
+    jwt.verify(accessToken, JWT_ACCESS_SECRET_KEY, (err, user) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+        console.log('user.accessUsername', user.accessUsername)
+        if(user.accessUsername === accessUsername) {
+        //decoded username is same as provided username
+            //user is authenticated
+            console.log('admin user is authenticated...');
+            res.json({status:1})
+            return;
+            
+
+        } else {
+        //decoded username does not match
+            //user is not authenticated
+            console.log('admin user is not authenticated...');
+            res.json({status:0})
+
+        }
+    })
+
+
+})
 
 
 
