@@ -126,7 +126,7 @@ function CartDrawer({ cart, setCart, handleCheckout, productDrawer }) {
 							</IconButton>
 						</Grid>
 						<Grid item>
-		                    <Typography variant="h5" onClick={() => console.log(cart)}>
+		                    <Typography variant="h5">
 		                        Votre commande
 		                    </Typography>
 	                    </Grid>

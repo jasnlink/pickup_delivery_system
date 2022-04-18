@@ -65,7 +65,6 @@ function TimeSelectForm({ setStep, storeTimeHours, setOrderDate, setOrderTime })
 
 			setCurrentWeekday(weekday)
 			currentWeekdayRef.current = weekday
-			console.log(weekday)
 			//check if store is closed by comparing current time to closing time
 			//if it is closed then we offset by 1 day
 			let offset = 0

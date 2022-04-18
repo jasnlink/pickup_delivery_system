@@ -265,7 +265,6 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime, userAut
 		}
 
 		setSelectProductOptions(tempOptions)
-		console.log('adding...',tempOptions)
 	}
 
 
@@ -299,7 +298,6 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime, userAut
 		}
 	
 		setSelectProductOptions(tempOptions);
-		console.log('removing...', tempOptions)
 	}
 
 	//handle closing product drawer
@@ -328,7 +326,6 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime, userAut
 	//calculate subtotal amount to be added to cart
 	useEffect(()=> {
 		let subtotal = 0
-		//console.log(selectProductOptions)
 		if(selectProductOptions.length) {
 			let sum = 0;
 			for(let g of selectProductOptions) {
@@ -443,12 +440,12 @@ function Menu({ setStep, cart, setCart, orderType, orderDate, orderTime, userAut
 					<Container>
 					
 						<List>
-							<ListItem disablePadding onClick={() => console.log('radioFilled',radioFilled)}>
+							<ListItem disablePadding>
 								<Typography variant="h4" className="product-drawer-title">
 									{selectProductName}
 								</Typography>
 							</ListItem>
-							<ListItem disablePadding sx={{ mt: '8px', mb: '24px' }} onClick={() => console.log('checkFilled',checkFilled)}>
+							<ListItem disablePadding sx={{ mt: '8px', mb: '24px' }}>
 								<Typography variant="body2" className="product-drawer-desc">
 									{selectProductDesc}
 								</Typography>

@@ -47,7 +47,6 @@ function CartDisplay({ cart, setCart, handleCheckout }) {
 
 	useEffect(()=> {
 
-		console.log(cart)
 		setCartLoading(false)
 
 

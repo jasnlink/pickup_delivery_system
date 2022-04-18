@@ -373,7 +373,7 @@ function PaymentDrawer({
 								<CloseIcon fontSize="inherit"  />
 							</IconButton>
 						</Grid>
-						<Grid item onClick={() => console.log(cart[0]['productOptions'][0]['groupId'])}>
+						<Grid item>
 							<ListItemText primary={<Typography variant="h5">Votre paiement</Typography>} />
 						</Grid>
 					</Grid>

@@ -63,7 +63,8 @@ import HistoryIcon from '@mui/icons-material/History';
 
 import './styles/Admin.css';
 
-import AdminOrderCard from './Forms/AdminOrderCard'
+import AdminOrderCard from './Forms/AdminOrderCard';
+import AdminOrderHistoryCard from './Forms/AdminOrderHistoryCard';
 
 import { ReactComponent as NewIcon } from './assets/noun-add-order-662273.svg';
 import { ReactComponent as ProcessingIcon } from './assets/noun-cooking-376836.svg';
@@ -150,9 +151,9 @@ function AdminOrderDashboard() {
 							</ToggleButton>
 						</ToggleButtonGroup>
 
-						<ButtonBase sx={{ width: '100%', height: 'auto', pt: '30%', pb: '30%', mt: '8vh' }}>
+						<ToggleButton sx={{ width: '100%', height: 'auto', pt: '30%', pb: '30%', mt: '8vh', borderRadius: 0, color: "#000000" }} classes={{ selected: "status-view-selected" }} value="HISTORY" selected={orderView === "HISTORY"} onClick={() => setOrderView("HISTORY")}>
 							<HistoryIcon sx={{ width: '32px', height: '32px' }} />
-						</ButtonBase>
+						</ToggleButton>
 
 					</Stack>
 				</Paper>
@@ -222,7 +223,13 @@ function AdminOrderDashboard() {
 
 						</>
 						)}
-						
+						{orderView === 'HISTORY' && (
+						<>
+							<AdminOrderHistoryCard orders={orders} />
+
+						</>
+						)}
+
 					</Container>
 				)}
 			</Grid>
