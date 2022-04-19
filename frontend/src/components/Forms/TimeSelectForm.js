@@ -59,7 +59,6 @@ function TimeSelectForm({ setStep, storeTimeHours, setOrderDate, setOrderTime })
 		//get closing time
 		getCloseTime(storeTimeHours)
 		.then((result) => {
-
 			//set the current day of the week, it is used to compare to the selected day to see if we selected today
 			let weekday = DateTime.now().setZone("America/Toronto").get('weekday')
 
@@ -68,7 +67,6 @@ function TimeSelectForm({ setStep, storeTimeHours, setOrderDate, setOrderTime })
 			//check if store is closed by comparing current time to closing time
 			//if it is closed then we offset by 1 day
 			let offset = 0
-
 			if(currentRoundedTime > result) {
 				offset = 1
 				weekday = DateTime.now().setZone("America/Toronto").plus({days:1}).get('weekday')
@@ -182,11 +180,17 @@ function TimeSelectForm({ setStep, storeTimeHours, setOrderDate, setOrderTime })
 		
 	}
 	//helper function to get the current time rounded to the next quarter hour
-	function getCurrentRoundedTime() {
+	function getCurrentRoundedTime(next = 1) {
 
 		let currentHour = DateTime.now().setZone("America/Toronto").get('hour');
 		let currentMin = DateTime.now().setZone("America/Toronto").get('minute');
-		let currentRoundedTime = roundToNext15Mins(currentHour, currentMin);
+		var currentRoundedTime;
+		if(next === 1) {
+			currentRoundedTime = roundToNext15Mins(currentHour, currentMin);
+		} else {
+			currentRoundedTime = roundToPrev15Mins(currentHour, currentMin);
+		}
+
 		currentRoundedTime = currentRoundedTime[0].hour+":"+currentRoundedTime[0].mins+":00"
 
 		return currentRoundedTime;
@@ -200,7 +204,8 @@ function TimeSelectForm({ setStep, storeTimeHours, setOrderDate, setOrderTime })
 		//a set so we only have unique values
 		//need uniques because the timegroups from and to times may overlap each other
 		let timeSlotSet = new Set;
-		let currentRoundedTime = getCurrentRoundedTime()
+		let currentRoundedTime = getCurrentRoundedTime(1)
+
 
 		var result
 
@@ -246,8 +251,24 @@ function TimeSelectForm({ setStep, storeTimeHours, setOrderDate, setOrderTime })
 		return result
 	}
 
+	//helper function to round the given time to the previous quarter hour
+	function roundToPrev15Mins(hour, mins) {
+		let result = []
+
+		mins = Math.floor(mins/15)*15
+		if(mins === 0) {
+			mins = '00'
+		}
+		if(hour < 10) {
+			hour = '0'+hour
+		}
+		result.push({ hour: hour, mins: mins })
+		return result
+	}
+
 	//helper function to generate time slots for a given slot interval, start and end times
 	async function getTimeSlots(interval, start, end) {
+		
 		//store results
 		let timeArray = []
 		//format start and end times
@@ -255,14 +276,16 @@ function TimeSelectForm({ setStep, storeTimeHours, setOrderDate, setOrderTime })
 		let endDateTime = DateTime.fromFormat(end, 'HH:mm:ss');
 		//create interval object to step through
 		let intervalDateTime = Interval.fromDateTimes(startDateTime, endDateTime)
+
 		
 		//helper stepper function to generate an iterator object for an array of time slots
 		//given an interval object and an slot interval gap
 		function* stepper(interval, intGap) {
 			//current selected property at start of the current hour
-			let cursor = interval.start.startOf("hour");
+			let cursor = interval.start;
+
 			//loop to the end
-			while (cursor < interval.end) {
+			while (cursor <= interval.end) {
 				//pause execution and return current time
 				yield cursor;
 				//add 1 step of interval gap
@@ -327,7 +350,7 @@ function TimeSelectForm({ setStep, storeTimeHours, setOrderDate, setOrderTime })
 								    padding: '0 12px', 
 								}}>
 								{dates.map((value, index) => (
-									<MenuItem key={index} value={value.date}>{value.display}</MenuItem>
+									<MenuItem key={index} value={value.date} classes={{ selected: "item-selected" }}>{value.display}</MenuItem>
 								))}
 							</Select>
 						</FormControl>
@@ -346,7 +369,7 @@ function TimeSelectForm({ setStep, storeTimeHours, setOrderDate, setOrderTime })
 								    padding: '0 12px', 
 								}}>
 								{time.map((value, index) => (
-									<MenuItem key={index} value={value}>{index === 0 && currentWeekday === selectWeekday ? 'Dès que possible' : value}</MenuItem>
+									<MenuItem key={index} value={value} classes={{ selected: "item-selected" }}>{index === 0 && currentWeekday === selectWeekday ? value+' - ASAP' : value}</MenuItem>
 								))}
 							</Select>
 						</FormControl>

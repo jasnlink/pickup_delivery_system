@@ -489,7 +489,7 @@ function AdminTimeManager() {
 							<Grid container justifyContent="space-between" alignItems="center">
 								<Grid item xs={8}>
 									<Typography variant="h4">
-										Feuilles de temps
+										Horaires de menu
 									</Typography>
 								</Grid>
 								<Grid item>
