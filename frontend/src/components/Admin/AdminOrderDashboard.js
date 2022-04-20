@@ -151,7 +151,7 @@ function AdminOrderDashboard() {
 							</ToggleButton>
 						</ToggleButtonGroup>
 
-						<ToggleButton sx={{ width: '100%', height: 'auto', pt: '30%', pb: '30%', mt: '8vh', borderRadius: 0, color: "#000000" }} classes={{ selected: "status-view-selected" }} value="HISTORY" selected={orderView === "HISTORY"} onClick={() => setOrderView("HISTORY")}>
+						<ToggleButton sx={{ width: '100%', height: 'auto', pt: '30%', pb: '30%', mt: '8vh', borderRadius: 0, color: "#000000", border: 'none' }} classes={{ selected: "status-view-selected" }} value="HISTORY" selected={orderView === "HISTORY"} onClick={() => setOrderView("HISTORY")}>
 							<HistoryIcon sx={{ width: '32px', height: '32px' }} />
 						</ToggleButton>
 
