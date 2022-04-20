@@ -541,6 +541,27 @@ app.post('/api/category/list/operation', (req, res) => {
 });
 
 
+//fetch categories given a weekday
+//used to list all categories for the preview of the day
+app.post('/api/category/list/weekday', (req, res) => {
+
+    const day = req.body.day;
+
+    const request =   "SELECT DISTINCT osd_product_categories.category_id, category_name FROM osd_timegroups INNER JOIN osd_timegroup_days ON osd_timegroups.timegroup_id = osd_timegroup_days.timegroup_id INNER JOIN osd_timegroup_categories ON osd_timegroups.timegroup_id = osd_timegroup_categories.timegroup_id INNER JOIN osd_product_categories ON osd_timegroup_categories.category_id = osd_product_categories.category_id WHERE osd_timegroup_days.timegroup_day=? AND osd_product_categories.enabled=1 ORDER BY osd_product_categories.order_index;";
+    connection.query(request, [day], (err, result) => {
+
+        if(err) {
+            res.status(400).send(err);
+            return;
+        }
+
+        res.send(result)
+        console.log('fetching categories of current day...');
+
+    })
+
+});
+
 
 /********************************************************************************************************
  * 
@@ -2601,7 +2622,7 @@ app.post('/api/admin/timegroups/update', (req, res) => {
     const selectCategories = req.body.selectCategories
 
 
-    let updateRequest = "UPDATE osd_timegroups SET timegroup_name=?, timegroup_from=STR_TO_DATE(?, '%H:%i'), timegroup_to=STR_TO_DATE(?, '%H:%i') WHERE timegroup_id=?;"
+    let updateRequest = "UPDATE osd_timegroups SET timegroup_name=?, timegroup_from=?, timegroup_to=? WHERE timegroup_id=?;"
     connection.query(updateRequest, [editName, editFrom, editTo, editId], (err, result) => {
         if(err) {
             console.log('error...', err);
@@ -2708,7 +2729,7 @@ app.post('/api/admin/timegroups/insert', (req, res) => {
     const selectCategories = req.body.selectCategories
 
 
-    let insertRequest = "INSERT INTO osd_timegroups (timegroup_name, timegroup_from, timegroup_to) VALUES (?, STR_TO_DATE(?, '%H:%i'), STR_TO_DATE(?, '%H:%i'));"
+    let insertRequest = "INSERT INTO osd_timegroups (timegroup_name, timegroup_from, timegroup_to) VALUES (?, ?, ?);"
     connection.query(insertRequest, [editName, editFrom, editTo], (err, result) => {
         if(err) {
             console.log('error...', err);

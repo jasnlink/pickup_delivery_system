@@ -104,7 +104,6 @@ function AdminTimeManager() {
 				.then((result) => {
 
 					setMarks(result)
-
 					setLoading(false)
 					
 
@@ -139,18 +138,24 @@ function AdminTimeManager() {
 			//current selected property at start of the current hour
 			let cursor = interval.start.startOf("hour");
 			//loop to the end
-			while (cursor <= interval.end) {
+			while (cursor < interval.end) {
+
 				//pause execution and return current time
 				yield cursor;
 				//add 1 step of interval gap
 				cursor = cursor.plus({ minutes: intGap });
+
 			}
 		}
 
 		//populate result array with intervals
 		for(var step of stepper(intervalDateTime, interval)) {
-		  timeArray.push(step.toFormat('HH:mm'))
+
+			timeArray.push(step.toFormat('HH:mm'))
+		  
 		}
+		//add 24:00 as last step
+		timeArray.push('24:00')
 
 		return timeArray;
 	}
@@ -163,7 +168,7 @@ function AdminTimeManager() {
 		let result = []
 
 		for(let i = 0; i<data.length; i++) {
-
+			//every 8th value we add a label, or every 2 hours
 			if(i % 8 === 0) {
 				result.push({
 					value: i,

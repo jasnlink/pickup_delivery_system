@@ -60,12 +60,10 @@ function Preface({ setStep}) {
 	useEffect(() => {
 
 		const orderWeekday = DateTime.now().setZone('America/Toronto').get('weekday');
-		const orderTime = DateTime.now().setZone('America/Toronto').toFormat('HH:mm')
 
 		//get categories
-		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/category/list/operation", {
+		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/category/list/weekday", {
 			day: orderWeekday,
-			time: orderTime,
 		})
 		.then((response) => {
 			setCategories(response.data)

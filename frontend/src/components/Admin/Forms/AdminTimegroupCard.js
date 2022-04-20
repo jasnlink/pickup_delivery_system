@@ -107,7 +107,14 @@ function AdminTimegroupCard({ timegroups, timegroup, index, marks, handleEdit })
 
 
 		const fromTime = DateTime.fromFormat(timegroup.timegroup_from, 'HH:mm:ss').toFormat('HH:mm');
-		const toTime = DateTime.fromFormat(timegroup.timegroup_to, 'HH:mm:ss').toFormat('HH:mm');
+		
+		let toTime = timegroup.timegroup_to
+
+		if(toTime === '24:00:00') {
+			toTime = '24:00'
+		} else {
+			toTime = DateTime.fromFormat(timegroup.timegroup_to, 'HH:mm:ss').toFormat('HH:mm');
+		}
 
 		const fromValue = marks.find(row => row.time === fromTime)
 		const toValue = marks.find(row => row.time === toTime)

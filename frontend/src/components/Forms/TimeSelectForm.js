@@ -284,13 +284,24 @@ function TimeSelectForm({ setStep, storeTimeHours, setOrderDate, setOrderTime })
 			//current selected property at start of the current hour
 			let cursor = interval.start;
 
+			//check if we end at 24:00, then we skip the last slot
 			//loop to the end
-			while (cursor <= interval.end) {
-				//pause execution and return current time
-				yield cursor;
-				//add 1 step of interval gap
-				cursor = cursor.plus({ minutes: intGap });
+			if(end === '24:00:00') {
+				while (cursor < interval.end) {
+					//pause execution and return current time
+					yield cursor;
+					//add 1 step of interval gap
+					cursor = cursor.plus({ minutes: intGap });
+				}
+			} else {
+				while (cursor <= interval.end) {
+					//pause execution and return current time
+					yield cursor;
+					//add 1 step of interval gap
+					cursor = cursor.plus({ minutes: intGap });
+				}
 			}
+			
 		}
 
 		//populate result array with intervals
