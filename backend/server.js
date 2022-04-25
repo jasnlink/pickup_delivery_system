@@ -154,8 +154,10 @@ connectToDb( () => {
 const httpServer = createServer(app);
 const io = new Server(httpServer, { 
     cors: {
-      origin: '*',
-      methods: ['GET', 'POST']
+      origin: 'https://staging.2kfusion.com',
+      methods: ['GET', 'POST'],
+      allowedHeaders: ['socket-io-cors'],
+      credentials: true
     }
 })
 

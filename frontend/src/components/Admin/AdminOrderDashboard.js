@@ -79,7 +79,12 @@ function AdminOrderDashboard() {
 	useEffect(() => {
 
 		//connect to socket host backend and listen for order refresh
-		let ioClient = io.connect(process.env.REACT_APP_SOCKET_HOST, {secure: true});
+		let ioClient = io.connect(process.env.REACT_APP_SOCKET_HOST, { 
+			withCredentials: true,
+			extraHeaders: {
+				'socket-io-cors': 'auth'
+			}
+		});
 
 		ioClient.on('refresh_orders', (response) => {
 
