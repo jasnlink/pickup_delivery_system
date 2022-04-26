@@ -77,7 +77,12 @@ let transporter = nodemailer.createTransport({
 
 //express json cors setup
 var app = express();
-app.use(cors());
+app.use(cors({
+        origin: SITE,
+        methods: ['GET', 'POST'],
+        allowedHeaders: ['frontend-cors'],
+        credentials: true
+    }));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json({extended: true}));
 
@@ -90,6 +95,7 @@ app.use(fileUpload({
     },
     abortOnLimit: true
  }));
+
 
 app.listen(PORT, () => {
     console.log(`server is running on port ${PORT}.`)
@@ -154,7 +160,7 @@ connectToDb( () => {
 const httpServer = createServer(app);
 const io = new Server(httpServer, { 
     cors: {
-      origin: 'https://staging.2kfusion.com',
+      origin: SITE,
       methods: ['GET', 'POST'],
       allowedHeaders: ['socket-io-cors'],
       credentials: true
@@ -3128,76 +3134,3 @@ app.post('/api/admin/auth', (req, res) => {
 
 
 
-
-
-// async..await is not allowed in global scope, must use a wrapper
-async function main() {
-  // Generate test SMTP service account from ethereal.email
-  // Only needed if you don't have a real mail account for testing
-
-  // send mail with defined transport object
-  let info = await transporter.sendMail({
-    from: '"Restaurant 2K Fusion" <noreply@2kfusion.com>', // sender address
-    to: "chem9310@gmail.com", // list of receivers
-    subject: "Hello ✔", // Subject line
-    text: "Hello world?", // plain text body
-    html: "<b>Hello world?</b>", // html body
-  });
-
-  console.log("Message sent: %s", info.messageId);
-  // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-
-  // Preview only available when sending through an Ethereal account
-  console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-  // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
-}
-
-//check if email is in DB so user can login
-app.get('/api/mail/test', (req, res) => {
-
-    main().catch(console.error);
-})
-
-app.get('/api/test', (req, res) => {
-
-    var userId;
-    const email = 'test@msmtech.ca'
-    //search for email in DB
-    const query = "SELECT * FROM osd_users WHERE user_email=?;";
-    connection.query(query, [email], (err, result) => {
-        if(err) {
-            res.status(400).send(err);
-            return;
-        }
-        userId = result[0].user_id
-
-        console.log('logging in with email...');
-        console.log('userId', userId)
-
-    })
-
-
-})
-
-
-app.get('/api/test/io', (req, res) => {
-
-   io.emit('refresh_orders');
-   res.send({status: 1})
-
-
-})
-
-
-
-
-
-app.get('/api/test/img', (req, res) => {
-
-    let img = "https://staging.2kfusion.com/assets/1648600005046.JPG"
-    img = img.replace(SITE, '')
-    img = CDN_DIR+img
-    console.log(img)
-
-
-})
