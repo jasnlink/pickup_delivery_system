@@ -77,12 +77,17 @@ let transporter = nodemailer.createTransport({
 
 //express json cors setup
 var app = express();
+
+/* CORS setup
 app.use(cors({
         origin: SITE,
         methods: ['GET', 'POST'],
         allowedHeaders: ['frontend-cors'],
         credentials: true
     }));
+*/
+app.use(cors());
+
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json({extended: true}));
 
@@ -158,12 +163,22 @@ connectToDb( () => {
 //socket io setup
 //need to create httpserver to listen in order to appease cors policies
 const httpServer = createServer(app);
+
+/* CORS setup socket.io
 const io = new Server(httpServer, { 
     cors: {
       origin: SITE,
       methods: ['GET', 'POST'],
       allowedHeaders: ['socket-io-cors'],
       credentials: true
+    }
+})
+*/
+
+const io = new Server(httpServer, { 
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST'],
     }
 })
 
@@ -177,6 +192,7 @@ io.on('connection', (socket) => {
         console.log('socket client has disconnected...', reason);
     });
 });
+
 
 /********************************************************************************************************
  * 
@@ -219,8 +235,6 @@ function verifyHashOTP(user,hash,otp){
     } 
     return false;
 }
-
-
 
 
 // async..await is not allowed in global scope, must use a wrapper
@@ -1263,6 +1277,44 @@ app.post('/api/order/delivery/place', (req, res) => {
  ********************************************************************************************************
 ********************************************************************************************************/
 
+//authentication middleware for admin JWT token
+function adminAuth(req, res, next) {
+    if(req.headers) {
+        const accessToken = req.headers['access-token']
+        const accessUsername = req.headers['access-username']
+
+        console.log('checking admin user auth...', accessUsername);
+
+        jwt.verify(accessToken, JWT_ACCESS_SECRET_KEY, (err, user) => {
+            if(err) {
+                console.log('error...', err);
+                return res.status(400).send(err);
+            }
+            console.log('user.accessUsername', user.accessUsername)
+            if(user.accessUsername === accessUsername) {
+            //decoded username is same as provided username
+                //user is authenticated
+                console.log('admin user is authenticated...');
+                next();
+                
+
+            } else {
+            //decoded username does not match
+                //user is not authenticated
+                console.log('admin user is not authenticated...');
+                return res.json({status:0})
+
+            }
+        })
+    } else {
+        //missing token
+        console.log('admin user is not authenticated, missing token...');
+        return res.json({status:0})
+    }
+    
+
+}
+
 
 /********************************************************************************************************
  * 
@@ -1279,7 +1331,7 @@ app.post('/api/order/delivery/place', (req, res) => {
 
 
 //fetch today's orders ordered by delivery time
-app.post('/api/admin/order/list/today', (req, res) => {
+app.post('/api/admin/order/list/today', adminAuth, (req, res) => {
 
     const fetchOrderRequest = "SELECT u.user_id, u.user_first_name, u.user_last_name, u.user_email, u.user_phone, o.order_address, o.order_city, o.order_district, o.order_postal_code, o.order_lat, o.order_lng, o.order_id, o.order_status, o.order_type, o.order_delivery_time, o.order_subtotal, o.order_delivery_fee, o.order_tip, o.order_gst, o.order_qst, o.order_total, p.payment_auth_id, p.payment_source, p.payment_status, p.payment_date FROM osd_orders o INNER JOIN osd_payments p ON p.order_id = o.order_id INNER JOIN osd_users u ON u.user_id = o.user_id WHERE DATE(order_delivery_time)=CURDATE() ORDER BY order_delivery_time ASC;";
     connection.query(fetchOrderRequest, (err, result) => {
@@ -1295,7 +1347,7 @@ app.post('/api/admin/order/list/today', (req, res) => {
 })
 
 //Fetch selected order content
-app.post('/api/admin/order/fetch/selected', (req, res) => {
+app.post('/api/admin/order/fetch/selected', adminAuth, (req, res) => {
 
     //current order id to be queried
     let orderId = req.body.orderId
@@ -1441,7 +1493,7 @@ app.post('/api/admin/order/fetch/selected', (req, res) => {
 
 
 //move order to next status
-app.post('/api/admin/order/status/next', (req, res) => {
+app.post('/api/admin/order/status/next', adminAuth, (req, res) => {
 
     //get current order status and order id;
     const status = req.body.status;
@@ -1484,7 +1536,7 @@ app.post('/api/admin/order/status/next', (req, res) => {
 
 
 //fetch all categories
-app.post('/api/admin/categories/fetch/all', (req, res) => {
+app.post('/api/admin/categories/fetch/all', adminAuth, (req, res) => {
 
 
     const fetchCategoriesRequest = "SELECT * FROM osd_product_categories ORDER BY order_index;";
@@ -1504,7 +1556,7 @@ app.post('/api/admin/categories/fetch/all', (req, res) => {
 
 
 //add a new category
-app.post('/api/admin/categories/insert', (req, res) => {
+app.post('/api/admin/categories/insert', adminAuth, (req, res) => {
 
 
     const editName = req.body.editName
@@ -1538,7 +1590,7 @@ app.post('/api/admin/categories/insert', (req, res) => {
 
 
 //update a category given a category id
-app.post('/api/admin/categories/update', (req, res) => {
+app.post('/api/admin/categories/update', adminAuth, (req, res) => {
 
 
 
@@ -1575,7 +1627,7 @@ app.post('/api/admin/categories/update', (req, res) => {
 
 
 //delete a category given a category id
-app.post('/api/admin/categories/delete', (req, res) => {
+app.post('/api/admin/categories/delete', adminAuth, (req, res) => {
 
     const editId = req.body.editId    
 
@@ -1607,7 +1659,7 @@ app.post('/api/admin/categories/delete', (req, res) => {
 
 
 //move category up or down one index
-app.post('/api/admin/categories/move', (req, res) => {
+app.post('/api/admin/categories/move', adminAuth, (req, res) => {
 
 
     const sId = req.body.sId;
@@ -1669,7 +1721,7 @@ app.post('/api/admin/categories/move', (req, res) => {
 
 
 //fetch all product options
-app.post('/api/admin/options/fetch/all', (req, res) => {
+app.post('/api/admin/options/fetch/all', adminAuth, (req, res) => {
 
 
     const fetchOptionsRequest = "SELECT * FROM osd_options;";
@@ -1689,7 +1741,7 @@ app.post('/api/admin/options/fetch/all', (req, res) => {
 
 
 //fetch all product options belonging to a given option group id
-app.post('/api/admin/options/fetch/optiongroup', (req, res) => {
+app.post('/api/admin/options/fetch/optiongroup', adminAuth, (req, res) => {
 
     const sId = req.body.sId
 
@@ -1710,7 +1762,7 @@ app.post('/api/admin/options/fetch/optiongroup', (req, res) => {
 
 
 //update an option given a option id
-app.post('/api/admin/options/update', (req, res) => {
+app.post('/api/admin/options/update', adminAuth, (req, res) => {
 
 
     const editId = req.body.editId
@@ -1747,7 +1799,7 @@ app.post('/api/admin/options/update', (req, res) => {
 
 
 //delete an option given a option id
-app.post('/api/admin/options/insert', (req, res) => {
+app.post('/api/admin/options/insert', adminAuth, (req, res) => {
 
     const editId = req.body.editId
     const optionEditName = req.body.optionEditName
@@ -1781,7 +1833,7 @@ app.post('/api/admin/options/insert', (req, res) => {
 
 
 //insert an option
-app.post('/api/admin/options/delete', (req, res) => {
+app.post('/api/admin/options/delete', adminAuth, (req, res) => {
 
     const editId = req.body.editId 
     const optionEditId = req.body.optionEditId
@@ -1827,7 +1879,7 @@ app.post('/api/admin/options/delete', (req, res) => {
 
 
 //fetch all product option groups
-app.post('/api/admin/optiongroups/fetch/all', (req, res) => {
+app.post('/api/admin/optiongroups/fetch/all', adminAuth, (req, res) => {
 
 
     const fetchOptionsgroupsRequest = "SELECT * FROM osd_optgroups;";
@@ -1846,7 +1898,7 @@ app.post('/api/admin/optiongroups/fetch/all', (req, res) => {
 })
 
 //insert an option group
-app.post('/api/admin/optiongroups/insert', (req, res) => {
+app.post('/api/admin/optiongroups/insert', adminAuth, (req, res) => {
 
     const editName = req.body.editName
     const editRequired = req.body.editRequired
@@ -1881,7 +1933,7 @@ app.post('/api/admin/optiongroups/insert', (req, res) => {
 
 
 //update an option group given a option group id
-app.post('/api/admin/optiongroups/update', (req, res) => {
+app.post('/api/admin/optiongroups/update', adminAuth, (req, res) => {
 
 
     const editId = req.body.editId
@@ -1957,7 +2009,7 @@ app.post('/api/admin/optiongroups/update', (req, res) => {
 
 
 //delete an option group given a option group id
-app.post('/api/admin/optiongroups/delete', (req, res) => {
+app.post('/api/admin/optiongroups/delete', adminAuth, (req, res) => {
 
 
     const editId = req.body.editId
@@ -2029,7 +2081,7 @@ app.post('/api/admin/optiongroups/delete', (req, res) => {
 
 
 //fetch all products in given category
-app.post('/api/admin/products/fetch/category', (req, res) => {
+app.post('/api/admin/products/fetch/category', adminAuth, (req, res) => {
 
     const categoryId = req.body.categoryId
 
@@ -2050,7 +2102,7 @@ app.post('/api/admin/products/fetch/category', (req, res) => {
 
 
 //add a new product
-app.post('/api/admin/products/insert', (req, res) => {
+app.post('/api/admin/products/insert', adminAuth, (req, res) => {
 
 
     const categorySelectId = req.body.categorySelectId
@@ -2181,7 +2233,7 @@ app.post('/api/admin/products/insert', (req, res) => {
 
 
 //update a product given a product id
-app.post('/api/admin/products/update', (req, res) => {
+app.post('/api/admin/products/update', adminAuth, (req, res) => {
 
 
     const categorySelectId = req.body.categorySelectId
@@ -2429,7 +2481,7 @@ app.post('/api/admin/products/update', (req, res) => {
 
 
 //delete a product given a product id
-app.post('/api/admin/products/delete', async (req, res) => {
+app.post('/api/admin/products/delete', adminAuth, (req, res) => {
 
     const categorySelectId = req.body.categorySelectId
     const editId = req.body.editId    
@@ -2492,7 +2544,7 @@ app.post('/api/admin/products/delete', async (req, res) => {
 
 
 //move product up or down one index
-app.post('/api/admin/products/move', (req, res) => {
+app.post('/api/admin/products/move', adminAuth, (req, res) => {
 
 
     const categorySelectId = req.body.categorySelectId
@@ -2557,7 +2609,7 @@ app.post('/api/admin/products/move', (req, res) => {
 
 
 //fetch all timegroups
-app.post('/api/admin/timegroups/fetch/all', (req, res) => {
+app.post('/api/admin/timegroups/fetch/all', adminAuth, (req, res) => {
 
 
     const fetchTimegroupsRequest = "SELECT * FROM osd_timegroups;";
@@ -2577,7 +2629,7 @@ app.post('/api/admin/timegroups/fetch/all', (req, res) => {
 
 
 //fetch timegroup days given a timegroup id
-app.post('/api/admin/timegroups/fetch/days', (req, res) => {
+app.post('/api/admin/timegroups/fetch/days', adminAuth, (req, res) => {
 
     const timegroupId = req.body.timegroupId;
 
@@ -2598,7 +2650,7 @@ app.post('/api/admin/timegroups/fetch/days', (req, res) => {
 
 
 //fetch timegroup categories given a timegroup id
-app.post('/api/admin/timegroups/fetch/categories', (req, res) => {
+app.post('/api/admin/timegroups/fetch/categories', adminAuth, (req, res) => {
 
     const timegroupId = req.body.timegroupId;
 
@@ -2619,7 +2671,7 @@ app.post('/api/admin/timegroups/fetch/categories', (req, res) => {
 
 
 //update timegroup given a timegroup id
-app.post('/api/admin/timegroups/update', (req, res) => {
+app.post('/api/admin/timegroups/update', adminAuth, (req, res) => {
 
 
     const editId = req.body.editId
@@ -2727,7 +2779,7 @@ app.post('/api/admin/timegroups/update', (req, res) => {
 
 
 //insert a new timegroup
-app.post('/api/admin/timegroups/insert', (req, res) => {
+app.post('/api/admin/timegroups/insert', adminAuth, (req, res) => {
 
 
     const editName = req.body.editName
@@ -2812,7 +2864,7 @@ app.post('/api/admin/timegroups/insert', (req, res) => {
 
 
 //delete timegroup given a timegroup id
-app.post('/api/admin/timegroups/delete', (req, res) => {
+app.post('/api/admin/timegroups/delete', adminAuth, (req, res) => {
 
     const editId = req.body.editId
 
@@ -2871,7 +2923,7 @@ app.post('/api/admin/timegroups/delete', (req, res) => {
 
 
 //fetch all delivery zones
-app.post('/api/admin/deliveryzones/fetch/all', (req, res) => {
+app.post('/api/admin/deliveryzones/fetch/all', adminAuth, (req, res) => {
 
 
     const fetchZonesRequest = "SELECT * FROM osd_delivery_zones ORDER BY delivery_zone_range;";
@@ -2891,7 +2943,7 @@ app.post('/api/admin/deliveryzones/fetch/all', (req, res) => {
 
 
 //update a delivery zone given a zone id
-app.post('/api/admin/deliveryzones/update', (req, res) => {
+app.post('/api/admin/deliveryzones/update', adminAuth, (req, res) => {
 
     const zoneSelectId = req.body.zoneSelectId;
     const editPrice = req.body.editPrice;
@@ -2929,7 +2981,7 @@ app.post('/api/admin/deliveryzones/update', (req, res) => {
 
 
 //insert new delivery zone
-app.post('/api/admin/deliveryzones/insert', (req, res) => {
+app.post('/api/admin/deliveryzones/insert', adminAuth, (req, res) => {
 
     const insertZonesRequest = "INSERT INTO osd_delivery_zones (delivery_zone_range, delivery_zone_price, delivery_zone_order_min) VALUES (?, ?, ?);"
     connection.query(insertZonesRequest, [0.5,0,0], (err, result) => {
@@ -2962,7 +3014,7 @@ app.post('/api/admin/deliveryzones/insert', (req, res) => {
 
 
 //delete a delivery zone given a delivery zone id
-app.post('/api/admin/deliveryzones/delete', (req, res) => {
+app.post('/api/admin/deliveryzones/delete', adminAuth, (req, res) => {
 
     const zoneSelectId = req.body.zoneSelectId;
 

@@ -72,7 +72,7 @@ import './styles/Admin.css';
 import AdminRenderMap from './Forms/AdminRenderMap';
 
 
-function AdminDeliveryZoneManager({ storeLat, storeLng }) {
+function AdminDeliveryZoneManager({ storeLat, storeLng, adminToken, adminUsername }) {
 
 	const [loading, setLoading] = useState(true)
 	const [zones, setZones] = useState([])
@@ -82,7 +82,11 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 
 	useEffect(() => {
 
-		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/deliveryzones/fetch/all")
+		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/deliveryzones/fetch/all", null, 
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 			setZones(response.data)
 
@@ -161,7 +165,11 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 			editPrice: editPrice,
 			editMinimum: editMinimum,
 			editRange: range,
-		})
+		},
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 			setZones(response.data)
 			setLoading(false)
@@ -176,7 +184,11 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 
 		setLoading(true)
 
-		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/deliveryzones/insert")
+		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/deliveryzones/insert", null, 
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 
 			setZones(response.data.result)
@@ -206,7 +218,11 @@ function AdminDeliveryZoneManager({ storeLat, storeLng }) {
 
 		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/deliveryzones/delete", {
 			zoneSelectId: zoneSelectId,
-		})
+		},
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 			setZones(response.data)
 			handleZoneUnselect()

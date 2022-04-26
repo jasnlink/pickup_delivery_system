@@ -70,7 +70,7 @@ import AdminCategoryCard from './Forms/AdminCategoryCard'
 
 
 
-function AdminCategoryManager() {
+function AdminCategoryManager({ adminToken, adminUsername }) {
 
 	const [loading, setLoading] = useState(true)
 	const [categories, setCategories] = useState([])
@@ -79,7 +79,11 @@ function AdminCategoryManager() {
 	useEffect(() => {
 
 
-		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/categories/fetch/all")
+		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/categories/fetch/all", null,
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 			.then((response) => {
 
 				setCategories(response.data)
@@ -113,7 +117,11 @@ function AdminCategoryManager() {
 	
 		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/categories/insert", {
 			editName: editName,
-		})
+		}, 
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 			handleEditClose();
 			setCategories(response.data);
@@ -148,7 +156,11 @@ function AdminCategoryManager() {
 
 		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/categories/delete", {
 			editId: editId,
-		})
+		},
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 			handleEditClose();
 			setCategories(response.data);
@@ -166,7 +178,11 @@ function AdminCategoryManager() {
 		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/categories/update", {
 			editId: editId,
 			editName: editName,
-		})
+		},
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 			handleEditClose();
 			setCategories(response.data);
@@ -206,7 +222,11 @@ function AdminCategoryManager() {
 			orderId: orderId,
 			nextRowId: nextRowId,
 			nextRowOrderId: nextRowOrderId,
-		})
+		}, 
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 			setCategories(response.data)
 		})

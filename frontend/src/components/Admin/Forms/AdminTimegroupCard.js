@@ -65,7 +65,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 import '../styles/Admin.css';
 
-function AdminTimegroupCard({ timegroups, timegroup, index, marks, handleEdit }) {
+function AdminTimegroupCard({ timegroups, timegroup, index, marks, handleEdit, adminToken, adminUsername }) {
 
 	const [loading, setLoading] = useState(true)
 	const [selectDays, setSelectDays] = useState([])
@@ -75,7 +75,11 @@ function AdminTimegroupCard({ timegroups, timegroup, index, marks, handleEdit })
 
 		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/timegroups/fetch/days", {
 			timegroupId: timegroup.timegroup_id,
-		})
+		},
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 
 			buildDays(response.data)

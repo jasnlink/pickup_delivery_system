@@ -70,7 +70,7 @@ import AdminProductCard from './Forms/AdminProductCard'
 import AdminToggleCard from './Forms/AdminToggleCard'
 import AdminError from './Forms/AdminError'
 
-function AdminProductManager() {
+function AdminProductManager({ adminToken, adminUsername }) {
 
 
 	const [productLoading, setProductLoading] = useState(false)
@@ -87,8 +87,16 @@ function AdminProductManager() {
 		const request1 = (process.env.REACT_APP_PUBLIC_URL+"/api/admin/categories/fetch/all")
 		const request2 = (process.env.REACT_APP_PUBLIC_URL+"/api/admin/optiongroups/fetch/all")
 
-		const requestCategories = Axios.post(request1)
-		const requestOptiongroups = Axios.post(request2)
+		const requestCategories = Axios.post(request1, null, 
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
+		const requestOptiongroups = Axios.post(request2, null, 
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 
 		Axios.all([requestCategories, requestOptiongroups])
 		.then(Axios.spread((...responses) => {
@@ -120,7 +128,11 @@ function AdminProductManager() {
 		//fetch categories
 		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/products/fetch/category", {
 			categoryId: sId
-		})
+		},
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 			setProducts(response.data)
 			setProductLoading(false)
@@ -185,7 +197,9 @@ function AdminProductManager() {
 		
 		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/products/insert", formData, {
 			headers: {
-				'Content-Type': 'multipart/form-data'
+				'Content-Type': 'multipart/form-data',
+				'access-token': adminToken,
+				'access-username': adminUsername
 			}
 		})
 		.then((response) => {
@@ -245,7 +259,11 @@ function AdminProductManager() {
 			categorySelectId: categorySelectId,
 			editId: editId,
 			editImg: editImg,
-		})
+		}, 
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 			handleEditClose();
 			setProducts(response.data);
@@ -280,7 +298,9 @@ function AdminProductManager() {
 		
 		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/products/update", formData, {
 			headers: {
-				'Content-Type': 'multipart/form-data'
+				'Content-Type': 'multipart/form-data',
+				'access-token': adminToken,
+				'access-username': adminUsername
 			}
 		})
 		.then((response) => {
@@ -377,7 +397,11 @@ function AdminProductManager() {
 		//get option groups
 		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/product/list/optiongroups", {
 			id: id,
-		})
+		},
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 
 			if(response.data.length) {
@@ -475,7 +499,11 @@ function AdminProductManager() {
 			orderId: orderId,
 			nextRowId: nextRowId,
 			nextRowOrderId: nextRowOrderId,
-		})
+		},
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 			setProducts(response.data)
 		})

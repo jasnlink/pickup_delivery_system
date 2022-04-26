@@ -70,7 +70,7 @@ import './styles/Admin.css';
 import AdminTimegroupCard from './Forms/AdminTimegroupCard'
 import AdminToggleCard from './Forms/AdminToggleCard'
 
-function AdminTimeManager() {
+function AdminTimeManager({ adminToken, adminUsername }) {
 
 
 	const [loading, setLoading] = useState(true)
@@ -86,8 +86,16 @@ function AdminTimeManager() {
 		const request1 = (process.env.REACT_APP_PUBLIC_URL+"/api/admin/categories/fetch/all")
 		const request2 = (process.env.REACT_APP_PUBLIC_URL+"/api/admin/timegroups/fetch/all")
 
-		const requestCategories = Axios.post(request1)
-		const requestTimegroups = Axios.post(request2)
+		const requestCategories = Axios.post(request1, null, 
+			{ headers: {
+				'access-token': adminToken,
+				'access-username': adminUsername
+			}})
+		const requestTimegroups = Axios.post(request2, null, 
+			{ headers: {
+				'access-token': adminToken,
+				'access-username': adminUsername
+			}})
 
 
 		Axios.all([requestCategories, requestTimegroups])
@@ -243,7 +251,11 @@ function AdminTimeManager() {
 
 		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/timegroups/fetch/categories", {
 			timegroupId: sId,
-		})
+		},
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 
 			setEditId(sId)
@@ -294,15 +306,27 @@ function AdminTimeManager() {
 			editFrom: marks[editTimeSlider[0]].time,
 			editTo: marks[editTimeSlider[1]].time,
 			selectCategories: selectCategories,
-		})
+		},
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 
 			//fetch categories and product option groups
 			const request1 = (process.env.REACT_APP_PUBLIC_URL+"/api/admin/categories/fetch/all")
 			const request2 = (process.env.REACT_APP_PUBLIC_URL+"/api/admin/timegroups/fetch/all")
 
-			const requestCategories = Axios.post(request1)
-			const requestTimegroups = Axios.post(request2)
+			const requestCategories = Axios.post(request1, null, 
+				{ headers: {
+					'access-token': adminToken,
+					'access-username': adminUsername
+				}})
+			const requestTimegroups = Axios.post(request2, null, 
+				{ headers: {
+					'access-token': adminToken,
+					'access-username': adminUsername
+				}})
 
 
 			Axios.all([requestCategories, requestTimegroups])
@@ -330,15 +354,27 @@ function AdminTimeManager() {
 
 		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/timegroups/delete", {
 			editId: editId,
-		})
+		},
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 
 			//fetch categories and product option groups
 			const request1 = (process.env.REACT_APP_PUBLIC_URL+"/api/admin/categories/fetch/all")
 			const request2 = (process.env.REACT_APP_PUBLIC_URL+"/api/admin/timegroups/fetch/all")
 
-			const requestCategories = Axios.post(request1)
-			const requestTimegroups = Axios.post(request2)
+			const requestCategories = Axios.post(request1, null, 
+				{ headers: {
+					'access-token': adminToken,
+					'access-username': adminUsername
+				}})
+			const requestTimegroups = Axios.post(request2, null, 
+				{ headers: {
+					'access-token': adminToken,
+					'access-username': adminUsername
+				}})
 
 
 			Axios.all([requestCategories, requestTimegroups])
@@ -385,15 +421,27 @@ function AdminTimeManager() {
 			editFrom: marks[editTimeSlider[0]].time,
 			editTo: marks[editTimeSlider[1]].time,
 			selectCategories: selectCategories,
-		})
+		},
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 
 			//fetch categories and product option groups
 			const request1 = (process.env.REACT_APP_PUBLIC_URL+"/api/admin/categories/fetch/all")
 			const request2 = (process.env.REACT_APP_PUBLIC_URL+"/api/admin/timegroups/fetch/all")
 
-			const requestCategories = Axios.post(request1)
-			const requestTimegroups = Axios.post(request2)
+			const requestCategories = Axios.post(request1, null,
+				{ headers: {
+					'access-token': adminToken,
+					'access-username': adminUsername
+				}})
+			const requestTimegroups = Axios.post(request2, null, 
+				{ headers: {
+					'access-token': adminToken,
+					'access-username': adminUsername
+				}})
 
 
 			Axios.all([requestCategories, requestTimegroups])
@@ -518,6 +566,8 @@ function AdminTimeManager() {
 										index={index}
 										marks={marks}
 										handleEdit={(sId, sName, sDays, sSlider) => handleEdit(sId, sName, sDays, sSlider)}
+										adminToken={adminToken}
+										adminUsername={adminUsername}
 									/>
 
 								))}

@@ -73,7 +73,7 @@ import AdminOptiongroupCard from './Forms/AdminOptiongroupCard'
 import AdminOptionCard from './Forms/AdminOptionCard'
 import AdminError from './Forms/AdminError'
 
-function AdminOptionManager() {
+function AdminOptionManager({ adminToken, adminUsername }) {
 
 
 	const [loading, setLoading] = useState(true)
@@ -86,7 +86,11 @@ function AdminOptionManager() {
 	useEffect(() => {
 
 
-		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/optiongroups/fetch/all")
+		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/optiongroups/fetch/all", null, 
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 
 			setOptiongroups(response.data)
@@ -130,7 +134,11 @@ function AdminOptionManager() {
 			editName: editName,
 			editRequired: editRequired,
 			editMaxChoices: editMaxChoices,
-		})
+		},
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 
 			handleEditClose();
@@ -153,7 +161,11 @@ function AdminOptionManager() {
 
 		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/options/fetch/optiongroup", {
 			sId: sId,
-		})
+		},
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 
 			setOptions(response.data)
@@ -202,7 +214,11 @@ function AdminOptionManager() {
 
 		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/optiongroups/delete", {
 			editId: editId,
-		})
+		},
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 
 			handleEditClose();
@@ -221,7 +237,11 @@ function AdminOptionManager() {
 			editName: editName,
 			editRequired: editRequired,
 			editMaxChoices: editMaxChoices,
-		})
+		},
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 
 			handleEditClose();
@@ -242,7 +262,11 @@ function AdminOptionManager() {
 			editRequired: editRequired,
 			editMaxChoices: editMaxChoices,
 			isIncluded: isIncluded,
-		})
+		},
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 
 			handleEditClose();
@@ -296,7 +320,11 @@ function AdminOptionManager() {
 
 			Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/options/fetch/optiongroup", {
 				sId: editId,
-			})
+			},
+			{ headers: {
+				'access-token': adminToken,
+				'access-username': adminUsername
+			}})
 			.then((response) => {
 
 				setOptions(response.data)
@@ -347,7 +375,11 @@ function AdminOptionManager() {
 			optionEditId: optionEditId,
 			optionEditName: optionEditName,
 			optionEditPrice: optionEditPrice,
-		})
+		},
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 			handleOptionEditClose();
 			setOptions(response.data);
@@ -374,7 +406,11 @@ function AdminOptionManager() {
 			editId: editId,
 			optionEditName: optionEditName,
 			optionEditPrice: optionEditPrice,
-		})
+		},
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 			handleOptionEditClose();
 			setOptions(response.data);
@@ -391,7 +427,11 @@ function AdminOptionManager() {
 		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/options/delete", {
 			editId: editId,
 			optionEditId: optionEditId,
-		})
+		},
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 			handleOptionEditClose();
 			setOptions(response.data);

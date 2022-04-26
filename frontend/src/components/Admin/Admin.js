@@ -172,7 +172,10 @@ function Admin({ setStep, storeLat, storeLng }) {
 						setNavSelect={select => setNavSelect(select)}
 						setAdminView={view => setAdminView(view)}
 					 />
-					<AdminOrderDashboard />
+					<AdminOrderDashboard
+						adminToken={adminToken} 
+						adminUsername={adminUsername}
+					 />
 				</>
 
 		)
@@ -186,7 +189,10 @@ function Admin({ setStep, storeLat, storeLng }) {
 						setNavSelect={select => setNavSelect(select)}
 						setAdminView={view => setAdminView(view)}
 					 />
-					<AdminProductManager />
+					<AdminProductManager
+						adminToken={adminToken} 
+						adminUsername={adminUsername}
+					 />
 				</>
 
 		)
@@ -200,7 +206,10 @@ function Admin({ setStep, storeLat, storeLng }) {
 						setNavSelect={select => setNavSelect(select)}
 						setAdminView={view => setAdminView(view)}
 					 />
-					<AdminCategoryManager />
+					<AdminCategoryManager 
+						adminToken={adminToken} 
+						adminUsername={adminUsername}
+					 />
 				</>
 
 		)
@@ -214,7 +223,10 @@ function Admin({ setStep, storeLat, storeLng }) {
 						setNavSelect={select => setNavSelect(select)}
 						setAdminView={view => setAdminView(view)}
 					 />
-					<AdminOptionManager />
+					<AdminOptionManager
+						adminToken={adminToken} 
+						adminUsername={adminUsername}
+					 />
 				</>
 
 		)
@@ -228,7 +240,10 @@ function Admin({ setStep, storeLat, storeLng }) {
 						setNavSelect={select => setNavSelect(select)}
 						setAdminView={view => setAdminView(view)}
 					 />
-					<AdminTimeManager />
+					<AdminTimeManager
+						adminToken={adminToken} 
+						adminUsername={adminUsername}
+					 />
 				</>
 
 		)
@@ -245,6 +260,8 @@ function Admin({ setStep, storeLat, storeLng }) {
 					<AdminDeliveryZoneManager
 						storeLat={storeLat}
 						storeLng={storeLng}
+						adminToken={adminToken} 
+						adminUsername={adminUsername}
 					 />
 				</>
 
@@ -259,7 +276,10 @@ function Admin({ setStep, storeLat, storeLng }) {
 						setNavSelect={select => setNavSelect(select)}
 						setAdminView={view => setAdminView(view)}
 					 />
-					<AdminOrderDashboard />
+					<AdminOrderDashboard
+						adminToken={adminToken} 
+						adminUsername={adminUsername}
+					 />
 				</>
 
 		)

@@ -70,7 +70,7 @@ import { ReactComponent as NewIcon } from './assets/noun-add-order-662273.svg';
 import { ReactComponent as ProcessingIcon } from './assets/noun-cooking-376836.svg';
 import { ReactComponent as ReadyIcon } from './assets/noun-shopping-bag-3897262.svg';
 
-function AdminOrderDashboard() {
+function AdminOrderDashboard({ adminToken, adminUsername }) {
 
 	const [loading, setLoading] = useState(true)
 	const [orders, setOrders] = useState([]);
@@ -89,7 +89,11 @@ function AdminOrderDashboard() {
 		ioClient.on('refresh_orders', (response) => {
 
 
-			Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/order/list/today")
+			Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/order/list/today", null, 
+			{ headers: {
+				'access-token': adminToken,
+				'access-username': adminUsername
+			}})
 			.then((response) => {
 				setOrders(response.data)
 			})
@@ -99,7 +103,11 @@ function AdminOrderDashboard() {
 		})
 
 		//initial order fetch
-		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/order/list/today")
+		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/order/list/today", null,
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 			setOrders(response.data)
 			setLoading(false)
