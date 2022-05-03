@@ -1327,9 +1327,6 @@ function adminAuth(req, res, next) {
 ********************************************************************************************************/
 
 
-
-
-
 //fetch today's orders ordered by delivery time
 app.post('/api/admin/order/list/today', adminAuth, (req, res) => {
 
@@ -1342,6 +1339,44 @@ app.post('/api/admin/order/list/today', adminAuth, (req, res) => {
         }
 
         console.log('fetching today\'s orders...')
+        res.send(result);
+    })
+})
+
+
+//fetch paginated orders by delivery time
+app.post('/api/admin/order/list/part', adminAuth, (req, res) => {
+
+    const offset = req.body.offset
+
+    const fetchOrderRequest = "SELECT u.user_id, u.user_first_name, u.user_last_name, u.user_email, u.user_phone, o.order_address, o.order_city, o.order_district, o.order_postal_code, o.order_lat, o.order_lng, o.order_id, o.order_status, o.order_type, o.order_delivery_time, o.order_subtotal, o.order_delivery_fee, o.order_tip, o.order_gst, o.order_qst, o.order_total, o.created_on, p.payment_auth_id, p.payment_source, p.payment_status, p.payment_date FROM osd_orders o INNER JOIN osd_payments p ON p.order_id = o.order_id INNER JOIN osd_users u ON u.user_id = o.user_id WHERE o.order_status='COMPLETED' ORDER BY order_delivery_time DESC LIMIT ?, 10;";
+    connection.query(fetchOrderRequest, [offset*10], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+
+        console.log('fetching orders by delivery time...')
+        res.send(result);
+    })
+})
+
+//fetch paginated orders by date
+app.post('/api/admin/order/list/date', adminAuth, (req, res) => {
+
+    const offset = req.body.offset
+    const date = req.body.date
+
+    const fetchOrderRequest = "SELECT u.user_id, u.user_first_name, u.user_last_name, u.user_email, u.user_phone, o.order_address, o.order_city, o.order_district, o.order_postal_code, o.order_lat, o.order_lng, o.order_id, o.order_status, o.order_type, o.order_delivery_time, o.order_subtotal, o.order_delivery_fee, o.order_tip, o.order_gst, o.order_qst, o.order_total, o.created_on, p.payment_auth_id, p.payment_source, p.payment_status, p.payment_date FROM osd_orders o INNER JOIN osd_payments p ON p.order_id = o.order_id INNER JOIN osd_users u ON u.user_id = o.user_id WHERE o.order_status='COMPLETED' AND o.order_delivery_time=? ORDER BY order_delivery_time DESC LIMIT ?, 10;";
+    connection.query(fetchOrderRequest, [date, offset*10], (err, result) => {
+        if(err) {
+            console.log('error...', err);
+            res.status(400).send(err);
+            return false;
+        }
+
+        console.log('fetching orders on selected date...')
         res.send(result);
     })
 })

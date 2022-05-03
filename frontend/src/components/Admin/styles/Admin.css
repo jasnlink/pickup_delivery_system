@@ -5,6 +5,19 @@
 	z-index: 0;
 }
 
+.order-history-card {
+	padding: 0 96px !important;
+}
+
+.order-history-date {
+	padding: 24px 2px !important;
+	border-radius: 0 !important;
+}
+
+.clear-date-btn {
+	padding: 0;
+}
+
 .product-edit-drawer {
 	min-height: 100vh !important;
 	max-height: 100vh !important;
@@ -33,6 +46,10 @@
 
 .btn:disabled {
 	background: #00000042 !important;
+}
+
+.page-chip {
+	border-radius: 0 !important;		
 }
 
 .zone-add-btn {

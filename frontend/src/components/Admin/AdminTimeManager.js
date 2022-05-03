@@ -592,7 +592,7 @@ function AdminTimeManager({ adminToken, adminUsername }) {
 											<Grid container justifyContent="space-between" alignItems="center">
 												<Grid item xs={10}>
 													<Typography variant="h5">
-														Nom de la feuille de temps
+														Nom de l'horaire
 													</Typography>
 												</Grid>
 											{editDrawerMode && (

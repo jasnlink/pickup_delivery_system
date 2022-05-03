@@ -201,6 +201,10 @@ body {
 	border-radius: 0 !important;
 }
 
+.qty-chip {
+	border-radius: 0 !important;
+}
+
 .product-drawer-add-cart-btn:disabled, .btn:disabled {
 	background: #00000042 !important;
 }

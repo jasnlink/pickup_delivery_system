@@ -65,7 +65,7 @@ import AdminOrderDisplay from './AdminOrderDisplay'
 
 import '../styles/Admin.css';
 
-function AdminOrderCard({ order, index, orderSelect, handleOrderSelect }) {
+function AdminOrderCard({ order, index, orderSelect, handleOrderSelect, adminToken, adminUsername }) {
 
 
 	
@@ -76,7 +76,11 @@ function AdminOrderCard({ order, index, orderSelect, handleOrderSelect }) {
 		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/order/status/next", {
 			status: status,
 			orderId: orderId
-		})
+		},
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 			return;
 		})
@@ -183,7 +187,11 @@ function AdminOrderCard({ order, index, orderSelect, handleOrderSelect }) {
 				</Grid>
 			</CardActionArea>
 			<Collapse in={orderSelect === order.order_id} unmountOnExit>
-				<AdminOrderDisplay order={order} />
+				<AdminOrderDisplay
+					order={order}
+					adminToken={adminToken}
+					adminUsername={adminUsername}
+				 />
 			</Collapse>
 		</Card>
 	</>

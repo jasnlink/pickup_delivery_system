@@ -85,7 +85,10 @@ function CartDisplay({ cart, setCart, handleCheckout }) {
 	                        <Grid item xs={9}>
 	                            <Grid container direction="row" alignItems="center" justifyContent="flex-start" spacing={1}>
 	                                <Grid item xs={3}>
-	                                    <Chip label={item.productQty} />
+	                                    <Chip
+	                                    	label={item.productQty}
+	                                    	className="qty-chip"
+	                                     />
 	                                </Grid>
 	                                <Grid item xs={9}>
 	                                    <Typography variant="subtitle2" color="textPrimary">

@@ -144,41 +144,43 @@ function AdminOrderDashboard({ adminToken, adminUsername }) {
 	return (
 	<>
 			<Grid container>
-			<Grid item xs={1} style={{ backgroundColor: '#d9d9d994', minHeight: '100vh', maxHeight: '100vh' }}>
-				<Paper sx={{ minHeight: '70vh', mt: '16vh', mb: '14vh' }} elevation={8} square>
-					<Stack sx={{ minWidth: '100%' }}>
+				<Grid item xs={1} style={{ backgroundColor: '#d9d9d994', minHeight: '100vh', maxHeight: '100vh' }}>
+					<Paper sx={{ minHeight: '70vh', mt: '16vh', mb: '14vh' }} elevation={8} square>
+						<Stack sx={{ minWidth: '100%' }}>
 
-						<ToggleButtonGroup
-							orientation="vertical"
-							exclusive
-							sx={{height:'51vh', color: '#000000'}}
-						>
-							<ToggleButton sx={{height:'17vh', borderRadius: 0, color: "#000000"}} classes={{ selected: "status-view-selected" }} value="NEW" selected={orderView === "NEW"} onClick={() => setOrderView("NEW")}>
-								<SvgIcon component={NewIcon} sx={{ width: '32px', height: '32px' }} inheritViewBox />
-							</ToggleButton>
-							<ToggleButton sx={{height:'17vh', borderRadius: 0, color: "#000000"}} classes={{ selected: "status-view-selected" }} value="PROCESSING" selected={orderView === "PROCESSING"} onClick={() => setOrderView("PROCESSING")}>
-								<SvgIcon component={ProcessingIcon} sx={{ width: '32px', height: '32px', paddingRight: '4px' }} inheritViewBox />
-							</ToggleButton>
-							<ToggleButton sx={{height:'17vh', borderRadius: 0, color: "#000000"}} classes={{ selected: "status-view-selected" }} value="READY" selected={orderView === "READY"} onClick={() => setOrderView("READY")}>
-								<SvgIcon component={ReadyIcon} sx={{ width: '32px', height: '32px' }} inheritViewBox />
-							</ToggleButton>
-						</ToggleButtonGroup>
+							<ToggleButtonGroup
+								orientation="vertical"
+								exclusive
+								sx={{height:'51vh', color: '#000000'}}
+							>
+								<ToggleButton sx={{height:'17vh', borderRadius: 0, color: "#000000"}} classes={{ selected: "status-view-selected" }} value="NEW" selected={orderView === "NEW"} onClick={() => setOrderView("NEW")}>
+									<SvgIcon component={NewIcon} sx={{ width: '32px', height: '32px' }} inheritViewBox />
+								</ToggleButton>
+								<ToggleButton sx={{height:'17vh', borderRadius: 0, color: "#000000"}} classes={{ selected: "status-view-selected" }} value="PROCESSING" selected={orderView === "PROCESSING"} onClick={() => setOrderView("PROCESSING")}>
+									<SvgIcon component={ProcessingIcon} sx={{ width: '32px', height: '32px', paddingRight: '4px' }} inheritViewBox />
+								</ToggleButton>
+								<ToggleButton sx={{height:'17vh', borderRadius: 0, color: "#000000"}} classes={{ selected: "status-view-selected" }} value="READY" selected={orderView === "READY"} onClick={() => setOrderView("READY")}>
+									<SvgIcon component={ReadyIcon} sx={{ width: '32px', height: '32px' }} inheritViewBox />
+								</ToggleButton>
+							</ToggleButtonGroup>
 
-						<ToggleButton sx={{ width: '100%', height: 'auto', pt: '30%', pb: '30%', mt: '8vh', borderRadius: 0, color: "#000000", border: 'none' }} classes={{ selected: "status-view-selected" }} value="HISTORY" selected={orderView === "HISTORY"} onClick={() => setOrderView("HISTORY")}>
-							<HistoryIcon sx={{ width: '32px', height: '32px' }} />
-						</ToggleButton>
+							<ToggleButton sx={{ width: '100%', height: 'auto', pt: '30%', pb: '30%', mt: '8vh', borderRadius: 0, color: "#000000", border: 'none' }} classes={{ selected: "status-view-selected" }} value="HISTORY" selected={orderView === "HISTORY"} onClick={() => setOrderView("HISTORY")}>
+								<HistoryIcon sx={{ width: '32px', height: '32px' }} />
+							</ToggleButton>
 
-					</Stack>
-				</Paper>
-			</Grid>
+						</Stack>
+					</Paper>
+				</Grid>
 				<Grid item xs={11} style={{ minHeight: '100vh', maxHeight: '100vh', overflow: 'auto', backgroundColor: '#d9d9d994' }}>
 					{loading && (
 						<Fade in={loading}>
-						<CircularProgress size={64} style={{position: 'relative', top: '50%', left:'50%', marginTop: '-32px', marginLeft: '-32px'}} color="inherit" />
+							<CircularProgress size={64} style={{position: 'relative', top: '50%', left:'50%', marginTop: '-32px', marginLeft: '-32px'}} color="inherit" />
 						</Fade>
 					)}
 					{!loading && (
-					<Container maxWidth="sm" sx={{ pt: 6 }}>
+
+					<Container maxWidth={orderView === 'HISTORY' ? "md" : "sm"} sx={{ pt: 6, pb: 6 }}>
+
 						{orderView === 'NEW' && (
 						<>
 							<Typography variant="h4">
@@ -189,7 +191,14 @@ function AdminOrderDashboard({ adminToken, adminUsername }) {
 								{orders.map((order, index) => (
 								<>
 									{order.order_status === 'NEW' && (
-										<AdminOrderCard order={order} index={index} orderSelect={orderSelect} handleOrderSelect={sel => handleOrderSelect(sel)} />
+										<AdminOrderCard 
+											order={order} 
+											index={index} 
+											orderSelect={orderSelect} 
+											handleOrderSelect={sel => handleOrderSelect(sel)}
+											adminToken={adminToken}
+											adminUsername={adminUsername}
+										 />
 									)}
 								</>
 								))}
@@ -208,7 +217,14 @@ function AdminOrderDashboard({ adminToken, adminUsername }) {
 								{orders.map((order, index) => (
 								<>
 									{order.order_status === 'PROCESSING' && (
-										<AdminOrderCard order={order} index={index} orderSelect={orderSelect} handleOrderSelect={sel => handleOrderSelect(sel)} />
+										<AdminOrderCard 
+											order={order} 
+											index={index} 
+											orderSelect={orderSelect} 
+											handleOrderSelect={sel => handleOrderSelect(sel)}
+											adminToken={adminToken}
+											adminUsername={adminUsername}
+										 />
 									)}
 								</>
 								))}
@@ -227,7 +243,14 @@ function AdminOrderDashboard({ adminToken, adminUsername }) {
 								{orders.map((order, index) => (
 								<>
 									{order.order_status === 'READY' && (
-										<AdminOrderCard order={order} index={index} orderSelect={orderSelect} handleOrderSelect={sel => handleOrderSelect(sel)} />
+										<AdminOrderCard 
+											order={order} 
+											index={index} 
+											orderSelect={orderSelect} 
+											handleOrderSelect={sel => handleOrderSelect(sel)}
+											adminToken={adminToken}
+											adminUsername={adminUsername}
+										 />
 									)}
 								</>
 								))}
@@ -238,7 +261,10 @@ function AdminOrderDashboard({ adminToken, adminUsername }) {
 						)}
 						{orderView === 'HISTORY' && (
 						<>
-							<AdminOrderHistoryCard orders={orders} />
+							<AdminOrderHistoryCard 
+								adminToken={adminToken}
+								adminUsername={adminUsername}
+							 />
 
 						</>
 						)}

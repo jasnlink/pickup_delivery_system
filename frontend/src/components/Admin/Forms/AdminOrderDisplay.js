@@ -60,7 +60,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import ContactsIcon from '@mui/icons-material/Contacts';
 
 
-function AdminOrderDisplay({ order }) {
+function AdminOrderDisplay({ order, adminToken, adminUsername }) {
 
 	const [orderDetail, setOrderDetail] = useState([])
 	const [orderLoading, setOrderLoading] = useState(true)
@@ -69,7 +69,11 @@ function AdminOrderDisplay({ order }) {
 
 		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/order/fetch/selected", {
 			orderId: order.order_id,
-		})
+		},
+		{ headers: {
+			'access-token': adminToken,
+			'access-username': adminUsername
+		}})
 		.then((response) => {
 			setOrderDetail(response.data)
 			setOrderLoading(false)
@@ -130,7 +134,10 @@ function AdminOrderDisplay({ order }) {
                         <Grid item xs={9}>
                             <Grid container direction="row" alignItems="center" justifyContent="flex-start" spacing={1}>
                                 <Grid item xs={3}>
-                                    <Chip label={item.productQty} />
+                                    <Chip 
+                                    	label={item.productQty}
+                                    	className="page-chip"
+                                     />
                                 </Grid>
                                 <Grid item xs={9}>
                                     <Typography variant="subtitle2" color="textPrimary">
