@@ -127,19 +127,24 @@ function AdminOrderHistoryCard({ adminToken, adminUsername }) {
 		let currentOffset = pageOffset
 		currentOffset += direction
 
+		console.log('currentOffset',currentOffset)
+
 		//if we selected a date
 		if(selectDate) {
 
+			let date = DateTime.fromJSDate(selectDate).toFormat('yyyy-MM-dd')
+
 			//fetch orders on selected date
 			Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/order/list/date", {
-				offset: pageOffset,
-				date: selectDate
+				offset: currentOffset,
+				date: date
 			},
 			{ headers: {
 				'access-token': adminToken,
 				'access-username': adminUsername
 			}})
 			.then((response) => {
+				setPageOffset(currentOffset)
 				setOrders(response.data)
 				setLoading(false)
 			})
@@ -182,6 +187,7 @@ function AdminOrderHistoryCard({ adminToken, adminUsername }) {
 	const [displayDate, setDisplayDate] = useState()
 
 
+	//track change in selected date
 	useEffect(() => {
 
 		setLoading(true)
@@ -190,7 +196,6 @@ function AdminOrderHistoryCard({ adminToken, adminUsername }) {
 		if(selectDate) {
 
 			let date = DateTime.fromJSDate(selectDate).toFormat('yyyy-MM-dd')
-			console.log(date)
 
 			//fetch orders on selected date
 			Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/order/list/date", {
@@ -285,7 +290,7 @@ function AdminOrderHistoryCard({ adminToken, adminUsername }) {
 				<ListItem style={{ padding: '24px 38px' }}>
 					<Grid container alignItems="center" justifyContent="space-between" spacing={0}>
 						<Grid item>
-							<Typography variant="h5">
+							<Typography variant="h5" onClick={() => console.log(selectDate)}>
 								Historique de commandes
 							</Typography>
 						</Grid>
