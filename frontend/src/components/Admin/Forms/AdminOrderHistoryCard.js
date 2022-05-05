@@ -314,6 +314,10 @@ function AdminOrderHistoryCard({ adminToken, adminUsername }) {
 											defaultMonth={selectDate}
 											formatters={{ formatCaption, formatWeekdayName }}
 											mode="single"
+											modifiersClassNames={{
+									          selected: 'calendar-selected',
+									          today: 'calendar-today'
+									        }}
 										 />
 									</Menu>
 								</Grid>
