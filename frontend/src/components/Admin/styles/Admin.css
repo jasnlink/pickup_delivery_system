@@ -14,11 +14,24 @@
 	border-radius: 0 !important;
 }
 
+/*  calendar styles  */
+
+:root {
+  /* Outline border for focused elements */
+  --rdp-outline: none !important;
+  /* Outline border for focused and selected elements */
+  --rdp-outline-selected: none !important;
+}
+
+.rdp {
+	font-family: "Roboto","Helvetica","Arial",sans-serif !important;
+}
+
 .calendar-selected:not([disabled]),
 .calendar-selected:focus:not([disabled]),
 .calendar-selected:active:not([disabled]),
 .calendar-selected:hover:not([disabled]) {
-	background-color: #000000;
+	background-color: #000000 !important;
 	color: #ffffff;
 	border-radius: 0;
 }
@@ -29,9 +42,27 @@
 	border-radius: 0;
 }
 
+.rdp-button:focus:not([disabled]),
+.rdp-button:active:not([disabled]),
+.rdp-button:hover:not([disabled]) {
+  color: #000000 !important;
+  border: none !important;
+  background-color: #ebebeb !important;
+  border-radius: 0 !important;
+  z-index: 0 !important;
+}
+
+
+.rdp-nav_button:active:not([disabled]),
+.rdp-nav_button:focus:not([disabled]) {
+  background: none !important;
+}
+
 .clear-date-btn {
 	padding: 0;
 }
+/**************************************/
+
 
 .product-edit-drawer {
 	min-height: 100vh !important;

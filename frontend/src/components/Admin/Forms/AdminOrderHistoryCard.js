@@ -316,7 +316,7 @@ function AdminOrderHistoryCard({ adminToken, adminUsername }) {
 											mode="single"
 											modifiersClassNames={{
 									          selected: 'calendar-selected',
-									          today: 'calendar-today'
+									          today: 'calendar-today',
 									        }}
 										 />
 									</Menu>
@@ -361,6 +361,8 @@ function AdminOrderHistoryCard({ adminToken, adminUsername }) {
 						<CircularProgress size={48} style={{position: 'relative', left:'50%', marginTop: '-24px', marginLeft: '-24px', paddingTop: '64px', paddingBottom: '64px'}} color="inherit" />
 					)}
 					{!loading && (
+					<>
+					{!!orders.length && (
 					<>
 						{orders.map((order, index) => (
 						<>
@@ -407,6 +409,15 @@ function AdminOrderHistoryCard({ adminToken, adminUsername }) {
 									<Divider />
 						</>
 						))}
+					</>
+					)}
+					{!orders.length && (
+					<>
+						<Typography variant="h4" sx={{ display: 'flex', justifyContent: 'center', paddingTop: '48px', paddingBottom: '12px' }}>
+							Aucune commande...
+						</Typography>
+					</>
+					)}
 					</>
 					)}
 		
