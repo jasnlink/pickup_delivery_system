@@ -74,6 +74,7 @@ import AdminCategoryManager from './AdminCategoryManager'
 import AdminOptionManager from './AdminOptionManager'
 import AdminTimeManager from './AdminTimeManager'
 import AdminDeliveryZoneManager from './AdminDeliveryZoneManager'
+import AdminReports from './AdminReports'
 
 import AdminNavMenu from './Forms/AdminNavMenu'
 
@@ -241,6 +242,23 @@ function Admin({ setStep, storeLat, storeLng }) {
 						setAdminView={view => setAdminView(view)}
 					 />
 					<AdminTimeManager
+						adminToken={adminToken} 
+						adminUsername={adminUsername}
+					 />
+				</>
+
+		)
+		case '30': 
+			return (
+				<>
+					<AdminNavMenu
+						navDrawer={navDrawer}
+						setNavDrawer={drawer => setNavDrawer(drawer)}
+						navSelect={navSelect}
+						setNavSelect={select => setNavSelect(select)}
+						setAdminView={view => setAdminView(view)}
+					 />
+					<AdminReports
 						adminToken={adminToken} 
 						adminUsername={adminUsername}
 					 />
