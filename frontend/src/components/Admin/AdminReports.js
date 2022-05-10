@@ -82,11 +82,12 @@ function AdminReports({ adminToken, adminUsername }) {
 	//sum of all order totals
 	const [totalSales, setTotalSales] = useState(0)
 
-	useEffect(() => {
+	//initialize start and end dates
+	const [dateFrom, setDateFrom] = useState(DateTime.now().setZone("America/Toronto").minus({months:2}).toFormat('yyyy-MM-dd'))
+	const [dateTo, setDateTo] = useState(DateTime.now().setZone("America/Toronto").toFormat('yyyy-MM-dd'))
 
-		//initiate order totals from and to dates, default is 2 months range
-		const dateFrom = DateTime.now().setZone("America/Toronto").minus({months:2}).toFormat('yyyy-MM-dd')
-		const dateTo = DateTime.now().setZone("America/Toronto").toFormat('yyyy-MM-dd')
+
+	useEffect(() => {
 
 		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/order/totals/date", {
 			dateFrom: dateFrom,
@@ -98,6 +99,8 @@ function AdminReports({ adminToken, adminUsername }) {
 		}})
 		.then((response) => {
 			setOrderTotals(response.data)
+
+			console.log('salesData',response.data)
 
 			getTotalSales(response.data)
 			.then((result) => {
@@ -113,7 +116,7 @@ function AdminReports({ adminToken, adminUsername }) {
 
 	}, [])
 
-	//get sum of total sales
+	//get total sales from data
 	async function getTotalSales(data) {
 
 		let result = 0;
@@ -156,7 +159,7 @@ function AdminReports({ adminToken, adminUsername }) {
 									<Typography variant="h4">
 										${totalSales}
 									</Typography>
-									<AdminLineChart data={orderTotals} />
+									<AdminLineChart data={orderTotals} dateFrom={dateFrom} dateTo={dateTo}/>
 								</Card>
 							</Stack>
 
