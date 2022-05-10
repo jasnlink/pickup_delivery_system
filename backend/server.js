@@ -1380,6 +1380,9 @@ app.post('/api/admin/order/list/date', adminAuth, (req, res) => {
         res.send(result);
     })
 })
+
+
+
 /******************* FINANCIAL REPORTS ******************/
 //fetch order totals by date range for financial reports
 app.post('/api/admin/order/totals/date', adminAuth, (req, res) => {
@@ -1399,6 +1402,9 @@ app.post('/api/admin/order/totals/date', adminAuth, (req, res) => {
         res.send(result);
     })
 })
+/******************* FINANCIAL REPORTS ******************/
+
+
 
 //Fetch selected order content
 app.post('/api/admin/order/fetch/selected', adminAuth, (req, res) => {

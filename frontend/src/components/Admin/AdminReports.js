@@ -69,16 +69,24 @@ import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 
 import './styles/Admin.css';
 
+import AdminLineChart from './Forms/AdminLineChart'
+
 function AdminReports({ adminToken, adminUsername }) {
 
+	//data loading
 	const [loading, setLoading] = useState(true)
+
+	//array of order totals and their date
 	const [orderTotals, setOrderTotals] = useState([])
+
+	//sum of all order totals
+	const [totalSales, setTotalSales] = useState(0)
 
 	useEffect(() => {
 
 		//initiate order totals from and to dates, default is 2 months range
-		const dateFrom = DateTime.now().setZone("America/Toronto").minus({months:2})
-		const dateTo = DateTime.now().setZone("America/Toronto")
+		const dateFrom = DateTime.now().setZone("America/Toronto").minus({months:2}).toFormat('yyyy-MM-dd')
+		const dateTo = DateTime.now().setZone("America/Toronto").toFormat('yyyy-MM-dd')
 
 		Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/order/totals/date", {
 			dateFrom: dateFrom,
@@ -90,8 +98,14 @@ function AdminReports({ adminToken, adminUsername }) {
 		}})
 		.then((response) => {
 			setOrderTotals(response.data)
-			console.log(response.data)
-			setLoading(false)
+
+			getTotalSales(response.data)
+			.then((result) => {
+
+				setTotalSales(result)
+				setLoading(false)
+
+			})
 			
 		})
 		.catch((err) => {
@@ -99,45 +113,20 @@ function AdminReports({ adminToken, adminUsername }) {
 
 	}, [])
 
-	function LineChart() {
+	//get sum of total sales
+	async function getTotalSales(data) {
 
-		function plotLine() {
+		let result = 0;
 
+		for(let sale of data) {
+			result += sale.order_total;
 		}
 
-		const SVG_WIDTH = 800;
-		const SVG_HEIGHT = 600;
-
-		const x0 = 50;
-		const xAxisLength = SVG_WIDTH - x0 * 2;
-
-		const y0 = 50;
-		const yAxisLength = SVG_HEIGHT - y0 * 2;
-
-		const xAxisY = y0 + yAxisLength;
-
-		return (
-		    <svg width={SVG_WIDTH} height={SVG_HEIGHT}>
-		      {/* X axis */}
-		      <line
-		        x1={x0}
-		        y1={xAxisY}
-		        x2={x0 + xAxisLength}
-		        y2={xAxisY}
-		        stroke="black"
-		      />
-		      <text x={x0 + xAxisLength + 5} y={xAxisY + 4}>
-		        x
-		      </text>
-
-		      {/* Y axis */}
-		      <line x1={x0} y1={y0} x2={x0} y2={y0 + yAxisLength} stroke="black" />
-		      <text x={x0} y={y0 - 8} textAnchor="middle">
-		        y
-		      </text>
-		    </svg>
-		  )
+		result = result.toFixed(2)
+		return result
 	}
+
+	
 
 	return (
 	<>
@@ -160,11 +149,14 @@ function AdminReports({ adminToken, adminUsername }) {
 							<Divider color="black" sx={{ mt: '8px', mb: '16px' }} />
 
 							<Stack spacing={2}>
-								<Card component="div" sx={{ p: '6px 24px' }} square>
-									<Typography variant="h5">
+								<Card component="div" sx={{ p: '36px 36px' }} square>
+									<Typography variant="h4">
 										Ventes totales
 									</Typography>
-									<LineChart />
+									<Typography variant="h4">
+										${totalSales}
+									</Typography>
+									<AdminLineChart data={orderTotals} />
 								</Card>
 							</Stack>
 
