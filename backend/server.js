@@ -1387,7 +1387,7 @@ app.post('/api/admin/order/totals/date', adminAuth, (req, res) => {
     const dateFrom = req.body.dateFrom
     const dateTo = req.body.dateTo
 
-    const fetchOrderRequest = "SELECT u.user_id, u.user_first_name, u.user_last_name, u.user_email, u.user_phone, o.order_address, o.order_city, o.order_district, o.order_postal_code, o.order_lat, o.order_lng, o.order_id, o.order_status, o.order_type, o.order_delivery_time, o.order_subtotal, o.order_delivery_fee, o.order_tip, o.order_gst, o.order_qst, o.order_total, o.created_on, p.payment_auth_id, p.payment_source, p.payment_status, p.payment_date FROM osd_orders o INNER JOIN osd_payments p ON p.order_id = o.order_id INNER JOIN osd_users u ON u.user_id = o.user_id WHERE o.order_status='COMPLETED' AND o.order_delivery_time BETWEEN STR_TO_DATE(CONCAT(?,' 00:00'), '%Y-%m-%d %H:%i') AND STR_TO_DATE(CONCAT(?,' 23:59'), '%Y-%m-%d %H:%i') ORDER BY order_delivery_time DESC LIMIT ?, 10;";
+    const fetchOrderRequest = "SELECT o.order_delivery_time, o.order_total FROM osd_orders o WHERE o.order_status='COMPLETED' AND o.order_delivery_time BETWEEN STR_TO_DATE(CONCAT(?,' 00:00'), '%Y-%m-%d %H:%i') AND STR_TO_DATE(CONCAT(?,' 23:59'), '%Y-%m-%d %H:%i');";
     connection.query(fetchOrderRequest, [dateFrom, dateTo], (err, result) => {
         if(err) {
             console.log('error...', err);
