@@ -13,23 +13,31 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 	const [loading, setLoading] = useState(false)
 
-
-	//chart points
+	//each point in the chart representing sales for that day
 	const [chartPoints, setChartPoints] = useState([])
 
 	//chart values
-	const [yDataMax, setYDataMax] = useState(0)
+
+	//the data's highest reached value
+	const [yDataMax, setYDataMax] = useState()
+	//the chart's topmost value
 	const [yChartMax, setYChartMax] = useState(0)
+	//chart half point
 	const [yDataHalf, setYDataHalf] = useState(0)
+	//chart lowest value
 	const [yChartMin, setYChartMin] = useState(0)
+
+
+	//number of y axis ticks above 0
+	const numYAxisTicks = 5
+
+	//number of x axis ticks
+	const numXAxisTicks = 4
 
 	useEffect(() => {
 
-		console.log(dateFrom)
-		console.log(dateTo)
-
 		//set chart sales highest point, data max, data half, chart minimum
-		getMax(data)
+		getDataMax(data)
 		.then((result) => {
 
 			setYDataMax(result)
@@ -47,11 +55,60 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 		})
 
-	},[])
+	}, [])
 
+	//wait for yDataMax then generate yAxisTicks
+	useEffect(() => {
+
+		if(yDataMax) {
+			console.log(yDataMax)
+
+			buildAxisLabels(numYAxisTicks, longDivision(yDataMax, 5))
+			.then((result) => {
+				console.log(result)
+			})
+		}
+
+	}, [yDataMax])
+
+
+	//helper function to build axis labels
+	//numTicks for number of label increments to add to y axis
+	//multiple is the step in each label increment
+	async function buildAxisLabels(numTicks, multiple) {
+
+		let result = [0];
+		for(let i = 1; i <= numTicks; i++) {
+			result.push(i*multiple)
+		}
+		return result
+
+	}
+
+	//long division function to generate ticks on axis for data
+	function longDivision(n,d){
+	    var num = n + "",
+	        numLength = num.length,
+	        remainder = 0,
+	        answer = '',
+	        i = 0;
+
+	    while( i < numLength + 3){
+	        var digit = i < numLength ? parseInt(num[i]) : 0;
+
+	        if (i == numLength){
+	            answer = answer + ".";
+	        }
+
+	        answer = answer + Math.floor((digit + (remainder * 10))/d);
+	        remainder = (digit + (remainder * 10))%d;
+	        i++;
+	    }
+	    return parseFloat(answer);
+	}
 
 	//helper function to get biggest value of an array
-	async function getMax(data) {
+	async function getDataMax(data) {
 		let result = 0
 		for(let sale of data) {
 			result = Math.max(result, sale.order_total)
@@ -65,6 +122,7 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 	//chart dimensions
 	const chartWidth = 720;
 	const chartHeight = 640;
+	const chartPadding = 50;
 	const dataLength = data.length
 
 
@@ -98,14 +156,13 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 		)
 	}
 
-	const [salesByDay, setSalesByDay] = useState([])
-
 	//sum order totals grouped into days
 	async function sumSalesByDay() {
 
 		//array containing sorted sales data
 		let salesArray = []
 
+		//starting and ending date of interval
 		const dateStart = DateTime.fromFormat(dateFrom, 'yyyy-MM-dd')
 		const dateEnd = DateTime.fromFormat(dateTo, 'yyyy-MM-dd')
 
@@ -130,7 +187,7 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 		//loop through each day of the interval
 		for(let step of stepper(interval, 1)) {
 
-			//current sum of totals
+			//sum of sales for current day
 			let daySum = 0
 
 			//loop through each sale point
@@ -158,7 +215,6 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 			salesArray.push(daySum)
 		}
 
-		console.log(salesArray)
 		return salesArray;
 	}
 		
@@ -174,9 +230,11 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 		<>
 
 			<Chart width={chartWidth} height={chartHeight}>
-				{chartPoints.map((element, index) => (
-					<Point x={(chartWidth/chartPoints.length)*index} y={(chartHeight - element)} />
-				))}
+				{chartPoints.map((element, index) => {
+					return (
+						<Point x={(((chartWidth-(chartPadding*2))/chartPoints.length)*index)+chartPadding} y={((chartHeight-chartPadding) - element)} />
+					)
+				})}
 			</Chart>
 
 		    <svg width={chartWidth} height={chartHeight}>
