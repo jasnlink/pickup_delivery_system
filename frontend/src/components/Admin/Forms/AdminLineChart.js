@@ -13,6 +13,10 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 	const [loading, setLoading] = useState(false)
 
+
+	//chart points
+	const [chartPoints, setChartPoints] = useState([])
+
 	//chart values
 	const [yDataMax, setYDataMax] = useState(0)
 	const [yChartMax, setYChartMax] = useState(0)
@@ -35,6 +39,7 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 			sumSalesByDay(data)
 			.then((result) => {
+				setChartPoints(result)
 				setLoading(false)
 			})
 
@@ -125,6 +130,9 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 		//loop through each day of the interval
 		for(let step of stepper(interval, 1)) {
 
+			//current sum of totals
+			let daySum = 0
+
 			//loop through each sale point
 			for(let sale of data) {
 
@@ -138,20 +146,19 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 				//interval between start and end of each step
 				const stepInterval = Interval.fromDateTimes(stepStart, stepEnd)
 
-				//current sum of totals
-				let daySum = 0
-
 				//check if date of sale falls inside the step interval
 				if(stepInterval.contains(saleDate)) {
+
 					//if it does, then add current day total to sale array
-					
+					daySum += sale.order_total
 
 				}
 
-				let cursor = null;
-
 			}
+			salesArray.push(daySum)
 		}
+
+		console.log(salesArray)
 		return salesArray;
 	}
 		
@@ -159,16 +166,16 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 	return (
 		<>
 		{!!loading && (
-					<Fade in={loading}>
-						<CircularProgress size={64} style={{position: 'relative', top: '50%', left:'50%', marginTop: '-32px', marginLeft: '-32px'}} color="inherit" />
-					</Fade>
+			<Fade in={loading}>
+				<CircularProgress size={64} style={{position: 'relative', top: '50%', left:'50%', marginTop: '-32px', marginLeft: '-32px'}} color="inherit" />
+			</Fade>
 		)}
 		{!loading && (
 		<>
 
 			<Chart width={chartWidth} height={chartHeight}>
-				{data.map((element, index) => (
-					<Point x={(chartWidth/dataLength)*index} y={element.order_total} />
+				{chartPoints.map((element, index) => (
+					<Point x={(chartWidth/chartPoints.length)*index} y={(chartHeight - element)} />
 				))}
 			</Chart>
 
