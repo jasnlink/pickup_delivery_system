@@ -13,25 +13,28 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 	const [loading, setLoading] = useState(false)
 
+	//chart y axis labels
+	const [yAxisLabels, setYAxisLabels] = useState([])
 	//each point in the chart representing sales for that day
-	const [chartPoints, setChartPoints] = useState([])
+	const [points, setPoints] = useState([])
 
 	//chart values
 
 	//the data's highest reached value
 	const [yDataMax, setYDataMax] = useState()
 	//the chart's topmost value
-	const [yChartMax, setYChartMax] = useState(0)
+	const [yChartMax, setYChartMax] = useState()
 	//chart half point
 	const [yDataHalf, setYDataHalf] = useState(0)
 	//chart lowest value
 	const [yChartMin, setYChartMin] = useState(0)
 
 
-	//number of y axis ticks above 0
-	const numYAxisTicks = 5
 
-	//number of x axis ticks
+	//number of y axis ticks to use
+	const numYAxisTicks = 6
+
+	//number of x axis ticks to use
 	const numXAxisTicks = 4
 
 	useEffect(() => {
@@ -41,44 +44,47 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 		.then((result) => {
 
 			setYDataMax(result)
-			setYChartMax(result * 1.5)
+
+			//set chart maximum
+			//it is set to 1.25 times the highest value the data reaches, rounded to nearest 10
+			setYChartMax(Math.ceil((result * 1.25)/10)*10)
 			setYDataHalf(result * 0.5)
 			setYChartMin(0)
 
 			sumSalesByDay(data)
 			.then((result) => {
-				setChartPoints(result)
+				setPoints(result)
 				setLoading(false)
 			})
-
-			
 
 		})
 
 	}, [])
 
-	//wait for yDataMax then generate yAxisTicks
+
+	//wait for yChartMax then build y axis labels
 	useEffect(() => {
 
-		if(yDataMax) {
-			console.log(yDataMax)
+		if(yChartMax) {
+			console.log('yChartMax',yChartMax)
 
-			buildAxisLabels(numYAxisTicks, longDivision(yDataMax, 5))
+			buildAxisLabels(numYAxisTicks, longDivision(yChartMax, 5))
 			.then((result) => {
 				console.log(result)
+				setYAxisLabels(result)
 			})
 		}
 
-	}, [yDataMax])
+	}, [yChartMax])
 
 
-	//helper function to build axis labels
+	//helper function to build axis labels array
 	//numTicks for number of label increments to add to y axis
 	//multiple is the step in each label increment
 	async function buildAxisLabels(numTicks, multiple) {
 
-		let result = [0];
-		for(let i = 1; i <= numTicks; i++) {
+		let result = [];
+		for(let i = 0; i < numTicks; i++) {
 			result.push(i*multiple)
 		}
 		return result
@@ -115,32 +121,47 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 		}
 
 		return result
-
 	}
 
+
+/********************************************************************/	
 
 	//chart dimensions
 	const chartWidth = 720;
 	const chartHeight = 640;
+
+	//chart padding distance
 	const chartPadding = 50;
+
+	//number of days
 	const dataLength = data.length
 
 
 	// X axis -> time
-	// X axis starting point
-	const x0 = 50;
-	const xAxisLength = chartWidth - x0 * 2;
+	// X axis starting point from left side with a padding of 50
+	const x0 = 0+chartPadding;
+
+	// X axis length,
+	// must pad right side twice the distance of the left side,
+	// once for the left padding distance,
+	// second time for the right padding distance
+	const xAxisLength = chartWidth - (x0 * 2);
 
 	// Y axis -> sales
-	// Y axis starting point
-	const y0 = 50;
-	const yAxisLength = chartHeight - y0 * 2;
+	// Y axis starting point from top side with a padding of 50
+	const y0 = 0+chartPadding;
 
-	//X and Y axis crossing point
+	// Y axis length
+	const yAxisLength = chartHeight - (y0 * 2);
+
+	//X and Y axis crossing point, (0, 0) point on chart
+	//start from top side, add y axis length to get to the bottom
 	const xAxisY = y0 + yAxisLength;
 
+/********************************************************************/	
 
-	//chart generation function
+
+	//chart drawing function
 	function Chart({ children, width, height }) {
 		return (
 			<svg viewBox={`0 0 ${width} ${height}`} width={width} height={height}>
@@ -149,7 +170,43 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 		)
 	}
 
-	//point generation function
+	//Y axis drawing function
+	function YAxis() {
+
+		//spacing between each label, divide the y Axis Length by number of ticks to use -1
+		//(there are only 5 spaces between 6 labels)
+		const spacing = (yAxisLength/(numYAxisTicks-1))
+		//reverse label orders because the chart is drawn inversed
+		const labels = [...yAxisLabels]
+
+		return (
+			<>
+
+			{labels.map((label, index) => (
+			<>
+				<line 
+					x1={0} 
+					y1={y0+(yAxisLength-(index*spacing))} 
+					x2={x0} 
+					y2={y0+(yAxisLength-(index*spacing))} 
+					stroke="black"
+				/>
+				<text 
+					x={x0-4} 
+					y={y0+(yAxisLength-(index*spacing))}
+					text-anchor="end"
+					font-size="20"
+					class="chart-labels"
+				>
+					{label}
+				</text>
+			</>
+			))}
+			</>
+		)
+	}
+
+	//point drawing function
 	function Point({ x, y, r=4 }) {
 		return (
 			<circle cx={x} cy={y} r={r} />
@@ -212,12 +269,17 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 				}
 
 			}
+			//push in each new sale of the day after each day iteration
 			salesArray.push(daySum)
 		}
 
 		return salesArray;
 	}
 		
+
+
+
+
 
 	return (
 		<>
@@ -230,9 +292,15 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 		<>
 
 			<Chart width={chartWidth} height={chartHeight}>
-				{chartPoints.map((element, index) => {
+				{points.map((element, index) => {
 					return (
-						<Point x={(((chartWidth-(chartPadding*2))/chartPoints.length)*index)+chartPadding} y={((chartHeight-chartPadding) - element)} />
+					<>
+						<YAxis />
+						<Point 
+							x={x0+((xAxisLength/points.length)*index)}
+							y={xAxisY-element} 
+						/>
+					</>
 					)
 				})}
 			</Chart>
