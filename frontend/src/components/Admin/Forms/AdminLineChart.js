@@ -42,25 +42,30 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 	useEffect(() => {
 
-		//set chart sales highest point, data max, data half, chart minimum
-		getDataMax(data)
-		.then((result) => {
-
-			setYDataMax(result)
-
-			//set chart maximum
-			//it is set to 1.25 times the highest value the data reaches, rounded to nearest 10
-			setYChartMax(Math.ceil((result * 1.25)/10)*10)
-			setYDataHalf(result * 0.5)
-			setYChartMin(0)
+		
 
 			sumSalesByDay(data)
 			.then((result) => {
-				setPoints(result)
-				setLoading(false)
-			})
 
-		})
+				setPoints(result)
+
+				//set chart sales highest point, data max, data half, chart minimum
+				getDataMax(result)
+				.then((result) => {
+
+					setYDataMax(result)
+
+					//set chart maximum
+					//it is set to 1.25 times the highest value the data reaches, rounded to nearest 10
+					setYChartMax(Math.ceil((result * 1.25)/10)*10)
+					setYDataHalf(result * 0.5)
+					setYChartMin(0)
+
+					setLoading(false)
+
+				})
+				
+			})
 
 	}, [])
 
@@ -157,11 +162,78 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 	//helper function to get biggest value of an array
 	async function getDataMax(data) {
 		let result = 0
-		for(let sale of data) {
-			result = Math.max(result, sale.order_total)
+		for(let day of data) {
+			result = Math.max(result, day.sale)
 		}
 
 		return result
+	}
+
+
+	//sum order totals grouped into days
+	async function sumSalesByDay() {
+
+		//array containing sorted sales data
+		let salesArray = []
+
+		//starting and ending date of interval
+		const dateStart = DateTime.fromFormat(dateFrom, 'yyyy-MM-dd')
+		const dateEnd = DateTime.fromFormat(dateTo, 'yyyy-MM-dd')
+
+		//create interval object to step through
+		let interval = Interval.fromDateTimes(dateStart, dateEnd)
+
+		//helper stepper function to generate an iterator object for an array of day slots
+		//given an interval object and an slot interval gap
+		function* stepper(interval, gap) {
+			//current selected property at start of the current hour
+			let cursor = interval.start;
+
+			//loop to the end
+			while (cursor <= interval.end) {
+				//pause execution and return current date
+				yield cursor;
+				//add 1 step of interval gap
+				cursor = cursor.plus({ days: gap });
+			}			
+		}
+
+		//loop through each day of the interval
+		for(let step of stepper(interval, 1)) {
+
+			//start and end of step in DateTime
+			const stepStart = step
+			const stepEnd = step.plus({ days: 1 })
+
+			//interval between start and end of each step
+			const stepInterval = Interval.fromDateTimes(stepStart, stepEnd)
+
+			//sum of sales for current day
+			let daySum = 0
+
+			//loop through each sale point
+			for(let sale of data) {
+
+				//date of sale converted into DateTime
+				const saleDate = DateTime.fromISO(sale.order_delivery_time)
+
+				//check if date of sale falls inside the step interval
+				if(stepInterval.contains(saleDate)) {
+
+					//if it does, then add current day total to sale array
+					daySum += sale.order_total
+
+				}
+
+			}
+			//push in each new sale of the day after each day iteration
+			salesArray.push({
+				date: step.toFormat('d MMMM', { locale: "fr" }),
+				sale: daySum
+			})
+		}
+
+		return salesArray;
 	}
 
 
@@ -299,76 +371,6 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 			<circle cx={x} cy={y} r={r} />
 		)
 	}
-
-	//sum order totals grouped into days
-	async function sumSalesByDay() {
-
-		//array containing sorted sales data
-		let salesArray = []
-
-		//starting and ending date of interval
-		const dateStart = DateTime.fromFormat(dateFrom, 'yyyy-MM-dd')
-		const dateEnd = DateTime.fromFormat(dateTo, 'yyyy-MM-dd')
-
-		//create interval object to step through
-		let interval = Interval.fromDateTimes(dateStart, dateEnd)
-
-		//helper stepper function to generate an iterator object for an array of day slots
-		//given an interval object and an slot interval gap
-		function* stepper(interval, gap) {
-			//current selected property at start of the current hour
-			let cursor = interval.start;
-
-			//loop to the end
-			while (cursor <= interval.end) {
-				//pause execution and return current date
-				yield cursor;
-				//add 1 step of interval gap
-				cursor = cursor.plus({ days: gap });
-			}			
-		}
-
-		//loop through each day of the interval
-		for(let step of stepper(interval, 1)) {
-
-			//start and end of step in DateTime
-			const stepStart = step
-			const stepEnd = step.plus({ days: 1 })
-
-			//interval between start and end of each step
-			const stepInterval = Interval.fromDateTimes(stepStart, stepEnd)
-
-			//sum of sales for current day
-			let daySum = 0
-
-			//loop through each sale point
-			for(let sale of data) {
-
-				//date of sale converted into DateTime
-				const saleDate = DateTime.fromISO(sale.order_delivery_time)
-
-				//check if date of sale falls inside the step interval
-				if(stepInterval.contains(saleDate)) {
-
-					//if it does, then add current day total to sale array
-					daySum += sale.order_total
-
-				}
-
-			}
-			//push in each new sale of the day after each day iteration
-			salesArray.push({
-				date: step.toFormat('d MMMM', { locale: "fr" }),
-				sale: daySum
-			})
-		}
-
-		return salesArray;
-	}
-		
-
-
-
 
 
 	return (
