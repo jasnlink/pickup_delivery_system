@@ -409,26 +409,6 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 				})}
 			</Chart>
 
-		    <svg width={chartWidth} height={chartHeight}>
-		      {/* X axis */}
-		      <line
-		        x1={x0}
-		        y1={xAxisY}
-		        x2={x0 + xAxisLength}
-		        y2={xAxisY}
-		        stroke="black"
-		      />
-		      <text x={x0 + xAxisLength + 5} y={xAxisY + 4}>
-		        time
-		      </text>
-
-		      {/* Y axis */}
-		      <line x1={x0} y1={y0} x2={x0} y2={y0 + yAxisLength} stroke="black" />
-		      <text x={x0} y={y0 - 8} textAnchor="middle">
-		        sales
-		      </text>
-		    </svg>
-
 		</>
 		)}
 	</>
