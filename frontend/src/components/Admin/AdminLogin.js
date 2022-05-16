@@ -34,19 +34,26 @@ import AdminError from './Forms/AdminError'
 
 function AdminLogin({ adminToken, setAdminToken, adminUsername, setAdminUsername }) {
 
-
+	//login button loading
 	const [loginLoading, setLoginLoading] = useState(false)
 	
+	//user and password inputs
 	const [inputUser, setInputUser] = useState('')
 	const [inputPass, setInputPass] = useState('')
 
+	//login validation bool
 	const [loginValid, setLoginValid] = useState(false)
 
+	//login validation schema
 	const loginSchema = Yup.object().shape({
 		username: Yup.string().required(),
 		password: Yup.string().required(),
 	})
 
+	//login authentication error bool
+	const [loginError, setLoginError] = useState(false)
+	//other login errors bool
+	const [error, setError] = useState(false)
 
 	useEffect(() => {
 
@@ -63,9 +70,6 @@ function AdminLogin({ adminToken, setAdminToken, adminUsername, setAdminUsername
 
 	}, [inputUser, inputPass])
 
-
-	const [loginError, setLoginError] = useState(false)
-	const [error, setError] = useState(false)
 
 
 	function handleLoginSubmit() {

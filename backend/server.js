@@ -1283,12 +1283,21 @@ function adminAuth(req, res, next) {
         const accessToken = req.headers['access-token']
         const accessUsername = req.headers['access-username']
 
-        console.log('checking admin user auth...', accessUsername);
+        console.log('checking admin user auth with adminAuth middleware...', accessUsername);
 
         jwt.verify(accessToken, JWT_ACCESS_SECRET_KEY, (err, user) => {
             if(err) {
-                console.log('error...', err);
-                return res.status(400).send(err);
+
+                //token expired, login again to renew
+                if(err.name === 'TokenExpiredError') {
+                    console.log('admin user token expired...');
+                    return res.json({status:0})
+                } else {
+                //other kinds of error.
+                    console.log('error...', err);
+                    return res.status(400).send(err);
+                }
+                
             }
             console.log('user.accessUsername', user.accessUsername)
             if(user.accessUsername === accessUsername) {
@@ -3188,38 +3197,9 @@ app.post('/api/admin/login', (req, res) => {
 
 
 //authenticate admin user given a JWT token
-app.post('/api/admin/auth', (req, res) => {
+app.post('/api/admin/auth', adminAuth, (req, res) => {
 
-
-    const accessToken = req.body.accessToken
-    const accessUsername = req.body.accessUsername
-
-    console.log('checking admin user auth...', accessUsername);
-
-    jwt.verify(accessToken, JWT_ACCESS_SECRET_KEY, (err, user) => {
-        if(err) {
-            console.log('error...', err);
-            res.status(400).send(err);
-            return false;
-        }
-        console.log('user.accessUsername', user.accessUsername)
-        if(user.accessUsername === accessUsername) {
-        //decoded username is same as provided username
-            //user is authenticated
-            console.log('admin user is authenticated...');
-            res.json({status:1})
-            return;
-            
-
-        } else {
-        //decoded username does not match
-            //user is not authenticated
-            console.log('admin user is not authenticated...');
-            res.json({status:0})
-
-        }
-    })
-
+    return res.json({status:1});
 
 })
 

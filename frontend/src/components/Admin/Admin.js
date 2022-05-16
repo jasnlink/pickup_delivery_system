@@ -83,7 +83,10 @@ import AdminNavMenu from './Forms/AdminNavMenu'
 function Admin({ setStep, storeLat, storeLng }) {
 
 	
+	//navigation drawer bool
 	const [navDrawer, setNavDrawer] = useState(false);
+
+	//navigation selection
 	const [navSelect, setNavSelect] = useState({
 												parent: 1,
 												child: 0,
@@ -91,7 +94,7 @@ function Admin({ setStep, storeLat, storeLng }) {
 											})
 
 
-
+	//current view to display
 	const [adminView, setAdminView] = useState('10');
 
 	//admin username and admin JWT token
@@ -100,7 +103,7 @@ function Admin({ setStep, storeLat, storeLng }) {
 
 	useEffect(() => {
 
-		//access local storage to get admin token and admin username
+		//access local storage to get admin token and admin username if they exist
 		if(localStorage.getItem('adminAccessToken')) {
 
 			setAdminToken(localStorage.getItem('adminAccessToken'))
@@ -112,57 +115,68 @@ function Admin({ setStep, storeLat, storeLng }) {
 	}, [])
 
 	
-	//check if admin token and admin username exist
-	if(adminToken && adminUsername) {
+	function doLogin(view) {
 
-		//temp holding of current view to go back to it
-		const currentView = adminView;
+		const currentView = view
 
-		Axios.post(process.env.REACT_APP_PUBLIC_URL+'/api/admin/auth', {
-
-			accessToken: adminToken,
-			accessUsername: adminUsername
-
-		})
-		.then((response) => {
-			if(response.data.status === 1) {
-				setAdminView(currentView)
-				return;
-			} else {
-				return (
-				<>	
-					<AdminLogin
-						adminToken={adminToken}
-						setAdminToken={token => setAdminToken(token)}
-						adminUsername={adminUsername}
-						setAdminUsername={username => setAdminUsername(username)}
-					/>
-				</>
-
-		)
-			}
-		})
-		.catch((err) => {
-	       	console.log("error ", err)});
-
-	} else {
 		return (
-				<>	
-					<AdminLogin
-						adminToken={adminToken}
-						setAdminToken={token => setAdminToken(token)}
-						adminUsername={adminUsername}
-						setAdminUsername={username => setAdminUsername(username)}
-					/>
-				</>
+			<>	
+				<AdminLogin
+					adminToken={adminToken}
+					setAdminToken={token => setAdminToken(token)}
+					adminUsername={adminUsername}
+					setAdminUsername={username => setAdminUsername(username)}
+				/>
+			</>
 
 		)
+
 	}
+	useEffect(() => {
+
+		//check if admin token and admin username exist
+		if(adminToken && adminUsername) {
+
+			Axios.post(process.env.REACT_APP_PUBLIC_URL+'/api/admin/auth', null,
+			{ headers: {
+				'access-token': adminToken,
+				'access-username': adminUsername
+			}})
+			.then((response) => {
+				if(response.data.status === 1) {
+					setAdminView('10')
+					return;
+				} else {
+					setAdminView('1')
+				}
+			})
+			.catch((err) => {
+		       	console.log("error ", err)});
+
+		} else {
+		//if they don't exist, send to login
+			setAdminView('1')
+		}
+
+	}, [adminToken, adminUsername])
+	
 
 
 	switch(adminView) {
 
 
+		case '1':
+			return (
+				<>	
+					<AdminLogin
+						adminToken={adminToken}
+						setAdminToken={token => setAdminToken(token)}
+						adminUsername={adminUsername}
+						setAdminUsername={username => setAdminUsername(username)}
+					/>
+				</>
+
+		)
 		case '10':
 			return (
 				<>	

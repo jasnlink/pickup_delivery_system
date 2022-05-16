@@ -15,6 +15,9 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 	//chart y axis labels
 	const [yAxisLabels, setYAxisLabels] = useState([])
+	//chart x axis labels
+	const [xAxisLabels, setXAxisLabels] = useState([])
+
 	//each point in the chart representing sales for that day
 	const [points, setPoints] = useState([])
 
@@ -35,7 +38,7 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 	const numYAxisTicks = 6
 
 	//number of x axis ticks to use
-	const numXAxisTicks = 4
+	const numXAxisTicks = 6
 
 	useEffect(() => {
 
@@ -65,33 +68,71 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 	//wait for yChartMax then build y axis labels
 	useEffect(() => {
 
-		if(yChartMax) {
-			console.log('yChartMax',yChartMax)
 
-			buildAxisLabels(numYAxisTicks, longDivision(yChartMax, 5))
+		if(yChartMax && points) {
+			console.log('yChartMax',yChartMax)
+			console.log('points#####',points)
+
+			//build y axis labels
+			buildYAxisLabels(numYAxisTicks, longDivision(yChartMax, 5))
 			.then((result) => {
-				console.log(result)
+				console.log('yaxislabels',result)
 				setYAxisLabels(result)
+			})
+
+			//step size to increment till next tick
+			//ex: 4 ticks needs 3 increments
+			const xAxisStep = points.length/(numXAxisTicks-1)
+
+			//build x axis labels
+			buildXAxisLabels(numXAxisTicks, xAxisStep)
+			.then((result) => {
+				console.log('xaxislabels',result)
+				setXAxisLabels(result)
 			})
 		}
 
-	}, [yChartMax])
+	}, [yChartMax, points])
 
 
-	//helper function to build axis labels array
+	//helper function to build y axis labels array
 	//numTicks for number of label increments to add to y axis
 	//multiple is the step in each label increment
-	async function buildAxisLabels(numTicks, multiple) {
+	async function buildYAxisLabels(numTicks, multiple) {
 
 		let result = [];
 		for(let i = 0; i < numTicks; i++) {
-			result.push(i*multiple)
+			result.push(Math.round(i*multiple))
 		}
 		return result
 
 	}
 
-	//long division function to generate ticks on axis for data
+	//helper function to build y axis labels array
+	//numTicks for number of label increments to add to y axis
+	//multiple is the step in each label increment
+	async function buildXAxisLabels(numTicks, multiple) {
+
+		let result = [];
+		let cursor = 0;
+
+		for(let i = 0; i < numTicks; i++) {
+
+			if(i === 0) {
+				cursor = Math.round(i*multiple)
+			} else {
+				cursor = (Math.round(i*multiple))-1
+			}
+
+			result.push(points[cursor].date)
+			
+		}
+		return result
+
+	}
+
+
+	//long division function used to generate the multiplication multiple for each tick of data on the axis
 	function longDivision(n,d){
 	    var num = n + "",
 	        numLength = num.length,
@@ -136,7 +177,6 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 	//number of days
 	const dataLength = data.length
 
-
 	// X axis -> time
 	// X axis starting point from left side with a padding of 50
 	const x0 = 0+chartPadding;
@@ -158,6 +198,15 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 	//start from top side, add y axis length to get to the bottom
 	const xAxisY = y0 + yAxisLength;
 
+	//ratio to how much height to attribute for each point of increase in the chart data
+	//divide the axis length by the highest point in the chart
+	const heightPerPointRatio = yAxisLength/yChartMax
+
+	//ratio to how much width to attribute for each point of increase in the chart data
+	//divide the axis length by the number to spaces between each tick
+	const widthPerPointRatio = xAxisLength/(numXAxisTicks-1)
+
+
 /********************************************************************/	
 
 
@@ -176,7 +225,7 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 		//spacing between each label, divide the y Axis Length by number of ticks to use -1
 		//(there are only 5 spaces between 6 labels)
 		const spacing = (yAxisLength/(numYAxisTicks-1))
-		//reverse label orders because the chart is drawn inversed
+		//don't need reverse label orders because the chart is drawn inversed
 		const labels = [...yAxisLabels]
 
 		return (
@@ -187,7 +236,7 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 				<line 
 					x1={0} 
 					y1={y0+(yAxisLength-(index*spacing))} 
-					x2={x0} 
+					x2={x0+xAxisLength} 
 					y2={y0+(yAxisLength-(index*spacing))} 
 					stroke="black"
 				/>
@@ -204,6 +253,44 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 			))}
 			</>
 		)
+	}
+
+	//X axis drawing function
+	function XAxis() {
+
+		//spacing between each label, divide the y Axis Length by number of ticks to use -1
+		//(there are only 5 spaces between 6 labels)
+		const spacing = widthPerPointRatio
+		//reverse label orders because the chart is drawn inversed
+		let labels = [...xAxisLabels]
+		labels = labels.reverse()
+
+		return (
+			<>
+
+			{labels.map((label, index) => (
+			<>
+				<line 
+					x1={x0+(xAxisLength-(index*spacing))} 
+					y1={xAxisY+chartPadding} 
+					x2={x0+(xAxisLength-(index*spacing))} 
+					y2={y0} 
+					stroke="black"
+				/>
+				<text 
+					x={x0+(xAxisLength-(index*spacing))} 
+					y={xAxisY+34}
+					text-anchor="middle"
+					font-size="20"
+					class="chart-labels"
+				>
+					{label}
+				</text>
+			</>
+			))}
+			</>
+		)
+
 	}
 
 	//point drawing function
@@ -244,6 +331,13 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 		//loop through each day of the interval
 		for(let step of stepper(interval, 1)) {
 
+			//start and end of step in DateTime
+			const stepStart = step
+			const stepEnd = step.plus({ days: 1 })
+
+			//interval between start and end of each step
+			const stepInterval = Interval.fromDateTimes(stepStart, stepEnd)
+
 			//sum of sales for current day
 			let daySum = 0
 
@@ -252,13 +346,6 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 				//date of sale converted into DateTime
 				const saleDate = DateTime.fromISO(sale.order_delivery_time)
-
-				//start and end of step in DateTime
-				const stepStart = step
-				const stepEnd = step.plus({ days: 1 })
-
-				//interval between start and end of each step
-				const stepInterval = Interval.fromDateTimes(stepStart, stepEnd)
 
 				//check if date of sale falls inside the step interval
 				if(stepInterval.contains(saleDate)) {
@@ -270,7 +357,10 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 			}
 			//push in each new sale of the day after each day iteration
-			salesArray.push(daySum)
+			salesArray.push({
+				date: step.toFormat('d MMMM', { locale: "fr" }),
+				sale: daySum
+			})
 		}
 
 		return salesArray;
@@ -293,13 +383,27 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 			<Chart width={chartWidth} height={chartHeight}>
 				{points.map((element, index) => {
+
 					return (
 					<>
 						<YAxis />
+						<XAxis />
 						<Point 
 							x={x0+((xAxisLength/points.length)*index)}
-							y={xAxisY-element} 
+							y={xAxisY-(element.sale*heightPerPointRatio)} 
 						/>
+
+						{/* X axis */}
+					      <line
+					        x1={x0}
+					        y1={xAxisY}
+					        x2={x0 + xAxisLength}
+					        y2={xAxisY}
+					        stroke="black"
+					      />
+					    {/* Y axis */}
+		      				<line x1={x0} y1={y0} x2={x0} y2={y0 + yAxisLength} stroke="black" />
+
 					</>
 					)
 				})}

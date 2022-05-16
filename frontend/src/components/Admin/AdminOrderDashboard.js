@@ -88,6 +88,7 @@ function AdminOrderDashboard({ adminToken, adminUsername }) {
 
 		ioClient.on('refresh_orders', (response) => {
 
+			setLoading(true)
 
 			Axios.post(process.env.REACT_APP_PUBLIC_URL+"/api/admin/order/list/today", null, 
 			{ headers: {
@@ -96,6 +97,7 @@ function AdminOrderDashboard({ adminToken, adminUsername }) {
 			}})
 			.then((response) => {
 				setOrders(response.data)
+				setLoading(false)
 			})
 			.catch((err) => {
 	   			console.log("error ", err)});
@@ -115,6 +117,7 @@ function AdminOrderDashboard({ adminToken, adminUsername }) {
 		.catch((err) => {
    			console.log("error ", err)});
 
+		//on component exit, disconnect from websocket server
 		return () => {
 		   	ioClient.disconnect();
 		  }
@@ -179,7 +182,7 @@ function AdminOrderDashboard({ adminToken, adminUsername }) {
 					)}
 					{!loading && (
 
-					<Container maxWidth={orderView === 'HISTORY' ? "md" : "sm"} sx={{ pt: 6, pb: 6 }}>
+						<Container maxWidth={orderView === 'HISTORY' ? "md" : "sm"} sx={{ pt: 6, pb: 6 }}>
 
 						{orderView === 'NEW' && (
 						<>
