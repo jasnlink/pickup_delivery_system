@@ -42,8 +42,6 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 	useEffect(() => {
 
-		
-
 			sumSalesByDay(data)
 			.then((result) => {
 
@@ -75,13 +73,10 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 
 		if(yChartMax && points) {
-			console.log('yChartMax',yChartMax)
-			console.log('points#####',points)
 
 			//build y axis labels
 			buildYAxisLabels(numYAxisTicks, longDivision(yChartMax, 5))
 			.then((result) => {
-				console.log('yaxislabels',result)
 				setYAxisLabels(result)
 			})
 
@@ -92,7 +87,6 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 			//build x axis labels
 			buildXAxisLabels(numXAxisTicks, xAxisStep)
 			.then((result) => {
-				console.log('xaxislabels',result)
 				setXAxisLabels(result)
 			})
 		}
@@ -372,6 +366,21 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 		)
 	}
 
+	//draw data line connecting each point in the graph
+	//prevX, prevY = previous point
+	//curX, curY = current point
+	function DataLine({ prevX, curX, prevY, curY }) {
+
+		return (
+			<line
+		        x1={prevX}
+		        y1={prevY}
+		        x2={curX}
+		        y2={curY}
+		        stroke="black"
+		      />
+		)
+	}
 
 	return (
 		<>
@@ -384,15 +393,27 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 		<>
 
 			<Chart width={chartWidth} height={chartHeight}>
-				{points.map((element, index) => {
+				{points.map((element, index, array) => {
+
+					//spacing ratio between each point
+					//use axis length and divide by number of points -1
+					const pointScatterRatio = xAxisLength/(points.length-1);
+
+					console.log(array[index-1]?.sale)
 
 					return (
 					<>
 						<YAxis />
 						<XAxis />
 						<Point 
-							x={x0+((xAxisLength/points.length)*index)}
+							x={x0+(pointScatterRatio)*index}
 							y={xAxisY-(element.sale*heightPerPointRatio)} 
+						/>
+						<DataLine
+							prevX={x0+(pointScatterRatio)*(index-1)}
+							prevY={xAxisY-((array[index-1]?.sale)*heightPerPointRatio)}
+							curX={x0+(pointScatterRatio)*index}
+							curY={xAxisY-(element.sale*heightPerPointRatio)}
 						/>
 
 						{/* X axis */}
