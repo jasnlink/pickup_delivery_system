@@ -22,23 +22,17 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 	const [points, setPoints] = useState([])
 
 	//chart values
-
 	//the data's highest reached value
 	const [yDataMax, setYDataMax] = useState()
 	//the chart's topmost value
 	const [yChartMax, setYChartMax] = useState()
-	//chart half point
-	const [yDataHalf, setYDataHalf] = useState(0)
-	//chart lowest value
-	const [yChartMin, setYChartMin] = useState(0)
-
 
 
 	//number of y axis ticks to use
 	const numYAxisTicks = 6
 
 	//number of x axis ticks to use
-	const numXAxisTicks = 6
+	const numXAxisTicks = 4
 
 	useEffect(() => {
 
@@ -56,8 +50,6 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 					//set chart maximum
 					//it is set to 1.25 times the highest value the data reaches, rounded to nearest 10
 					setYChartMax(Math.ceil((result * 1.25)/10)*10)
-					setYDataHalf(result * 0.5)
-					setYChartMin(0)
 
 					setLoading(false)
 
@@ -92,6 +84,12 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 		}
 
 	}, [yChartMax, points])
+
+
+
+/*****************************************************************************************************
+*						helper / build functions
+*****************************************************************************************************/
 
 
 	//helper function to build y axis labels array
@@ -231,7 +229,9 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 	}
 
 
-/********************************************************************/	
+/*****************************************************************************************************
+*						chart constants
+*****************************************************************************************************/
 
 	//chart dimensions
 	const chartWidth = 720;
@@ -266,15 +266,21 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 	//ratio to how much height to attribute for each point of increase in the chart data
 	//divide the axis length by the highest point in the chart
-	const heightPerPointRatio = yAxisLength/yChartMax
+	const heightPerTickRatio = yAxisLength/yChartMax
 
 	//ratio to how much width to attribute for each point of increase in the chart data
 	//divide the axis length by the number to spaces between each tick
-	const widthPerPointRatio = xAxisLength/(numXAxisTicks-1)
+	const widthPerTickRatio = xAxisLength/(numXAxisTicks-1)
+
+	//spacing ratio between each point
+	//use axis length and divide by number of points -1
+	const pointScatterRatio = xAxisLength/(points.length-1);
 
 
-/********************************************************************/	
 
+/*****************************************************************************************************
+*						chart drawing functions
+*****************************************************************************************************/
 
 	//chart drawing function
 	function Chart({ children, width, height }) {
@@ -324,43 +330,54 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 	//X axis drawing function
 	function XAxis() {
 
-		//spacing between each label, divide the y Axis Length by number of ticks to use -1
-		//(there are only 5 spaces between 6 labels)
-		const spacing = widthPerPointRatio
+		
 		//reverse label orders because the chart is drawn inversed
 		let labels = [...xAxisLabels]
 		labels = labels.reverse()
 
+		//spacing between each label, divide the y Axis Length by number of ticks to use -1
+		//(there are only 5 spaces between 6 labels)
+		const spacing = Math.round(((points.length-1)/(labels.length-1))*(pointScatterRatio))
+		console.log('Math.round(((points.length-1)/(labels.length-1)))',Math.round(((points.length-1)/(labels.length-1))))
+
+		
+
 		return (
 			<>
 
-			{labels.map((label, index) => (
-			<>
-				<line 
-					x1={x0+(xAxisLength-(index*spacing))} 
-					y1={xAxisY+chartPadding} 
-					x2={x0+(xAxisLength-(index*spacing))} 
-					y2={y0} 
-					stroke="black"
-				/>
-				<text 
-					x={x0+(xAxisLength-(index*spacing))} 
-					y={xAxisY+34}
-					text-anchor="middle"
-					font-size="20"
-					class="chart-labels"
-				>
-					{label}
-				</text>
-			</>
-			))}
+			{labels.map((label, index) => {
+
+				return (
+
+					<>
+						<line 
+							x1={x0+(xAxisLength-(index*spacing))} 
+							y1={xAxisY+chartPadding} 
+							x2={x0+(xAxisLength-(index*spacing))} 
+							y2={y0} 
+							stroke="black"
+						/>
+						<text 
+							x={x0+(xAxisLength-(index*spacing))} 
+							y={xAxisY+34}
+							text-anchor="middle"
+							font-size="20"
+							class="chart-labels"
+						>
+							{label}
+						</text>
+					</>
+
+				)
+			
+			})}
 			</>
 		)
 
 	}
 
 	//point drawing function
-	function Point({ x, y, r=4 }) {
+	function DataPoint({ x, y, r=3 }) {
 		return (
 			<circle cx={x} cy={y} r={r} />
 		)
@@ -378,9 +395,16 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 		        x2={curX}
 		        y2={curY}
 		        stroke="black"
+		        stroke-width="2"
 		      />
 		)
 	}
+
+
+/*****************************************************************************************************/
+/*****************************************************************************************************/
+
+
 
 	return (
 		<>
@@ -395,26 +419,27 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 			<Chart width={chartWidth} height={chartHeight}>
 				{points.map((element, index, array) => {
 
-					//spacing ratio between each point
-					//use axis length and divide by number of points -1
-					const pointScatterRatio = xAxisLength/(points.length-1);
-
-					console.log(array[index-1]?.sale)
+					console.log('pointScatterRatio',pointScatterRatio)
 
 					return (
 					<>
 						<YAxis />
 						<XAxis />
-						<Point 
+						<DataPoint 
 							x={x0+(pointScatterRatio)*index}
-							y={xAxisY-(element.sale*heightPerPointRatio)} 
+							y={xAxisY-(element.sale*heightPerTickRatio)} 
 						/>
-						<DataLine
-							prevX={x0+(pointScatterRatio)*(index-1)}
-							prevY={xAxisY-((array[index-1]?.sale)*heightPerPointRatio)}
-							curX={x0+(pointScatterRatio)*index}
-							curY={xAxisY-(element.sale*heightPerPointRatio)}
-						/>
+						{index > 0 && (
+
+							<DataLine
+								prevX={x0+(pointScatterRatio)*(index-1)}
+								prevY={xAxisY-((array[index-1]?.sale)*heightPerTickRatio)}
+								curX={x0+(pointScatterRatio)*index}
+								curY={xAxisY-(element.sale*heightPerTickRatio)}
+							/>
+
+						)}
+						
 
 						{/* X axis */}
 					      <line
