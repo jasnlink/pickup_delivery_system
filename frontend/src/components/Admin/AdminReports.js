@@ -83,7 +83,8 @@ function AdminReports({ adminToken, adminUsername }) {
 	const [totalSales, setTotalSales] = useState(0)
 
 	//initialize start and end dates
-	const [dateFrom, setDateFrom] = useState(DateTime.now().setZone("America/Toronto").minus({months:2}).toFormat('yyyy-MM-dd'))
+	//we're going with 60 days in the past
+	const [dateFrom, setDateFrom] = useState(DateTime.now().setZone("America/Toronto").minus({days:60}).toFormat('yyyy-MM-dd'))
 	const [dateTo, setDateTo] = useState(DateTime.now().setZone("America/Toronto").toFormat('yyyy-MM-dd'))
 
 

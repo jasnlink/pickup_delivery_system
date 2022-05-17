@@ -13,26 +13,19 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 	const [loading, setLoading] = useState(false)
 
-	//chart y axis labels
-	const [yAxisLabels, setYAxisLabels] = useState([])
-	//chart x axis labels
-	const [xAxisLabels, setXAxisLabels] = useState([])
-
-	//each point in the chart representing sales for that day
-	const [points, setPoints] = useState([])
-
 	//chart values
 	//the data's highest reached value
 	const [yDataMax, setYDataMax] = useState()
 	//the chart's topmost value
 	const [yChartMax, setYChartMax] = useState()
 
+	//chart y axis labels
+	const [yAxisLabels, setYAxisLabels] = useState([])
+	//chart x axis labels
+	const [xAxisLabels, setXAxisLabels] = useState([])
 
-	//number of y axis ticks to use
-	const numYAxisTicks = 6
-
-	//number of x axis ticks to use
-	const numXAxisTicks = 4
+	//each data point in the chart representing sales for that day
+	const [points, setPoints] = useState([])
 
 	useEffect(() => {
 
@@ -88,7 +81,7 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 
 /*****************************************************************************************************
-*						helper / build functions
+*						array building helper functions
 *****************************************************************************************************/
 
 
@@ -233,15 +226,23 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 *						chart constants
 *****************************************************************************************************/
 
-	//chart dimensions
-	const chartWidth = 720;
-	const chartHeight = 640;
+	//fallback chart dimensions
+	const fallbackChartWidth = 720;
+	const fallbackChartHeight = 360;
+
+	//chart dimensions set to outer div dimensions that is set to 100%
+	let chartWidth = document.getElementById('chart-root').clientWidth;
+	let chartHeight = chartWidth*0.6;
 
 	//chart padding distance
 	const chartPadding = 50;
 
-	//number of days
-	const dataLength = data.length
+	//number of y axis ticks to use
+	const numYAxisTicks = 6
+
+	//number of x axis ticks to use
+	const numXAxisTicks = 6
+
 
 	// X axis -> time
 	// X axis starting point from left side with a padding of 50
@@ -267,10 +268,6 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 	//ratio to how much height to attribute for each point of increase in the chart data
 	//divide the axis length by the highest point in the chart
 	const heightPerTickRatio = yAxisLength/yChartMax
-
-	//ratio to how much width to attribute for each point of increase in the chart data
-	//divide the axis length by the number to spaces between each tick
-	const widthPerTickRatio = xAxisLength/(numXAxisTicks-1)
 
 	//spacing ratio between each point
 	//use axis length and divide by number of points -1
@@ -313,8 +310,9 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 					stroke="black"
 				/>
 				<text 
-					x={x0-4} 
+					x={x0-(chartPadding*0.16)} 
 					y={y0+(yAxisLength-(index*spacing))}
+					alignment-baseline="central"
 					text-anchor="end"
 					font-size="20"
 					class="chart-labels"
@@ -337,10 +335,7 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 		//spacing between each label, divide the y Axis Length by number of ticks to use -1
 		//(there are only 5 spaces between 6 labels)
-		const spacing = Math.round(((points.length-1)/(labels.length-1))*(pointScatterRatio))
-		console.log('Math.round(((points.length-1)/(labels.length-1)))',Math.round(((points.length-1)/(labels.length-1))))
-
-		
+		const spacing = ((points.length-1)/(labels.length-1))*(pointScatterRatio)		
 
 		return (
 			<>
@@ -359,7 +354,7 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 						/>
 						<text 
 							x={x0+(xAxisLength-(index*spacing))} 
-							y={xAxisY+34}
+							y={xAxisY+(chartPadding*0.5)}
 							text-anchor="middle"
 							font-size="20"
 							class="chart-labels"
@@ -377,7 +372,7 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 	}
 
 	//point drawing function
-	function DataPoint({ x, y, r=3 }) {
+	function DataPoint({ x, y, r=2 }) {
 		return (
 			<circle cx={x} cy={y} r={r} />
 		)
@@ -395,7 +390,7 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 		        x2={curX}
 		        y2={curY}
 		        stroke="black"
-		        stroke-width="2"
+		        stroke-width="4"
 		      />
 		)
 	}
@@ -415,47 +410,34 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 		)}
 		{!loading && (
 		<>
+			<div id="chart-root" style={{ height: '100%', width: '100%' }}>
+				<Chart width={chartWidth} height={chartHeight}>
+					{points.map((element, index, array) => {
 
-			<Chart width={chartWidth} height={chartHeight}>
-				{points.map((element, index, array) => {
-
-					console.log('pointScatterRatio',pointScatterRatio)
-
-					return (
-					<>
-						<YAxis />
-						<XAxis />
-						<DataPoint 
-							x={x0+(pointScatterRatio)*index}
-							y={xAxisY-(element.sale*heightPerTickRatio)} 
-						/>
-						{index > 0 && (
-
-							<DataLine
-								prevX={x0+(pointScatterRatio)*(index-1)}
-								prevY={xAxisY-((array[index-1]?.sale)*heightPerTickRatio)}
-								curX={x0+(pointScatterRatio)*index}
-								curY={xAxisY-(element.sale*heightPerTickRatio)}
+						return (
+						<>
+							<YAxis />
+							<XAxis />
+							<DataPoint 
+								x={x0+(pointScatterRatio)*index}
+								y={xAxisY-(element.sale*heightPerTickRatio)} 
 							/>
+							{index > 0 && (
 
-						)}
-						
+								<DataLine
+									prevX={x0+(pointScatterRatio)*(index-1)}
+									prevY={xAxisY-((array[index-1]?.sale)*heightPerTickRatio)}
+									curX={x0+(pointScatterRatio)*index}
+									curY={xAxisY-(element.sale*heightPerTickRatio)}
+								/>
 
-						{/* X axis */}
-					      <line
-					        x1={x0}
-					        y1={xAxisY}
-					        x2={x0 + xAxisLength}
-					        y2={xAxisY}
-					        stroke="black"
-					      />
-					    {/* Y axis */}
-		      				<line x1={x0} y1={y0} x2={x0} y2={y0 + yAxisLength} stroke="black" />
-
-					</>
-					)
-				})}
-			</Chart>
+							)}
+							
+						</>
+						)
+					})}
+				</Chart>
+			</div>
 
 		</>
 		)}
