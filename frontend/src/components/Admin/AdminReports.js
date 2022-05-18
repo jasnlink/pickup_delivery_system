@@ -101,8 +101,6 @@ function AdminReports({ adminToken, adminUsername }) {
 		.then((response) => {
 			setOrderTotals(response.data)
 
-			console.log('salesData',response.data)
-
 			getTotalSales(response.data)
 			.then((result) => {
 

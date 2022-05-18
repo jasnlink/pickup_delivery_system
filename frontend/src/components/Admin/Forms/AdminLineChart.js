@@ -213,7 +213,7 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 			}
 			//push in each new sale of the day after each day iteration
 			salesArray.push({
-				date: step.toFormat('d MMMM', { locale: "fr" }),
+				date: step.toFormat('d MMM', { locale: "fr" }),
 				sale: daySum
 			})
 		}
@@ -231,11 +231,17 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 	const fallbackChartHeight = 360;
 
 	//chart dimensions set to outer div dimensions that is set to 100%
-	let chartWidth = document.getElementById('chart-root').clientWidth;
+	let chartWidth = document.getElementById('chart-root')?.clientWidth;
 	let chartHeight = chartWidth*0.6;
 
-	//chart padding distance
-	const chartPadding = 50;
+	//chart padding distances
+	const chartXPadding = 76;
+	const chartYPadding = 30;
+
+	//chart font
+	const fontSize = 18
+	const fontWeight = 500
+	const fontFamily = "Roboto, Helvetica, Arial, sans-serif"
 
 	//number of y axis ticks to use
 	const numYAxisTicks = 6
@@ -246,7 +252,7 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 	// X axis -> time
 	// X axis starting point from left side with a padding of 50
-	const x0 = 0+chartPadding;
+	const x0 = 0+chartXPadding;
 
 	// X axis length,
 	// must pad right side twice the distance of the left side,
@@ -256,7 +262,7 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 	// Y axis -> sales
 	// Y axis starting point from top side with a padding of 50
-	const y0 = 0+chartPadding;
+	const y0 = 0+chartYPadding;
 
 	// Y axis length
 	const yAxisLength = chartHeight - (y0 * 2);
@@ -291,30 +297,30 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 	//Y axis drawing function
 	function YAxis() {
 
-		//spacing between each label, divide the y Axis Length by number of ticks to use -1
-		//(there are only 5 spaces between 6 labels)
-		const spacing = (yAxisLength/(numYAxisTicks-1))
+		
 		//don't need reverse label orders because the chart is drawn inversed
 		const labels = [...yAxisLabels]
+
+		//spacing between each label, divide the y Axis Length by number of ticks to use -1
+		//(there are only 5 spaces between 6 labels)
+		const labelSpacing = (yAxisLength/(numYAxisTicks-1))
+
+		//positioning of the label, using a ratio of the padding
+		const labelPosition = chartXPadding*0.4
 
 		return (
 			<>
 
 			{labels.map((label, index) => (
 			<>
-				<line 
-					x1={0} 
-					y1={y0+(yAxisLength-(index*spacing))} 
-					x2={x0+xAxisLength} 
-					y2={y0+(yAxisLength-(index*spacing))} 
-					stroke="black"
-				/>
 				<text 
-					x={x0-(chartPadding*0.16)} 
-					y={y0+(yAxisLength-(index*spacing))}
+					x={x0-labelPosition} 
+					y={y0+(yAxisLength-(index*labelSpacing))}
 					alignment-baseline="central"
 					text-anchor="end"
-					font-size="20"
+					font-size={fontSize}
+					font-weight={fontWeight}
+					font-family={fontFamily}
 					class="chart-labels"
 				>
 					{label}
@@ -335,7 +341,10 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 		//spacing between each label, divide the y Axis Length by number of ticks to use -1
 		//(there are only 5 spaces between 6 labels)
-		const spacing = ((points.length-1)/(labels.length-1))*(pointScatterRatio)		
+		const labelSpacing = ((points.length-1)/(labels.length-1))*(pointScatterRatio)
+
+		//positioning of the label, using a ratio of the padding
+		const labelPosition = chartYPadding*1
 
 		return (
 			<>
@@ -345,18 +354,13 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 				return (
 
 					<>
-						<line 
-							x1={x0+(xAxisLength-(index*spacing))} 
-							y1={xAxisY+chartPadding} 
-							x2={x0+(xAxisLength-(index*spacing))} 
-							y2={y0} 
-							stroke="black"
-						/>
 						<text 
-							x={x0+(xAxisLength-(index*spacing))} 
-							y={xAxisY+(chartPadding*0.5)}
+							x={x0+(xAxisLength-(index*labelSpacing))} 
+							y={xAxisY+labelPosition}
 							text-anchor="middle"
-							font-size="20"
+							font-size={fontSize}
+							font-weight={fontWeight}
+							font-family={fontFamily}
 							class="chart-labels"
 						>
 							{label}
