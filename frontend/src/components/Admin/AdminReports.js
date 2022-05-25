@@ -142,7 +142,7 @@ function AdminReports({ adminToken, adminUsername }) {
 				{!loading && (
 				<>
 
-					<Container maxWidth="md" sx={{ pt: 4}}>
+					<Container maxWidth="md" sx={{ pt: 4, pb: 4}}>
 
 							<Typography variant="h4">
 								Rapports finances

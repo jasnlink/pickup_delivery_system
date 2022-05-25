@@ -3,7 +3,8 @@ import { Interval, DateTime } from "luxon";
 
 import { 
 	CircularProgress,
-	Fade
+	Fade,
+	Tooltip
  } from '@mui/material'
 
 import '../styles/Admin.css';
@@ -285,12 +286,55 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 *						chart drawing functions
 *****************************************************************************************************/
 
+
 	//chart drawing function
 	function Chart({ children, width, height }) {
+
+		const [trackMousePos, setTrackMousePos] = useState(false)
+
+		//convert screen mouse coords into SVG coords
+		function toSVGPoint(svg, x, y) {
+		  	let p = new DOMPoint(x, y);
+		  	return p.matrixTransform(svg.getScreenCTM().inverse());
+		};
+
+		//enable data tooltip and convert mouse coords to svg coords on mouse move in chart
+		function handleMousemove(e) {
+			setTrackMousePos(true)
+			let p = toSVGPoint(e.target, e.clientX, e.clientY);
+			console.log('x: ', p.x, 'y: ', p.y)
+		}
+
+		//access points array and round given coord to nearest point X coord
+		function getNearestPoint(data, x) {
+			
+			//gap calculated between mouse coord and point coord
+			//we want the smallest one to return the closest point
+			let gap = Infinity
+			for(point in data) {
+
+			}
+		}
+
+/*
+		svg.addEventListener('click', e => {
+		  let p = toSVGPoint(e.target, e.clientX, e.clientY);
+		  print.textContent = `x: ${p.x} - y: ${p.y}`;
+		});
+
+*/
 		return (
-			<svg viewBox={`0 0 ${width} ${height}`} width={width} height={height}>
-				{children}
-			</svg>
+			<Tooltip open={trackMousePos} title="This will be a data box" followCursor>
+				<svg 
+					viewBox={`0 0 ${chartWidth} ${chartHeight}`} 
+					width={chartWidth} 
+					height={chartHeight} 
+					onMouseMove={(e) => handleMousemove(e)}
+					onMouseLeave={() => setTrackMousePos(false)}
+				>
+					{children}
+				</svg>
+			</Tooltip>
 		)
 	}
 
@@ -316,12 +360,12 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 				<text 
 					x={x0-labelPosition} 
 					y={y0+(yAxisLength-(index*labelSpacing))}
-					alignment-baseline="central"
-					text-anchor="end"
-					font-size={fontSize}
-					font-weight={fontWeight}
-					font-family={fontFamily}
-					class="chart-labels"
+					alignmentBaseline="central"
+					textAnchor="end"
+					fontSize={fontSize}
+					fontWeight={fontWeight}
+					fontFamily={fontFamily}
+					className="chart-labels"
 				>
 					{label}
 				</text>
@@ -357,11 +401,11 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 						<text 
 							x={x0+(xAxisLength-(index*labelSpacing))} 
 							y={xAxisY+labelPosition}
-							text-anchor="middle"
-							font-size={fontSize}
-							font-weight={fontWeight}
-							font-family={fontFamily}
-							class="chart-labels"
+							textAnchor="middle"
+							fontSize={fontSize}
+							fontWeight={fontWeight}
+							fontFamily={fontFamily}
+							className="chart-labels"
 						>
 							{label}
 						</text>
@@ -394,7 +438,7 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 		        x2={curX}
 		        y2={curY}
 		        stroke="black"
-		        stroke-width="4"
+		        strokeWidth="4"
 		      />
 		)
 	}
