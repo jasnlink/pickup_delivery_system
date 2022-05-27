@@ -4,7 +4,8 @@ import { Interval, DateTime } from "luxon";
 import { 
 	CircularProgress,
 	Fade,
-	Tooltip
+	Tooltip,
+	Typography
  } from '@mui/material'
 
 import '../styles/Admin.css';
@@ -26,14 +27,14 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 	const [xAxisLabels, setXAxisLabels] = useState([])
 
 	//each data point in the chart representing sales for that day
-	const [points, setPoints] = useState([])
+	const [dataPoints, setDataPoints] = useState([])
 
 	useEffect(() => {
 
 			sumSalesByDay(data)
 			.then((result) => {
 
-				setPoints(result)
+				setDataPoints(result)
 
 				//set chart sales highest point, data max, data half, chart minimum
 				getDataMax(result)
@@ -58,7 +59,7 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 	useEffect(() => {
 
 
-		if(yChartMax && points) {
+		if(yChartMax && dataPoints) {
 
 			//build y axis labels
 			buildYAxisLabels(numYAxisTicks, longDivision(yChartMax, 5))
@@ -68,7 +69,7 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 			//step size to increment till next tick
 			//ex: 4 ticks needs 3 increments
-			const xAxisStep = points.length/(numXAxisTicks-1)
+			const xAxisStep = dataPoints.length/(numXAxisTicks-1)
 
 			//build x axis labels
 			buildXAxisLabels(numXAxisTicks, xAxisStep)
@@ -77,7 +78,7 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 			})
 		}
 
-	}, [yChartMax, points])
+	}, [yChartMax, dataPoints])
 
 
 
@@ -115,7 +116,7 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 				cursor = (Math.round(i*multiple))-1
 			}
 
-			result.push(points[cursor].date)
+			result.push(dataPoints[cursor].date)
 			
 		}
 		return result
@@ -277,8 +278,8 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 	const heightPerTickRatio = yAxisLength/yChartMax
 
 	//spacing ratio between each point
-	//use axis length and divide by number of points -1
-	const pointScatterRatio = xAxisLength/(points.length-1);
+	//use axis length and divide by number of dataPoints -1
+	const pointScatterRatio = xAxisLength/(dataPoints.length-1);
 
 
 
@@ -286,11 +287,12 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 *						chart drawing functions
 *****************************************************************************************************/
 
+	const [trackMousePos, setTrackMousePos] = useState(false)
+	const [currentPoint, setCurrentPoint] = useState({})
 
 	//chart drawing function
 	function Chart({ children, width, height }) {
 
-		const [trackMousePos, setTrackMousePos] = useState(false)
 
 		//convert screen mouse coords into SVG coords
 		function toSVGPoint(svg, x, y) {
@@ -300,41 +302,98 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 		//enable data tooltip and convert mouse coords to svg coords on mouse move in chart
 		function handleMousemove(e) {
-			setTrackMousePos(true)
-			let p = toSVGPoint(e.target, e.clientX, e.clientY);
-			console.log('x: ', p.x, 'y: ', p.y)
-		}
-
-		//access points array and round given coord to nearest point X coord
-		function getNearestPoint(data, x) {
 			
-			//gap calculated between mouse coord and point coord
-			//we want the smallest one to return the closest point
-			let gap = Infinity
-			for(point in data) {
+			let p = toSVGPoint(e.target, e.clientX, e.clientY);
+
+			//if mouse is hovering outside the chart area, then reset
+			if(p.x < x0 || p.x > x0+xAxisLength || p.y < y0 || p.y > xAxisY) {
+
+				setTrackMousePos(false)
+				setCurrentPoint({})
+				return
 
 			}
+
+			setTrackMousePos(true)
+
+			return getNearestPoint(p.x)
+			.then((result) => {
+				setCurrentPoint(result)
+			})
+			
 		}
 
-/*
-		svg.addEventListener('click', e => {
-		  let p = toSVGPoint(e.target, e.clientX, e.clientY);
-		  print.textContent = `x: ${p.x} - y: ${p.y}`;
-		});
+		//reset data on mouse leave
+		function handleMouseLeave(e) {
 
-*/
+			setTrackMousePos(false)
+			setCurrentPoint({})
+
+		}
+
+		//calculate nearest point from given coord using pointScatter ratio
+		async function getNearestPoint(x) {
+
+			let result = {}
+
+			//remove chart padding
+			let index = x - x0
+
+			//check if on left bounds, keep point at first data point until mouse hovers off the chart
+			if(index <= 0) {
+
+				return result = {
+					date: dataPoints[0].date,
+					sale: dataPoints[0].sale,
+					dataX: x0,
+					index: 0
+				}
+
+			}
+
+			//divide by ratio
+			index = index/pointScatterRatio
+
+			//round to nearest index
+			index = Math.round(index)
+
+			let dataLength = dataPoints.length
+
+			//check if mouse is on right bounds of the chart, keep at last data point until mouse hover off the chart
+			if(index >= dataLength-1) {
+
+				return result = {
+					date: dataPoints[dataLength-1].date,
+					sale: dataPoints[dataLength-1].sale,
+					dataX: x0+(pointScatterRatio*(dataLength-1)),
+					index: dataLength-1
+				}
+
+			}
+
+			return result = {
+				date: dataPoints[index].date,
+				sale: dataPoints[index].sale,
+				dataX: x0+(pointScatterRatio*index),
+				index: index
+			}
+
+		}
+
 		return (
-			<Tooltip open={trackMousePos} title="This will be a data box" followCursor>
+			<>
+				<Typography variant="h4">date: {currentPoint.date}</Typography>
+				<Typography variant="h4">sale: {currentPoint.sale}</Typography>
+
 				<svg 
-					viewBox={`0 0 ${chartWidth} ${chartHeight}`} 
 					width={chartWidth} 
 					height={chartHeight} 
 					onMouseMove={(e) => handleMousemove(e)}
-					onMouseLeave={() => setTrackMousePos(false)}
+					onMouseLeave={(e) => handleMouseLeave(e)}
 				>
 					{children}
 				</svg>
-			</Tooltip>
+		</>
 		)
 	}
 
@@ -385,7 +444,7 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 		//spacing between each label, divide the y Axis Length by number of ticks to use -1
 		//(there are only 5 spaces between 6 labels)
-		const labelSpacing = ((points.length-1)/(labels.length-1))*(pointScatterRatio)
+		const labelSpacing = ((dataPoints.length-1)/(labels.length-1))*(pointScatterRatio)
 
 		//positioning of the label, using a ratio of the padding
 		const labelPosition = chartYPadding*1
@@ -439,9 +498,55 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 		        y2={curY}
 		        stroke="black"
 		        strokeWidth="4"
+		        strokeLinecap="round"
 		      />
 		)
 	}
+
+	//draw the current point that we are hovering over in the graph
+	function CurrentPoint({ x, y, r=6 }) {
+		return (
+			<circle cx={x} cy={y} r={r} />
+		)
+	}
+
+	//draw vertical line to more easily locate the current point we are hovering on
+	function CurrentLine({ x1, x2, y1, y2 }) {
+
+		return (
+			<line
+				x1={x1}
+				y1={y1}
+				x2={x2}
+				y2={y2}
+				stroke="grey"
+				strokeDasharray="4"
+			/>
+		)
+	}
+
+	//draw box containing sale and date of the current point
+	function DataBox({ x, y }) {
+
+		const boxWidth = 100
+		const boxHeight = 60
+
+		return (
+			<rect
+				x={x+12}
+				y={y-boxHeight-12}
+				width={boxWidth}
+				height={boxHeight}
+				fill="white"
+				stroke="black"
+				strokeWidth="1"
+			>
+				<text>databox</text>
+			</rect>
+		)
+
+	}
+
 
 
 /*****************************************************************************************************/
@@ -460,30 +565,57 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 		<>
 			<div id="chart-root" style={{ height: '100%', width: '100%' }}>
 				<Chart width={chartWidth} height={chartHeight}>
-					{points.map((element, index, array) => {
+					<YAxis />
+					<XAxis />
+					{!!dataPoints &&(
+					<>
+						{dataPoints.map((element, index, array) => {
 
-						return (
-						<>
-							<YAxis />
-							<XAxis />
-							<DataPoint 
-								x={x0+(pointScatterRatio)*index}
-								y={xAxisY-(element.sale*heightPerTickRatio)} 
-							/>
-							{index > 0 && (
-
-								<DataLine
-									prevX={x0+(pointScatterRatio)*(index-1)}
-									prevY={xAxisY-((array[index-1]?.sale)*heightPerTickRatio)}
-									curX={x0+(pointScatterRatio)*index}
-									curY={xAxisY-(element.sale*heightPerTickRatio)}
+							return (
+							<>
+								
+								<DataPoint 
+									x={x0+(pointScatterRatio)*index}
+									y={xAxisY-(element.sale*heightPerTickRatio)} 
 								/>
+								{index > 0 && (
 
-							)}
-							
-						</>
-						)
-					})}
+									<DataLine
+										prevX={x0+(pointScatterRatio)*(index-1)}
+										prevY={xAxisY-((array[index-1]?.sale)*heightPerTickRatio)}
+										curX={x0+(pointScatterRatio)*index}
+										curY={xAxisY-(element.sale*heightPerTickRatio)}
+									/>
+
+								)}
+								
+							</>
+							)
+						})}
+					</>
+					)}
+
+					{!!currentPoint.dataX && (
+					<>
+						
+						<CurrentLine 
+							x1={currentPoint.dataX}
+							x2={currentPoint.dataX}
+							y1={xAxisY}
+							y2={y0}
+						/>
+						<CurrentPoint
+							x={currentPoint.dataX}
+							y={xAxisY-(currentPoint.sale*heightPerTickRatio)} 
+						/>
+						<DataBox
+							x={currentPoint.dataX}
+							y={xAxisY-(currentPoint.sale*heightPerTickRatio)} 
+						/>
+
+					</>
+					)}
+					
 				</Chart>
 			</div>
 
