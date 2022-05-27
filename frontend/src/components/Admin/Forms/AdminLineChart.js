@@ -331,7 +331,7 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 		}
 
-		//calculate nearest point from given coord using pointScatter ratio
+		//calculate nearest point from given coord using pointScatterRatio
 		async function getNearestPoint(x) {
 
 			let result = {}
@@ -382,9 +382,6 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 		return (
 			<>
-				<Typography variant="h4">date: {currentPoint.date}</Typography>
-				<Typography variant="h4">sale: {currentPoint.sale}</Typography>
-
 				<svg 
 					width={chartWidth} 
 					height={chartHeight} 
@@ -528,21 +525,53 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 	//draw box containing sale and date of the current point
 	function DataBox({ x, y }) {
 
-		const boxWidth = 100
-		const boxHeight = 60
+		const boxWidth = 160
+		const boxHeight = 80
+
+		const textLeftIndent = 8
+		const textSpacing = 34
+
+		//how far the box is from the currentPoint
+		let boxBaseline = 16
+
+		//if currentPoint is more than half way accross the chart,
+		//invert box position to left side so it doesn't clip out on the right side
+		if(x >= chartWidth/2) {
+
+			boxBaseline = -boxWidth-16
+
+		}
 
 		return (
-			<rect
-				x={x+12}
-				y={y-boxHeight-12}
-				width={boxWidth}
-				height={boxHeight}
-				fill="white"
-				stroke="black"
-				strokeWidth="1"
-			>
-				<text>databox</text>
-			</rect>
+			<>
+				<rect
+					x={x+boxBaseline}
+					y={y-boxHeight-24}
+					width={boxWidth}
+					height={boxHeight}
+					fill="white"
+					stroke="black"
+					strokeWidth="1"
+				/>
+				<text 
+					x={x+boxBaseline+textLeftIndent}
+					y={y-boxHeight}
+					fontSize="18"
+					fontWeight={fontWeight}
+					fontFamily={fontFamily}
+				>
+					{currentPoint.date}
+				</text>
+				<text 
+					x={x+boxBaseline+textLeftIndent}
+					y={y-boxHeight+textSpacing}
+					fontSize="24"
+					fontWeight={fontWeight}
+					fontFamily={fontFamily}
+				>
+					${currentPoint.sale.toFixed(2)}
+				</text>
+			</>
 		)
 
 	}

@@ -152,10 +152,10 @@ function AdminReports({ adminToken, adminUsername }) {
 
 							<Stack spacing={2}>
 								<Card component="div" sx={{ p: '36px 36px' }} square>
-									<Typography variant="h4">
+									<Typography variant="h5">
 										Ventes totales
 									</Typography>
-									<Typography variant="h4">
+									<Typography variant="h4" sx={{ fontWeight: 500, mb: '24px' }}>
 										${totalSales}
 									</Typography>
 									<AdminLineChart data={orderTotals} dateFrom={dateFrom} dateTo={dateTo}/>
