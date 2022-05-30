@@ -393,6 +393,10 @@
 	box-shadow: 0px 0px 0px 8px rgb(56 56 56 / 16%) !important;
 }
 
+
+.chart {
+	touch-action: none;
+}
 .chart-labels {
 	cursor: default;
 }

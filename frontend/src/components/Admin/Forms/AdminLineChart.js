@@ -31,26 +31,26 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 
 	useEffect(() => {
 
-			sumSalesByDay(data)
+		sumSalesByDay(data)
+		.then((result) => {
+
+			setDataPoints(result)
+
+			//set chart sales highest point, data max, data half, chart minimum
+			getDataMax(result)
 			.then((result) => {
 
-				setDataPoints(result)
+				setYDataMax(result)
 
-				//set chart sales highest point, data max, data half, chart minimum
-				getDataMax(result)
-				.then((result) => {
+				//set chart maximum
+				//it is set to 1.25 times the highest value the data reaches, rounded to nearest 10
+				setYChartMax(Math.ceil((result * 1.25)/10)*10)
 
-					setYDataMax(result)
+				setLoading(false)
 
-					//set chart maximum
-					//it is set to 1.25 times the highest value the data reaches, rounded to nearest 10
-					setYChartMax(Math.ceil((result * 1.25)/10)*10)
-
-					setLoading(false)
-
-				})
-				
 			})
+			
+		})
 
 	}, [])
 
@@ -286,9 +286,16 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 /*****************************************************************************************************
 *						chart drawing functions
 *****************************************************************************************************/
-
+	
+	//track mouse position bool flag
 	const [trackMousePos, setTrackMousePos] = useState(false)
+
+	//track if the pointer is moving, so we don't double calculate
+	const [pointerMoving, setPointerMoving] = useState(true)
+
+	//stores current point we are hovering over
 	const [currentPoint, setCurrentPoint] = useState({})
+
 
 	//chart drawing function
 	function Chart({ children, width, height }) {
@@ -300,8 +307,9 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 		  	return p.matrixTransform(svg.getScreenCTM().inverse());
 		};
 
+
 		//enable data tooltip and convert mouse coords to svg coords on mouse move in chart
-		function handleMousemove(e) {
+		function handlePointerMove(e) {
 			
 			let p = toSVGPoint(e.target, e.clientX, e.clientY);
 
@@ -320,11 +328,21 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 			.then((result) => {
 				setCurrentPoint(result)
 			})
-			
+
+		}
+
+		//handles pointer cancel event that fires from the browser
+		//the event should be cancelled from touch-action: none;
+		//but it might sitll fire, so this error handles it
+		function handlePointerCancel(e) {
+
+			setTrackMousePos(false)
+			setCurrentPoint({})
+
 		}
 
 		//reset data on mouse leave
-		function handleMouseLeave(e) {
+		function handlePointerLeave(e) {
 
 			setTrackMousePos(false)
 			setCurrentPoint({})
@@ -385,8 +403,10 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 				<svg 
 					width={chartWidth} 
 					height={chartHeight} 
-					onMouseMove={(e) => handleMousemove(e)}
-					onMouseLeave={(e) => handleMouseLeave(e)}
+					onPointerMove={(e) => handlePointerMove(e)}
+					onPointerLeave={(e) => handlePointerLeave(e)}
+					onPointerCancel={(e) => handlePointerCancel(e)}
+					className="chart"
 				>
 					{children}
 				</svg>
@@ -423,7 +443,7 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 					fontFamily={fontFamily}
 					className="chart-labels"
 				>
-					{label}
+					${label}
 				</text>
 			</>
 			))}
