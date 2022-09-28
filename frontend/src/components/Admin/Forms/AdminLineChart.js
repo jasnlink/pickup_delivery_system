@@ -153,6 +153,11 @@ function AdminLineChart({ data, dateFrom, dateTo }) {
 			result = Math.max(result, day.sale)
 		}
 
+		//make sure we set a minimum value if the highest value is 0 so that we don't end up with a flat chart
+		if(result === 0) {
+			result = 75
+		}
+
 		return result
 	}
 
